@@ -4,6 +4,27 @@ A portable library of **universal, self-discovering audit prompts** for coding a
 
 These differ from project-specific agent docs (e.g., `vostego/docs/self-directed-agents/`) in that they contain **no hardcoded paths or service names**. The agent does discovery first, then applies a universal mental model.
 
+## Install
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/iansherr/determinagents/main/install.sh | sh
+```
+
+Installs to `~/.determinagents/` (override with `$DETERMINAGENTS_HOME`) and a `determinagents` shim to `~/.local/bin/` (override with `$DETERMINAGENTS_BIN`).
+
+```sh
+determinagents version             # what's installed
+determinagents update              # check for updates, show diff, apply with confirmation
+determinagents materialize         # install slash commands for your host tool
+determinagents help                # full command list
+```
+
+To pin a branch (e.g., `dev` for unreleased work):
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/iansherr/determinagents/dev/install.sh | sh -s -- --branch=dev
+```
+
 ## Quick start
 
 For paste-ready invocation prompts, see **[INVOCATIONS.md](INVOCATIONS.md)**.
