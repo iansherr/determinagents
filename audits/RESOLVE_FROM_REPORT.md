@@ -42,7 +42,62 @@ Open-ended — depends on how many findings, how complex each fix is, and whethe
 git status --porcelain
 ```
 
-If non-empty: stop. The resolver requires a clean tree so each fix lands as its own commit. Surface this to the user: either commit/stash the existing changes or pick a different starting point.
+If empty: proceed. If non-empty: **stop and present the three options below.** The resolver requires a clean tree so each fix lands as its own commit, separable from in-progress work.
+
+Do **not** auto-execute any of these — git operations on uncommitted work can lose data. Show the commands; let the user run them and re-invoke the resolver.
+
+#### Option A — worktree (recommended in most cases)
+
+Preserves the user's current state completely intact. Resolve session runs in an isolated checkout. Best when: WIP is unrelated to the audit findings, or when working on `main` directly.
+
+```bash
+# From the repo root:
+git worktree add ../<repo-name>-resolve origin/main
+cd ../<repo-name>-resolve
+
+# After the session, merge or cherry-pick back, then:
+git worktree remove ../<repo-name>-resolve
+```
+
+#### Option B — commit WIP first
+
+Cleanest history if the WIP is already a coherent change. Best when: WIP is on a feature branch and represents one logical chunk.
+
+```bash
+git add -A
+git commit -m "WIP: <describe your in-progress work>"
+
+# Then re-invoke RESOLVE_FROM_REPORT. After the session:
+# - if WIP was a draft, amend or squash as you normally would
+# - if WIP and resolve fixes are independent, leave them as separate commits
+```
+
+#### Option C — stash (fragile; use sparingly)
+
+Quick but `git stash pop` afterwards may conflict with resolve commits. Best when: WIP is trivial and unlikely to overlap with audit-fix paths.
+
+```bash
+git stash push -u -m "WIP before resolve session"
+
+# Re-invoke RESOLVE_FROM_REPORT. After:
+git stash pop
+# If pop conflicts: resolve manually. Don't try to clever-merge resolver
+# commits with stashed changes — stash is meant for short-lived WIP.
+```
+
+#### Recommending the right option
+
+The resolver should look at what's modified and recommend:
+
+| Pattern in `git status` | Recommend |
+|------------------------|-----------|
+| Many unrelated files (mixed CSS / config / docs / code) | Worktree (Option A) |
+| All on a feature branch, all related | Commit WIP (Option B) |
+| 1–3 small files, clearly trivial | Stash (Option C) |
+| User is on `main` with uncommitted work | Worktree (Option A) — never commit directly to main |
+| WIP includes the same files findings will touch | Worktree (Option A) — overlap risk too high for stash |
+
+After the user runs their chosen option and re-invokes the resolver, Phase 0.1 should pass and the session continues normally.
 
 ### 0.2 Locate the report
 
