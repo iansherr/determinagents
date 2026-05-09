@@ -1,6 +1,6 @@
 # Audit Context — <PROJECT NAME>
 
-> Project-specific overlay for the universal audits in `/Users/iansherr/Projects/self-directed-agents/`.
+> Project-specific overlay for the universal audits in `${DETERMINAGENTS_HOME:-$HOME/.determinagents}/`.
 > Read this file before running any audit. See `BOOTSTRAP.md` for what belongs here.
 >
 > **Last reviewed:** YYYY-MM-DD

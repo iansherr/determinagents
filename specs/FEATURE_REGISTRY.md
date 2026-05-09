@@ -1,6 +1,6 @@
 # Feature Registry Spec
 
-A spec for `docs/self-directed-agents/FEATURE_REGISTRY.md` — a per-project living catalog of every testable feature, structured so an agent can pick up **one** entry and execute it with no cross-referencing.
+A spec for `docs/determinagents/FEATURE_REGISTRY.md` — a per-project living catalog of every testable feature, structured so an agent can pick up **one** entry and execute it with no cross-referencing.
 
 This file is the **spec**, like `google-labs-code/design.md` is the spec for `DESIGN.md`. Each project produces its own `FEATURE_REGISTRY.md` instance; this directory does not contain one.
 
@@ -25,7 +25,7 @@ Three problems it solves:
 
 ## Output location
 
-`docs/self-directed-agents/FEATURE_REGISTRY.md` (in the target project).
+`docs/determinagents/FEATURE_REGISTRY.md` (in the target project).
 
 ---
 
@@ -147,23 +147,23 @@ Multiple tags per entry. The fanout invocation (`test all [admin]`) only works i
 These should work without modification given a registry that follows this spec:
 
 ```
-Read docs/self-directed-agents/FEATURE_REGISTRY.md, section "F03". Test it
+Read docs/determinagents/FEATURE_REGISTRY.md, section "F03". Test it
 using <Playwright MCP | curl | browser>. Report PASS/FAIL with evidence.
 ```
 
 ```
-Read docs/self-directed-agents/FEATURE_REGISTRY.md. Test all features tagged
+Read docs/determinagents/FEATURE_REGISTRY.md. Test all features tagged
 [critical]. Report PASS/FAIL per feature. Continue past failures.
 ```
 
 ```
-Read docs/self-directed-agents/FEATURE_REGISTRY.md and DESIGN.md. Run visual
+Read docs/determinagents/FEATURE_REGISTRY.md and DESIGN.md. Run visual
 tests on all [public] features at viewports 390/768/1280. Report any DESIGN.md
 deviations with computed vs. expected values.
 ```
 
 ```
-Read docs/self-directed-agents/FEATURE_REGISTRY.md and audit it for drift:
+Read docs/determinagents/FEATURE_REGISTRY.md and audit it for drift:
 which features in the registry no longer exist in code, and which routes in
 code have no entry. Report both lists.
 ```
@@ -197,8 +197,8 @@ Report goes to `docs/reports/REGISTRY_DRIFT_<YYYY-MM-DD>.md`.
 For a new project that doesn't have a registry yet:
 
 ```
-Generate docs/self-directed-agents/FEATURE_REGISTRY.md for this repo following
-the spec at /Users/iansherr/Projects/self-directed-agents/specs/FEATURE_REGISTRY.md.
+Generate docs/determinagents/FEATURE_REGISTRY.md for this repo following
+the spec at ${DETERMINAGENTS_HOME:-$HOME/.determinagents}/specs/FEATURE_REGISTRY.md.
 
 Discovery steps:
 1. Identify every user-visible route (frontend pages, mobile screens, API
@@ -227,8 +227,8 @@ For adding a new feature to an existing registry, in the same PR as the feature:
 
 ```
 I'm shipping <feature name> in this PR. Add an entry to
-docs/self-directed-agents/FEATURE_REGISTRY.md following the spec at
-/Users/iansherr/Projects/self-directed-agents/specs/FEATURE_REGISTRY.md.
+docs/determinagents/FEATURE_REGISTRY.md following the spec at
+${DETERMINAGENTS_HOME:-$HOME/.determinagents}/specs/FEATURE_REGISTRY.md.
 
 The feature: <route(s)>, <auth requirements>, <intended behavior>.
 

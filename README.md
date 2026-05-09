@@ -1,4 +1,4 @@
-# Self-Directed Agents
+# Determinagents
 
 A portable library of **universal, self-discovering audit prompts** for coding agents. Hand any audit to an agent pointed at a repo; the agent discovers the project layout, runs the audit, and produces a structured report. No project-specific configuration required.
 
@@ -13,7 +13,7 @@ For installing this library as slash commands or skills in your host tool (Claud
 ## Layout
 
 ```
-self-directed-agents/
+determinagents/
 ├── README.md            # this file
 ├── INVOCATIONS.md       # paste-ready prompts for every behavior
 ├── INSTALL.md           # how an agent installs this library into a host tool
@@ -57,8 +57,8 @@ These describe an artifact each project generates its own instance of.
 
 | Spec | Project artifact | Purpose |
 |------|------------------|---------|
-| [specs/FEATURE_REGISTRY.md](specs/FEATURE_REGISTRY.md) | `docs/self-directed-agents/FEATURE_REGISTRY.md` | Living catalog of every testable feature with URL, auth, steps, pass criteria, tags |
-| [specs/AUDIT_CONTEXT_TEMPLATE.md](specs/AUDIT_CONTEXT_TEMPLATE.md) | `docs/self-directed-agents/AUDIT_CONTEXT.md` | Project-specific overlay (known incidents, false-positives, severity calibrations) |
+| [specs/FEATURE_REGISTRY.md](specs/FEATURE_REGISTRY.md) | `docs/determinagents/FEATURE_REGISTRY.md` | Living catalog of every testable feature with URL, auth, steps, pass criteria, tags |
+| [specs/AUDIT_CONTEXT_TEMPLATE.md](specs/AUDIT_CONTEXT_TEMPLATE.md) | `docs/determinagents/AUDIT_CONTEXT.md` | Project-specific overlay (known incidents, false-positives, severity calibrations) |
 
 Supporting docs: [specs/FORMAT.md](specs/FORMAT.md) (audit authoring spec), [specs/BOOTSTRAP.md](specs/BOOTSTRAP.md) (overlay generator workflow).
 
@@ -71,7 +71,7 @@ Every audit:
 - Classifies findings by severity (**P0/P1/P2/P3**) with concrete criteria.
 - Emits a report with file:line references and concrete fixes — never "fix this."
 - Reports go to `docs/reports/` (in the target project) with a date-stamped name (e.g., `STUB_AUDIT_2026-05-09.md`).
-- Reads `docs/self-directed-agents/AUDIT_CONTEXT.md` first if it exists, to apply project-specific calibrations.
+- Reads `docs/determinagents/AUDIT_CONTEXT.md` first if it exists, to apply project-specific calibrations.
 
 ## Companion: DESIGN.md
 

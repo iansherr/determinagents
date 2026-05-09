@@ -10,8 +10,8 @@ This file is the single source of truth for invocations. Individual audit/spec d
 
 Every invocation in this file assumes the following — agents reading them should treat these as defaults unless the prompt overrides them:
 
-1. **Library location**: this library is at `/Users/iansherr/Projects/self-directed-agents/` (adjust if installed elsewhere).
-2. **Project context first**: if `docs/self-directed-agents/AUDIT_CONTEXT.md` exists in the target repo, read it before running any audit. Apply its calibrations (severity adjustments, known false-positives, ignore paths).
+1. **Library location**: this library is at `${DETERMINAGENTS_HOME:-$HOME/.determinagents}/` (adjust if installed elsewhere).
+2. **Project context first**: if `docs/determinagents/AUDIT_CONTEXT.md` exists in the target repo, read it before running any audit. Apply its calibrations (severity adjustments, known false-positives, ignore paths).
 3. **Reports go to** `docs/reports/<NAME>_<YYYY-MM-DD>.md` in the target repo.
 4. **Findings classified P0–P3** per the rubric in the audit doc.
 5. **Read-only by default.** Only `audits/TESTING_CREATOR.md` mutates the codebase, and only after explicit approval per the rules in that doc.
@@ -21,8 +21,8 @@ Every invocation in this file assumes the following — agents reading them shou
 You can prepend this short preface to any invocation if the agent isn't already aware of these conventions:
 
 ```
-Library at /Users/iansherr/Projects/self-directed-agents/. Read
-docs/self-directed-agents/AUDIT_CONTEXT.md if present and apply its
+Library at ${DETERMINAGENTS_HOME:-$HOME/.determinagents}/. Read
+docs/determinagents/AUDIT_CONTEXT.md if present and apply its
 calibrations. Commit reports to docs/reports/ with a date-stamped name.
 ```
 
@@ -39,10 +39,10 @@ Each audit has three scope variants. Default is `standard`.
 **Variants**: `quick` (Phase 1 only), `standard` (Phases 1–3), `deep` (all phases).
 
 ```
-Run audits/STUB_AND_COMPLETENESS.md from the self-directed-agents library at
-<LIBRARY_PATH> against this repo, scope=<quick|standard|deep>.
+Run audits/STUB_AND_COMPLETENESS.md from the determinagents library at
+$DETERMINAGENTS_HOME against this repo, scope=<quick|standard|deep>.
 
-Read docs/self-directed-agents/AUDIT_CONTEXT.md first if it exists.
+Read docs/determinagents/AUDIT_CONTEXT.md first if it exists.
 
 Produce the report per the doc's template at
 docs/reports/STUB_AUDIT_<YYYY-MM-DD>.md. Include file:line for every finding
@@ -56,10 +56,10 @@ and a concrete suggested fix. Do not commit until I review.
 **Variants**: `quick` (Phases 1–2 — auth + secrets), `standard` (Phases 1–4), `deep` (all phases, with written exploit sketch for each P0/P1).
 
 ```
-Run audits/SECURITY_PENTEST.md from <LIBRARY_PATH> against this repo,
+Run audits/SECURITY_PENTEST.md from $DETERMINAGENTS_HOME against this repo,
 scope=<quick|standard|deep>.
 
-Read docs/self-directed-agents/AUDIT_CONTEXT.md first.
+Read docs/determinagents/AUDIT_CONTEXT.md first.
 
 Report to docs/reports/SECURITY_AUDIT_<YYYY-MM-DD>.md. For every P0/P1
 finding, include a written exploit sketch (1–3 sentences) describing how
@@ -76,11 +76,11 @@ writing them to the public report.
 **Variants**: per-flow only (no quick/standard/deep — the audit is already scoped to one flow).
 
 ```
-Run audits/DATA_FLOW_TRACE.md from <LIBRARY_PATH> against this repo for the
+Run audits/DATA_FLOW_TRACE.md from $DETERMINAGENTS_HOME against this repo for the
 flow: <FLOW_NAME — e.g., "save bookmark", "submit job application",
 "update profile">.
 
-Read docs/self-directed-agents/AUDIT_CONTEXT.md first.
+Read docs/determinagents/AUDIT_CONTEXT.md first.
 
 Trace the flow end-to-end through all phases (UI → network → handler → DB →
 read path → cache). Build the field round-trip table. Report to
@@ -94,10 +94,10 @@ docs/reports/DATA_FLOW_<flow-slug>_<YYYY-MM-DD>.md.
 **Variants**: `quick` (Phases 1–2 — frontend + backend swallowing), `standard` (Phases 1–4), `deep` (all phases).
 
 ```
-Run audits/ERROR_HANDLING.md from <LIBRARY_PATH> against this repo,
+Run audits/ERROR_HANDLING.md from $DETERMINAGENTS_HOME against this repo,
 scope=<quick|standard|deep>.
 
-Read docs/self-directed-agents/AUDIT_CONTEXT.md first — pay attention to
+Read docs/determinagents/AUDIT_CONTEXT.md first — pay attention to
 the "Approved silent fallbacks" section so you don't re-flag intentional
 ones.
 
@@ -112,10 +112,10 @@ answer: "what does the user see when this fails?"
 **Variants**: `quick` (Phases 0–2 — inventory + failure-mode coverage), `standard` (Phases 0–4), `deep` (all phases including mutation test).
 
 ```
-Run audits/TEST_GAPS.md from <LIBRARY_PATH> against this repo,
+Run audits/TEST_GAPS.md from $DETERMINAGENTS_HOME against this repo,
 scope=<quick|standard|deep>.
 
-Read docs/self-directed-agents/AUDIT_CONTEXT.md first — its
+Read docs/determinagents/AUDIT_CONTEXT.md first — its
 "Critical paths (project's own list)" is the input for Phase 1.
 
 Report to docs/reports/TEST_GAPS_<YYYY-MM-DD>.md. Include the critical-path
@@ -129,7 +129,7 @@ coverage matrix and, for deep scope, the mutation-test results.
 **Variants**: `quick` (Phases 0–2 — README + architecture), `standard` (Phases 0–5), `deep` (all phases including code-block bitrot test).
 
 ```
-Run audits/DOCS_DRIFT.md from <LIBRARY_PATH> against this repo,
+Run audits/DOCS_DRIFT.md from $DETERMINAGENTS_HOME against this repo,
 scope=<quick|standard|deep>.
 
 Walk the README setup section as if you'd never seen the project. For
@@ -146,7 +146,7 @@ Report to docs/reports/DOCS_DRIFT_<YYYY-MM-DD>.md.
 **Variants**: `quick` (Phases 1–3 — token compliance + colors), `standard` (Phases 1–6), `deep` (all phases including accessibility and dark mode; requires a running app or screenshots).
 
 ```
-Run audits/UX_DESIGN_AUDIT.md from <LIBRARY_PATH> against this repo,
+Run audits/UX_DESIGN_AUDIT.md from $DETERMINAGENTS_HOME against this repo,
 scope=<quick|standard|deep>.
 
 Prerequisite: DESIGN.md must exist at the project root. If it doesn't,
@@ -165,7 +165,7 @@ finding, include both the computed value and the expected DESIGN.md token.
 When you only have time to find showstoppers:
 
 ```
-Run audits/<AUDIT_NAME>.md from <LIBRARY_PATH> against this repo, but stop
+Run audits/<AUDIT_NAME>.md from $DETERMINAGENTS_HOME against this repo, but stop
 after identifying P0 findings. Skip P1/P2/P3 entirely. Surface P0s to me in
 chat — do not write a full report. If there are no P0s, say so.
 ```
@@ -181,7 +181,7 @@ This is the only doc in the library that writes code. Each tier is an independen
 ### 2.1 Tier 1 — Adversarial
 
 ```
-Run Phase 1 of audits/TESTING_CREATOR.md from <LIBRARY_PATH> against
+Run Phase 1 of audits/TESTING_CREATOR.md from $DETERMINAGENTS_HOME against
 service <SERVICE_NAME>.
 
 Read the most recent docs/reports/SECURITY_AUDIT_*.md for input.
@@ -200,7 +200,7 @@ Report to docs/reports/TEST_VERIFICATION_<service>_<YYYY-MM-DD>.md.
 ### 2.2 Tier 2 — Chaos
 
 ```
-Run Phase 2 of audits/TESTING_CREATOR.md from <LIBRARY_PATH> against
+Run Phase 2 of audits/TESTING_CREATOR.md from $DETERMINAGENTS_HOME against
 service <SERVICE_NAME>.
 
 Read the most recent docs/reports/DATA_FLOW_*.md if present.
@@ -217,7 +217,7 @@ as a separate commit.
 ### 2.3 Tier 3 — Simulation
 
 ```
-Run Phase 3 of audits/TESTING_CREATOR.md from <LIBRARY_PATH> against
+Run Phase 3 of audits/TESTING_CREATOR.md from $DETERMINAGENTS_HOME against
 service <SERVICE_NAME>.
 
 This requires creating a simulation/<feature>/ harness. Confirm with me
@@ -235,7 +235,7 @@ and surface that — Tier 3 may not apply here.
 ### 2.4 Tier 4 — Forensics
 
 ```
-Run Phase 4 of audits/TESTING_CREATOR.md from <LIBRARY_PATH> against
+Run Phase 4 of audits/TESTING_CREATOR.md from $DETERMINAGENTS_HOME against
 service <SERVICE_NAME>.
 
 Required for services holding audit logs, immutable history, signed records,
@@ -279,8 +279,8 @@ capture the product's visual identity.
 **When**: adopting the registry in a new project once it has ~10+ user-visible features.
 
 ```
-Generate docs/self-directed-agents/FEATURE_REGISTRY.md for this repo
-following the spec at <LIBRARY_PATH>/specs/FEATURE_REGISTRY.md.
+Generate docs/determinagents/FEATURE_REGISTRY.md for this repo
+following the spec at $DETERMINAGENTS_HOME/specs/FEATURE_REGISTRY.md.
 
 Discovery:
 1. Identify every user-visible route (frontend pages, mobile screens, API
@@ -308,8 +308,8 @@ Show the registry in chunks of 5 features for review before committing.
 
 ```
 I'm shipping <FEATURE_NAME> in this PR. Add an entry to
-docs/self-directed-agents/FEATURE_REGISTRY.md following the spec at
-<LIBRARY_PATH>/specs/FEATURE_REGISTRY.md.
+docs/determinagents/FEATURE_REGISTRY.md following the spec at
+$DETERMINAGENTS_HOME/specs/FEATURE_REGISTRY.md.
 
 The feature: <ROUTES>, <AUTH_REQUIREMENTS>, <INTENDED_BEHAVIOR>.
 
@@ -322,8 +322,8 @@ Show the entry before committing.
 **When**: quarterly; before relying on the registry as a release gate.
 
 ```
-Audit docs/self-directed-agents/FEATURE_REGISTRY.md against the codebase
-following the spec at <LIBRARY_PATH>/specs/FEATURE_REGISTRY.md "Sync audit"
+Audit docs/determinagents/FEATURE_REGISTRY.md against the codebase
+following the spec at $DETERMINAGENTS_HOME/specs/FEATURE_REGISTRY.md "Sync audit"
 section.
 
 Report two lists:
@@ -341,8 +341,8 @@ registry — the report is the proposal; I'll approve before changes.
 **When**: first time adopting this library in a new project, after running 1–2 audits to have something to calibrate.
 
 ```
-Bootstrap docs/self-directed-agents/AUDIT_CONTEXT.md for this repo
-following the workflow at <LIBRARY_PATH>/specs/BOOTSTRAP.md (cold mode).
+Bootstrap docs/determinagents/AUDIT_CONTEXT.md for this repo
+following the workflow at $DETERMINAGENTS_HOME/specs/BOOTSTRAP.md (cold mode).
 
 Survey the codebase: identify the auth model, deployment surface, primary
 languages/frameworks, archived or dead directories, and any obvious
@@ -353,7 +353,7 @@ be visible from the code alone — recent incidents, known weak spots, areas
 where severity should be calibrated differently from the universal P0–P3
 rubric.
 
-Use the template at <LIBRARY_PATH>/specs/AUDIT_CONTEXT_TEMPLATE.md. Leave
+Use the template at $DETERMINAGENTS_HOME/specs/AUDIT_CONTEXT_TEMPLATE.md. Leave
 sections empty rather than inventing content.
 
 Show me the file before committing.
@@ -365,8 +365,8 @@ Show me the file before committing.
 
 ```
 You just produced docs/reports/<REPORT_FILENAME>. Propose updates to
-docs/self-directed-agents/AUDIT_CONTEXT.md based on what you learned,
-following <LIBRARY_PATH>/specs/BOOTSTRAP.md (warm mode).
+docs/determinagents/AUDIT_CONTEXT.md based on what you learned,
+following $DETERMINAGENTS_HOME/specs/BOOTSTRAP.md (warm mode).
 
 Only propose entries that:
 - Are project-specific institutional knowledge (not findable by discovery)
@@ -385,7 +385,7 @@ of proposed changes; do not commit until I approve each entry.
 **When**: quarterly; after a significant refactor.
 
 ```
-Review docs/self-directed-agents/AUDIT_CONTEXT.md. For each entry:
+Review docs/determinagents/AUDIT_CONTEXT.md. For each entry:
 1. Is it still true? (Verify by reading current code where the entry
    references files or patterns.)
 2. Is the date older than 12 months on a non-conventions entry?
@@ -400,7 +400,7 @@ Propose deletions and updates as a diff. Do not commit until I approve.
 **When**: pre-release sanity check; ~30 minutes total.
 
 ```
-Run all seven read-only audits from <LIBRARY_PATH>/audits/ against this
+Run all seven read-only audits from $DETERMINAGENTS_HOME/audits/ against this
 repo, but stop each audit after identifying P0 findings only. Skip
 P1/P2/P3.
 

@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Produce or update `docs/self-directed-agents/AUDIT_CONTEXT.md` for a project — a small overlay file that captures institutional knowledge the universal audit docs can't infer through discovery.
+Produce or update `docs/determinagents/AUDIT_CONTEXT.md` for a project — a small overlay file that captures institutional knowledge the universal audit docs can't infer through discovery.
 
 This is **not** a rewrite of the audit docs. The universal docs in this directory remain the source of truth. `AUDIT_CONTEXT.md` is a thin layer of project-specific calibrations that gets read alongside an audit doc on every run.
 
@@ -33,8 +33,8 @@ Run when adopting these audits in a new project. The agent surveys the repo, ask
 **Prompt:**
 
 ```
-Bootstrap docs/self-directed-agents/AUDIT_CONTEXT.md for this repo, following
-the spec at /Users/iansherr/Projects/self-directed-agents/specs/BOOTSTRAP.md.
+Bootstrap docs/determinagents/AUDIT_CONTEXT.md for this repo, following
+the spec at ${DETERMINAGENTS_HOME:-$HOME/.determinagents}/specs/BOOTSTRAP.md.
 
 Survey the codebase: identify the auth model, deployment surface, primary
 languages/frameworks, and any obvious archived/dead directories.
@@ -43,7 +43,7 @@ Then ask me up to 5 questions about institutional knowledge that wouldn't be
 visible from the code alone — recent incidents, known weak spots, areas where
 severity should be calibrated differently from the universal P0–P3 rubric.
 
-Use the template at /Users/iansherr/Projects/self-directed-agents/specs/AUDIT_CONTEXT_TEMPLATE.md.
+Use the template at ${DETERMINAGENTS_HOME:-$HOME/.determinagents}/specs/AUDIT_CONTEXT_TEMPLATE.md.
 Leave sections empty rather than inventing content. Commit the result.
 ```
 
@@ -55,7 +55,7 @@ Run after completing any audit. The agent proposes updates based on what was lea
 
 ```
 You just produced an audit report at docs/reports/<filename>. Propose updates
-to docs/self-directed-agents/AUDIT_CONTEXT.md based on what you learned.
+to docs/determinagents/AUDIT_CONTEXT.md based on what you learned.
 
 Only propose entries that:
 - Are project-specific institutional knowledge (not findable by discovery)
