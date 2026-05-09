@@ -91,31 +91,76 @@ These typically use either `.<tool>/commands/` or a settings file with named pro
 
 If no convention is detectable, install nothing. Tell the user the library is portable as-is — they can paste from `INVOCATIONS.md` directly.
 
+## Materialized files are thin pointers (read this twice)
+
+This is the most important rule in this document. **The slash commands you generate must reference the audit docs by path, not embed their content.**
+
+Why: when the library updates (`determinagents update`), the audit docs in `$DETERMINAGENTS_HOME/audits/` change. A thin-pointer command picks up the new content automatically the next time it runs. An inlined command would be frozen at materialization time and require re-running `materialize` after every library update — defeating the point of having a centrally-maintained library.
+
+### Wrong (do not do this)
+
+```markdown
+---
+description: Run STUB_AND_COMPLETENESS audit
+---
+
+# Phase 1: Frontend → Backend Contract Verification
+
+### 1.1 Extract All Frontend API Calls
+Scan every JavaScript file...
+[500 lines of audit content inlined]
+```
+
+This will rot the moment the audit doc improves.
+
+### Right
+
+```markdown
+---
+description: Run STUB_AND_COMPLETENESS audit against this repo
+---
+
+Read $DETERMINAGENTS_HOME/audits/STUB_AND_COMPLETENESS.md and run it
+against this repo, scope=${1:-standard} (quick | standard | deep).
+
+If docs/determinagents/AUDIT_CONTEXT.md exists, read it first and apply
+its calibrations.
+
+Report to docs/reports/STUB_AUDIT_<YYYY-MM-DD>.md per the doc's report
+template. Include file:line and a concrete suggested fix for every
+finding. Do not commit the report until I review.
+```
+
+The slash command is ~10 lines. The audit doc is the source of truth. Updates flow through.
+
 ## File template
 
 For each invocation in `INVOCATIONS.md`, generate a file like this (Claude Code slash command example):
 
 ```markdown
 ---
-description: <one-line description from INVOCATIONS.md "When" field>
+description: <one-line description derived from INVOCATIONS.md "When" field>
+source: $DETERMINAGENTS_HOME/INVOCATIONS.md#<N.N>
 ---
 
-# <Behavior Name>
-
-<Shared conventions block — copied verbatim from INVOCATIONS.md top section>
-
-## Invocation
-
-<Prompt body from INVOCATIONS.md, with <ANGLE_BRACKET> placeholders preserved>
-
-## Notes
-
-- Library: ${DETERMINAGENTS_HOME:-$HOME/.determinagents}/
-- Source invocation: INVOCATIONS.md section <N.N>
-- Variants (if applicable): <list>
+<Prompt body from INVOCATIONS.md — verbatim, with $DETERMINAGENTS_HOME
+references preserved (NOT expanded to absolute paths) so updates flow
+through the env var.>
 ```
 
-Adapt the frontmatter to whatever the host tool expects. The body — shared conventions + invocation — should be identical across host tools so the prompts behave consistently.
+The `source:` frontmatter field is the marker the uninstall path uses to identify generated files.
+
+Adapt the frontmatter shape to whatever the host tool expects. The body should be identical across host tools so the prompts behave consistently.
+
+### Re-materialization
+
+Re-running materialize is only required when:
+
+1. A new invocation is added to `INVOCATIONS.md` (new behavior).
+2. The shared conventions header changes.
+3. The host tool's frontmatter convention changes.
+
+Day-to-day audit improvements (Phase changes, new commands, severity rubric updates) flow through automatically because the slash command always reads the live audit doc.
 
 ## Installation procedure
 
