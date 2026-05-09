@@ -58,10 +58,16 @@ Use this default unless the audit needs a domain-specific scale:
 
 ## Report template
 
-Every audit ends with a report skeleton like:
+Every audit produces a report following this structure. Reports are self-contained — a reader 3 weeks later should not have to look up the rubric or guess what to do next.
 
 ```markdown
 # [Audit Name] Report — [DATE]
+
+## Severity rubric (this audit)
+- **P0**: [one-line definition from this audit's rubric]
+- **P1**: [one-line definition]
+- **P2**: [one-line definition]
+- **P3**: [one-line definition]
 
 ## Summary
 - Findings: X (P0: X, P1: X, P2: X, P3: X)
@@ -69,18 +75,55 @@ Every audit ends with a report skeleton like:
 - Time spent: ~Xh
 
 ## P0 — [Category]
-| Issue | Location | Impact | Suggested fix |
-|-------|----------|--------|---------------|
-| ... | path:line | ... | ... |
+| # | Issue | Location | Impact | Suggested fix |
+|---|-------|----------|--------|---------------|
+| 1 | ... | path:line | ... | ... |
 
 ## P1 — ...
 
 ## Patterns observed
 1–3 paragraph synthesis of root causes, not just a list.
 
-## Recommendations
-Ordered list of concrete next actions.
+## Next steps
+
+Suggested invocations to act on this report. Copy and paste into your agent.
+
+**Resolve all actionable findings:**
+
 ```
+Run audits/RESOLVE_FROM_REPORT.md from $DETERMINAGENTS_HOME against the
+report at <THIS_REPORT_PATH>.
+
+Read docs/determinagents/AUDIT_CONTEXT.md first.
+
+Triage findings into Actionable / Needs decision / Already resolved /
+Invalid / Out of scope. Show me the plan before doing any work.
+```
+
+**Resolve P0 only (fast path):**
+
+```
+Run audits/RESOLVE_FROM_REPORT.md from $DETERMINAGENTS_HOME against the
+report at <THIS_REPORT_PATH>, scope=P0.
+```
+
+**Re-run this audit after resolution to verify clean state:**
+
+```
+[same invocation that produced this report]
+```
+
+## Recommendations
+Ordered list of concrete next actions, separate from the per-finding fixes
+above. Use this for cross-cutting recommendations (e.g., "establish a
+convention for X", "consider migration to Y").
+```
+
+The `## Severity rubric (this audit)` block is filled in from the audit doc's rubric — copied verbatim so the report is self-contained.
+
+The `## Next steps` block is filled in by the agent producing the report. The `<THIS_REPORT_PATH>` placeholder is replaced with the actual filename being written, so the user can copy-paste without editing.
+
+The `## Patterns observed` and `## Recommendations` sections are distinct: patterns are *what's true*; recommendations are *what to do about it that's not already covered by per-finding fixes*.
 
 ## Authoring checklist
 
@@ -93,3 +136,4 @@ Before committing a new audit doc:
 - [ ] Report template uses tables for findings.
 - [ ] No prose where a command would do.
 - [ ] No advice where a check would do.
+- [ ] Report template includes `## Severity rubric (this audit)` and `## Next steps` sections.

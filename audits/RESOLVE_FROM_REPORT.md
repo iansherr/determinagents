@@ -44,7 +44,18 @@ git status --porcelain
 
 If non-empty: stop. The resolver requires a clean tree so each fix lands as its own commit. Surface this to the user: either commit/stash the existing changes or pick a different starting point.
 
-### 0.2 Read the report
+### 0.2 Locate the report
+
+If the user gave a specific report path, use that. Otherwise auto-discover:
+
+```bash
+# Most recent report — confirm with user before proceeding
+ls -t docs/reports/*.md 2>/dev/null | head -5
+```
+
+Show the top 3 candidates with their dates and ask which (or confirm the most recent). Don't silently pick — reports older than 7 days are likely stale and should be re-run, not resolved.
+
+### 0.3 Read the report
 
 Locate the report at `docs/reports/<REPORT_NAME>`. Parse:
 
@@ -54,7 +65,7 @@ Locate the report at `docs/reports/<REPORT_NAME>`. Parse:
 
 If the report does not follow the format spec (no severity rubric, missing file:line, no suggested fix per finding), stop and surface the problem. A malformed report can't be resolved reliably.
 
-### 0.3 Staleness check
+### 0.4 Staleness check
 
 Compare the report date to recent git activity:
 
@@ -64,7 +75,7 @@ git log --since='<REPORT_DATE>' --oneline | head -20
 
 If many commits have landed since the report was produced, warn the user: findings may already be resolved or the codebase may have moved. Recommend re-running the audit before continuing.
 
-### 0.4 Read AUDIT_CONTEXT
+### 0.5 Read AUDIT_CONTEXT
 
 If `docs/determinagents/AUDIT_CONTEXT.md` exists, read it. Apply:
 
@@ -132,7 +143,7 @@ Re-run the discovery command from the source audit. The report may be days old; 
 
 Don't trust the report's "suggested fix" verbatim — read the surrounding code, write a fresh fix plan. The report may have suggested something that doesn't fit the code's current shape.
 
-Present:
+Present using this shorthand format. Single-letter responses keep the loop conversational:
 
 ```
 Finding P0 #1: 10 unregistered Stripe webhook handlers
@@ -150,10 +161,25 @@ Finding P0 #1: 10 unregistered Stripe webhook handlers
 
   Tests to run after: services/foo/internal/http/...
   Out-of-scope but worth noting: signature validation appears unimplemented
-  — flag for follow-up
+  — flag for follow-up.
 
-  Apply? [y/n/edit/skip]
+  [y] apply  [n] reject (mark needs-decision)  [d] show me the diff first
+  [e] edit the plan  [s] skip (defer)  [i] mark invalid  [q] quit session
 ```
+
+**Shorthand legend** (use exactly these letters; resist verbose alternatives):
+
+| Key | Meaning |
+|-----|---------|
+| `y` | apply the proposed fix as shown |
+| `n` | reject this plan; mark "needs decision" with reason |
+| `d` | show the actual diff before deciding |
+| `e` | user wants to modify the plan; iterate |
+| `s` | skip this finding; mark "deferred" with reason |
+| `i` | mark this finding "invalid" (false positive); record reason |
+| `q` | stop the session entirely; annotate report with what's done |
+
+If the user types prose instead of a letter, treat it as `e` (edit the plan) and incorporate their guidance.
 
 ### 2.3 Implement
 

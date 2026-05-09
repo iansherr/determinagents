@@ -180,16 +180,21 @@ Takes a report from any read-only audit and works through findings — one at a 
 
 ### 2.1 Resolve all actionable findings (default)
 
+If you don't pass a report path, the agent auto-discovers the most recent report in `docs/reports/` and confirms before proceeding.
+
 ```
-Run audits/RESOLVE_FROM_REPORT.md from $DETERMINAGENTS_HOME against the
-report at docs/reports/<REPORT_FILENAME>.
+Run audits/RESOLVE_FROM_REPORT.md from $DETERMINAGENTS_HOME.
+
+[Optional: target report at docs/reports/<REPORT_FILENAME>. If omitted,
+auto-discover the most recent.]
 
 Read docs/determinagents/AUDIT_CONTEXT.md first.
 
 Triage findings into Actionable / Needs decision / Already resolved /
 Invalid / Out of scope. Show me the plan before doing any work. Then
-work through Actionable findings in severity order (P0 first), with
-approval per finding. One commit per fix. Stop on first failure.
+work through Actionable findings in severity order (P0 first), using
+the shorthand approval format (y/n/d/e/s/i/q per finding). One commit
+per fix. Stop on first failure or `q`.
 
 Append a ## Resolution section to the report when finished.
 ```

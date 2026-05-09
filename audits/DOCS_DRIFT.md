@@ -194,6 +194,8 @@ git log --since='6 months ago' --pretty=format:'%h %ad %s' --date=short -- READM
 
 ## Report template
 
+Reports must also include the universal sections from `specs/FORMAT.md` — `## Severity rubric (this audit)` (copied verbatim from this doc's rubric) and `## Next steps` (paste-ready RESOLVE_FROM_REPORT invocation with this report's path filled in). Audit-specific structure below:
+
 ```markdown
 # Documentation Drift Audit — <DATE>
 

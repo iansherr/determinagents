@@ -207,6 +207,8 @@ Per finding, classify the **layer break**:
 
 ## Report template
 
+Reports must also include the universal sections from `specs/FORMAT.md` — `## Severity rubric (this audit)` (copied verbatim from this doc's rubric) and `## Next steps` (paste-ready RESOLVE_FROM_REPORT invocation with this report's path filled in). Audit-specific structure below:
+
 ```markdown
 # Data Flow Trace: <Flow Name> — <DATE>
 
