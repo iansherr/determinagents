@@ -25,9 +25,11 @@ Every entry in `INVOCATIONS.md` becomes one host-tool artifact. The mapping:
 | Source (in `INVOCATIONS.md`) | Generated artifact |
 |------------------------------|-------------------|
 | Each audit invocation (1.1–1.7) | One slash command / skill per audit |
-| Each TESTING_CREATOR tier (2.1–2.4) | One slash command per tier |
-| Each bootstrap / sync invocation (3.x) | One slash command per behavior |
-| Maintenance invocations (4.x) | One slash command per behavior |
+| P0-only triage (1.8) | One slash command (parameterized over audit name) |
+| Each RESOLVE_FROM_REPORT variant (2.1–2.4) | One slash command per variant |
+| Each TESTING_CREATOR tier (3.1–3.4) | One slash command per tier |
+| Each bootstrap / sync invocation (4.x) | One slash command per behavior |
+| Maintenance invocations (5.x) | One slash command per behavior |
 
 The shared conventions block at the top of `INVOCATIONS.md` should become a **header included in every generated artifact**, so each command is self-contained.
 
@@ -42,6 +44,9 @@ Two conventions, both supported:
 ```
 ~/.claude/commands/
 ├── audit-stub.md
+├── resolve-from-report.md
+├── resolve-p0.md
+├── resolve-finding.md
 ├── audit-security.md
 ├── audit-data-flow.md
 ├── audit-error-handling.md

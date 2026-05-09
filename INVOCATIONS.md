@@ -14,7 +14,7 @@ Every invocation in this file assumes the following — agents reading them shou
 2. **Project context first**: if `docs/determinagents/AUDIT_CONTEXT.md` exists in the target repo, read it before running any audit. Apply its calibrations (severity adjustments, known false-positives, ignore paths).
 3. **Reports go to** `docs/reports/<NAME>_<YYYY-MM-DD>.md` in the target repo.
 4. **Findings classified P0–P3** per the rubric in the audit doc.
-5. **Read-only by default.** Only `audits/TESTING_CREATOR.md` mutates the codebase, and only after explicit approval per the rules in that doc.
+5. **Read-only by default.** Two docs mutate the codebase, both gated behind explicit per-action approval: `audits/RESOLVE_FROM_REPORT.md` (works through audit-report findings) and `audits/TESTING_CREATOR.md` (writes new tests across four tiers).
 6. **Each finding includes file:line and a concrete fix** — never "fix this."
 7. **Discovery first.** Phase 0 of every audit identifies project shape; later phases reference what discovery found.
 
@@ -172,13 +172,69 @@ chat — do not write a full report. If there are no P0s, say so.
 
 ---
 
-## 2. TESTING_CREATOR (mutating)
+## 2. RESOLVE_FROM_REPORT (mutating)
 
-This is the only doc in the library that writes code. Each tier is an independent session.
+Takes a report from any read-only audit and works through findings — one at a time, with explicit approval per fix, separate commits per fix, and verification. The standard workflow after running an audit and reviewing the report.
+
+**Prerequisites**: a report at `docs/reports/<NAME>_<YYYY-MM-DD>.md` from any read-only audit, plus a clean working tree.
+
+### 2.1 Resolve all actionable findings (default)
+
+```
+Run audits/RESOLVE_FROM_REPORT.md from $DETERMINAGENTS_HOME against the
+report at docs/reports/<REPORT_FILENAME>.
+
+Read docs/determinagents/AUDIT_CONTEXT.md first.
+
+Triage findings into Actionable / Needs decision / Already resolved /
+Invalid / Out of scope. Show me the plan before doing any work. Then
+work through Actionable findings in severity order (P0 first), with
+approval per finding. One commit per fix. Stop on first failure.
+
+Append a ## Resolution section to the report when finished.
+```
+
+### 2.2 Resolve only P0 findings (fast path)
+
+```
+Run audits/RESOLVE_FROM_REPORT.md from $DETERMINAGENTS_HOME against the
+report at docs/reports/<REPORT_FILENAME>, scope=P0.
+
+Same triage and approval flow as the default invocation, but stop after
+P0 is clean. Surface remaining P1/P2/P3 in the resolution annotation
+without resolving them.
+```
+
+### 2.3 Resolve a single finding
+
+```
+Run audits/RESOLVE_FROM_REPORT.md from $DETERMINAGENTS_HOME against the
+report at docs/reports/<REPORT_FILENAME>. Scope to finding <SEVERITY> #<NUMBER>
+only.
+
+Skip triage of other findings. Verify the issue still exists, plan the
+fix, get approval, implement, verify, commit, annotate. Done.
+```
+
+### 2.4 Resolve a category
+
+```
+Run audits/RESOLVE_FROM_REPORT.md from $DETERMINAGENTS_HOME against the
+report at docs/reports/<REPORT_FILENAME>. Scope to findings tagged
+<CATEGORY — e.g., "phantom endpoints", "stub handlers", "orphan compiled JS">.
+
+Apply the standard per-finding loop within that category only.
+```
+
+---
+
+## 3. TESTING_CREATOR (mutating)
+
+Implements tests across four tiers (Adversarial, Chaos, Simulation, Forensics) beyond what `TEST_GAPS.md` covers. Each tier is an independent session.
 
 **Prerequisites for all tiers**: `audits/TEST_GAPS.md` and `audits/SECURITY_PENTEST.md` reports must exist in `docs/reports/`. Stop and run those first if they don't.
 
-### 2.1 Tier 1 — Adversarial
+### 3.1 Tier 1 — Adversarial
 
 ```
 Run Phase 1 of audits/TESTING_CREATOR.md from $DETERMINAGENTS_HOME against
@@ -197,7 +253,7 @@ disabled and pass when enabled, then commit.
 Report to docs/reports/TEST_VERIFICATION_<service>_<YYYY-MM-DD>.md.
 ```
 
-### 2.2 Tier 2 — Chaos
+### 3.2 Tier 2 — Chaos
 
 ```
 Run Phase 2 of audits/TESTING_CREATOR.md from $DETERMINAGENTS_HOME against
@@ -214,7 +270,7 @@ After approval, implement and verify each test. Commit each tier-2 artifact
 as a separate commit.
 ```
 
-### 2.3 Tier 3 — Simulation
+### 3.3 Tier 3 — Simulation
 
 ```
 Run Phase 3 of audits/TESTING_CREATOR.md from $DETERMINAGENTS_HOME against
@@ -232,7 +288,7 @@ If the service runs only one instance and is not designed to scale, stop
 and surface that — Tier 3 may not apply here.
 ```
 
-### 2.4 Tier 4 — Forensics
+### 3.4 Tier 4 — Forensics
 
 ```
 Run Phase 4 of audits/TESTING_CREATOR.md from $DETERMINAGENTS_HOME against
@@ -250,9 +306,9 @@ audit logs exist, test their immutability via the application's own API.
 
 ---
 
-## 3. Per-project artifact bootstraps
+## 4. Per-project artifact bootstraps
 
-### 3.1 DESIGN.md cold bootstrap
+### 4.1 DESIGN.md cold bootstrap
 
 **When**: before running `audits/UX_DESIGN_AUDIT.md` if no DESIGN.md exists.
 
@@ -274,7 +330,7 @@ against the rendered UI. Revise until both YAML and prose faithfully
 capture the product's visual identity.
 ```
 
-### 3.2 FEATURE_REGISTRY cold bootstrap
+### 4.2 FEATURE_REGISTRY cold bootstrap
 
 **When**: adopting the registry in a new project once it has ~10+ user-visible features.
 
@@ -302,7 +358,7 @@ feature's behavior is unclear, mark Pass criteria as
 Show the registry in chunks of 5 features for review before committing.
 ```
 
-### 3.3 FEATURE_REGISTRY per-feature add (in-PR)
+### 4.3 FEATURE_REGISTRY per-feature add (in-PR)
 
 **When**: shipping a new feature; add the registry entry in the same PR.
 
@@ -317,7 +373,7 @@ Use the next available ID. Match the tag conventions already in the file.
 Show the entry before committing.
 ```
 
-### 3.4 FEATURE_REGISTRY sync audit
+### 4.4 FEATURE_REGISTRY sync audit
 
 **When**: quarterly; before relying on the registry as a release gate.
 
@@ -336,7 +392,7 @@ Report to docs/reports/REGISTRY_DRIFT_<YYYY-MM-DD>.md. Do not modify the
 registry — the report is the proposal; I'll approve before changes.
 ```
 
-### 3.5 AUDIT_CONTEXT cold bootstrap
+### 4.5 AUDIT_CONTEXT cold bootstrap
 
 **When**: first time adopting this library in a new project, after running 1–2 audits to have something to calibrate.
 
@@ -359,7 +415,7 @@ sections empty rather than inventing content.
 Show me the file before committing.
 ```
 
-### 3.6 AUDIT_CONTEXT warm overlay (post-audit)
+### 4.6 AUDIT_CONTEXT warm overlay (post-audit)
 
 **When**: after completing any audit; to capture institutional knowledge surfaced during the run.
 
@@ -378,9 +434,9 @@ of proposed changes; do not commit until I approve each entry.
 
 ---
 
-## 4. Maintenance invocations
+## 5. Maintenance invocations
 
-### 4.1 Refresh AUDIT_CONTEXT
+### 5.1 Refresh AUDIT_CONTEXT
 
 **When**: quarterly; after a significant refactor.
 
@@ -395,7 +451,7 @@ Review docs/determinagents/AUDIT_CONTEXT.md. For each entry:
 Propose deletions and updates as a diff. Do not commit until I approve.
 ```
 
-### 4.2 Sweep all audits at P0-only
+### 5.2 Sweep all audits at P0-only
 
 **When**: pre-release sanity check; ~30 minutes total.
 

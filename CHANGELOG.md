@@ -6,6 +6,14 @@ All notable changes to determinagents are documented here. The format is loosely
 
 ## [Unreleased]
 
+### Added
+- `audits/RESOLVE_FROM_REPORT.md` — mutating doc that takes any audit report and works through findings one at a time with per-finding approval, separate commits, and verification. Closes the audit→fix loop without conflating read-only and mutating sessions. Standard workflow: audit → review → resolve → re-audit.
+- 4 invocation variants in `INVOCATIONS.md` §2: resolve-all-actionable, P0-only, single-finding, by-category.
+- README "standard workflow" guidance describing the audit → resolve → re-audit chain.
+
+### Changed
+- README footer attribution: "Built by [Ian Sherr](https://iansherr.com) at [Time Worthy Media](https://timeworthymedia.com)."
+
 ## [0.1.0] — 2026-05-09
 
 Initial public-shaped release. The library and install flow are usable end-to-end; per-host-tool materialization is agent-driven via `INSTALL.md`.

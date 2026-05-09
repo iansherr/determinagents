@@ -46,7 +46,8 @@ determinagents/
 │   ├── TEST_GAPS.md
 │   ├── DOCS_DRIFT.md
 │   ├── UX_DESIGN_AUDIT.md
-│   └── TESTING_CREATOR.md   # mutating (creates code)
+│   ├── RESOLVE_FROM_REPORT.md  # mutating: works through report findings
+│   └── TESTING_CREATOR.md      # mutating: writes new tests
 └── specs/               # conventions and per-project artifact specs
     ├── FORMAT.md                 # how to author a new audit
     ├── BOOTSTRAP.md              # how to generate AUDIT_CONTEXT.md
@@ -70,7 +71,10 @@ determinagents/
 
 | Doc | What it does | Prerequisites |
 |-----|--------------|---------------|
+| [audits/RESOLVE_FROM_REPORT.md](audits/RESOLVE_FROM_REPORT.md) | Works through findings in any audit report — one at a time, with per-finding approval, separate commits, and verification | An audit report exists at `docs/reports/`; clean working tree |
 | [audits/TESTING_CREATOR.md](audits/TESTING_CREATOR.md) | Implements tests across four tiers — Adversarial, Chaos, Simulation, Forensics — beyond what `TEST_GAPS.md` covers | Run `TEST_GAPS.md` and `SECURITY_PENTEST.md` first |
+
+**The standard workflow**: run an audit (read-only) → review the report → run `RESOLVE_FROM_REPORT` to work through findings → re-run the audit to verify clean state. For security-sensitive fixes, optionally chain into `TESTING_CREATOR` Tier 1 (Adversarial) afterwards to add executable coverage.
 
 ## Per-project specs
 
@@ -87,7 +91,7 @@ Supporting docs: [specs/FORMAT.md](specs/FORMAT.md) (audit authoring spec), [spe
 
 Every audit:
 
-- Is **read-only** by default. The one mutating doc (`TESTING_CREATOR.md`) declares this in its purpose section.
+- Is **read-only** by default. Two mutating docs (`RESOLVE_FROM_REPORT.md` and `TESTING_CREATOR.md`) declare this prominently in their purpose sections.
 - Has **phases** so you can scope: run Phase 1 only for a quick pass, all phases for a deep pass.
 - Classifies findings by severity (**P0/P1/P2/P3**) with concrete criteria.
 - Emits a report with file:line references and concrete fixes — never "fix this."
@@ -106,5 +110,5 @@ The bootstrap prompt for DESIGN.md is in [INVOCATIONS.md](INVOCATIONS.md). The o
 
 ---
 
-Built by [Ian Sherr](https://timeworthymedia.com).
+Built by [Ian Sherr](https://iansherr.com) at [Time Worthy Media](https://timeworthymedia.com).
 
