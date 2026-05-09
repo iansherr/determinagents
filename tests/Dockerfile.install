@@ -1,0 +1,48 @@
+# End-to-end install test: clean Ubuntu, run install.sh against the local
+# checkout (simulating the curl-pipe flow), then exercise the shim.
+#
+# Build context must be the repo root.
+# Build:  docker build -f tests/Dockerfile.install -t det-install-test .
+# Run:    docker run --rm det-install-test
+
+FROM ubuntu:24.04
+
+RUN apt-get update -qq && \
+    apt-get install -y --no-install-recommends \
+      git curl ca-certificates && \
+    rm -rf /var/lib/apt/lists/*
+
+# Non-root tester user, mimicking a real install
+RUN useradd -m -s /bin/bash tester
+USER tester
+WORKDIR /home/tester
+
+# Stage the repo as a "remote" the installer can clone from.
+# The .git directory must be present in the build context for clone to work.
+COPY --chown=tester:tester .git /home/tester/source/.git
+COPY --chown=tester:tester . /home/tester/source/
+
+# Verify the staged repo is intact
+RUN cd /home/tester/source && git log -1 --oneline
+
+# Run the installer against the local "remote"
+ENV DETERMINAGENTS_REPO_URL=/home/tester/source
+RUN sh /home/tester/source/install.sh
+
+# Smoke tests
+ENV PATH=/home/tester/.local/bin:$PATH
+
+RUN test -d /home/tester/.determinagents/audits           || (echo "FAIL: audits/ missing" && exit 1)
+RUN test -d /home/tester/.determinagents/specs            || (echo "FAIL: specs/ missing" && exit 1)
+RUN test -f /home/tester/.determinagents/INVOCATIONS.md   || (echo "FAIL: INVOCATIONS.md missing" && exit 1)
+RUN test -f /home/tester/.local/bin/determinagents        || (echo "FAIL: shim not installed" && exit 1)
+
+RUN determinagents version
+RUN determinagents path
+RUN determinagents help | head -5
+
+# Verify update is a no-op against our local source (already at HEAD)
+RUN echo n | determinagents update | tee /tmp/update-output && \
+    grep -qE 'already up to date|skipped' /tmp/update-output
+
+CMD ["sh", "-c", "echo 'All install smoke tests passed.'"]

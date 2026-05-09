@@ -2,7 +2,7 @@
 
 A portable library of **universal, self-discovering audit prompts** for coding agents. Hand any audit to an agent pointed at a repo; the agent discovers the project layout, runs the audit, and produces a structured report. No project-specific configuration required.
 
-These differ from project-specific agent docs (e.g., `vostego/docs/self-directed-agents/`) in that they contain **no hardcoded paths or service names**. The agent does discovery first, then applies a universal mental model.
+These differ from project-specific agent docs (the kind a team writes for one repo, hardcoding its layout) in that they contain **no hardcoded paths or service names**. The agent does discovery first, then applies a universal mental model — so the same audit works on any codebase.
 
 ## Install
 
@@ -103,3 +103,8 @@ Every audit:
 - Format: https://stitch.withgoogle.com/docs/design-md/format/
 
 The bootstrap prompt for DESIGN.md is in [INVOCATIONS.md](INVOCATIONS.md). The other six audits do not require DESIGN.md.
+
+---
+
+Built by [Ian Sherr](https://timeworthymedia.com).
+

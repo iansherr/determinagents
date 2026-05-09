@@ -1,0 +1,18 @@
+# Local dev wrapper for the install end-to-end test.
+#
+# Usage:
+#   docker compose -f tests/docker-compose.yml up --build install-test
+#
+# Or from the repo root:
+#   make test-install
+#
+# This is one container, not many — docker-compose is used for the
+# convenient build+run workflow, not because there are multiple services.
+
+services:
+  install-test:
+    build:
+      context: ..
+      dockerfile: tests/Dockerfile.install
+    image: det-install-test
+    container_name: det-install-test
