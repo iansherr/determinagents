@@ -198,22 +198,19 @@ The slash command is ~10 lines. The audit doc is the source of truth. Updates fl
 
 ## File template
 
-For each invocation in `INVOCATIONS.md`, generate a file like this (Claude Code slash command example):
+For each invocation in `INVOCATIONS.md`, generate a file like this (Gemini CLI example):
 
-```markdown
----
-description: <one-line description derived from INVOCATIONS.md "When" field>
-source: $DETERMINAGENTS_HOME/INVOCATIONS.md#<N.N>
----
+```toml
+description = "<one-line description>"
+prompt = \"\"\"
+Library at <ABSOLUTE_PATH_TO_LIBRARY> (or \$DETERMINAGENTS_HOME if set).
+Read docs/determinagents/AUDIT_CONTEXT.md if present.
 
-<Prompt body from INVOCATIONS.md — verbatim, with $DETERMINAGENTS_HOME
-references preserved (NOT expanded to absolute paths) so updates flow
-through the env var.>
+<Prompt body from INVOCATIONS.md>
+\"\"\"
 ```
 
-The `source:` frontmatter field is the marker the uninstall path uses to identify generated files.
-
-Adapt the frontmatter shape to whatever the host tool expects. The body should be identical across host tools so the prompts behave consistently.
+**Note on paths**: While `INVOCATIONS.md` uses `$DETERMINAGENTS_HOME` for portability, the materializing agent should include the **absolute path** discovered during installation as a fallback. This ensures the command works immediately even if the user hasn't configured their environment variables yet.
 
 ### Re-materialization
 
