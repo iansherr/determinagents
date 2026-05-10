@@ -50,12 +50,16 @@ command -v git >/dev/null 2>&1 || {
 # Local detection prompt
 if [ "$IN_REPO" = true ] && [ -z "${DETERMINAGENTS_HOME:-}" ] && [ "$INSTALL_DIR" = "$HOME/.determinagents" ] && [ -t 0 ]; then
   echo "Local repository detected: $(pwd)"
-  echo "  y: Use this local repository (no network call)"
-  echo "  n: Download/update from GitHub (may have newer versions)"
-  printf "Choice? [Y/n] "
-  read -r USE_LOCAL
-  case "$USE_LOCAL" in
-    n|N|no|NO)
+  echo "  1: Use in-place (stays here, no network)"
+  echo "  2: Copy to $INSTALL_DIR (installs to default, no network)"
+  echo "  3: Download fresh from GitHub (uses network)"
+  printf "Choice? [1] "
+  read -r CHOICE
+  case "$CHOICE" in
+    2)
+      LOCAL_COPY=true
+      ;;
+    3)
       FORCE_UPDATE=true
       ;;
     *)
@@ -68,7 +72,7 @@ echo "Determinagents → $INSTALL_DIR (branch: $BRANCH)"
 
 # Install or update
 if [ -d "$INSTALL_DIR/.git" ]; then
-  if [ "$FORCE_UPDATE" = false ] && [ "$INSTALL_DIR" = "$(pwd)" ] && [ "$IN_REPO" = true ]; then
+  if [ "${FORCE_UPDATE:-false}" = false ] && [ "$INSTALL_DIR" = "$(pwd)" ] && [ "$IN_REPO" = true ]; then
     echo "  using local repository; skipping network update"
   else
     echo "  existing checkout found; updating..."
@@ -76,6 +80,13 @@ if [ -d "$INSTALL_DIR/.git" ]; then
     git -C "$INSTALL_DIR" checkout --quiet "$BRANCH"
     git -C "$INSTALL_DIR" pull --ff-only --quiet origin "$BRANCH"
   fi
+elif [ "${LOCAL_COPY:-false}" = true ]; then
+  echo "  installing local copy to $INSTALL_DIR..."
+  if [ -e "$INSTALL_DIR" ]; then
+    echo "error: $INSTALL_DIR exists. Please remove it first." >&2
+    exit 1
+  fi
+  git clone --quiet --branch "$BRANCH" "$(pwd)" "$INSTALL_DIR"
 else
   if [ -e "$INSTALL_DIR" ]; then
     echo "error: $INSTALL_DIR exists but is not a git checkout" >&2
