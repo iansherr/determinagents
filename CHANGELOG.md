@@ -6,6 +6,40 @@ All notable changes to determinagents are documented here. The format is loosely
 
 ## [Unreleased]
 
+## [0.5.0] — 2026-05-10
+
+This release consolidates four months of in-tree work (the v0.3 harness expansion and v0.4 simplification pass referenced below were never tagged) plus a fresh batch covering installer ergonomics, the hub command flow, the rebrand to **DeterminAgents**, and shim-side quality-of-life features (doctor, completions, paste-ready uninstall cleanup).
+
+### Added (shim — quality of life)
+- `determinagents doctor` — read-only health check across install, shim, remote, and shell completion. Reports `ok` / `warn` / `fail` per check; exits non-zero on any fail. Catches stale checkouts, dirty working trees, missing PATH entries, unreachable origin, and unsupported shells before they bite during a real run.
+- `determinagents completions <shell>` — prints a tab-completion script for `bash`, `zsh`, or `fish` to stdout. Single source of truth for the subcommand list lives in the shim, so adding a subcommand later only touches one place. Installer detects `$SHELL` and prints the one-liner to enable it; never edits dotfiles.
+- `determinagents uninstall` now prints a paste-ready prompt for the user's LLM app to clean up generated slash commands (the shim removes the library directory; the host-tool commands live elsewhere and need an agent to remove safely).
+- Shim help text rewritten so `materialize` reflects reality — one prompt, host-agnostic. The agent inside the LLM detects Claude Code / Gemini / Cursor / etc. from its own context. (Previously the help advertised a `[host]` arg that the shim silently dropped.)
+
+### Added (installer)
+- Local repository detection. If `install.sh` is run from a clone, prompts for in-place install (no network), local copy to default path, or fresh download from GitHub.
+- Local-copy install option (writes a clone of the local checkout to `$DETERMINAGENTS_HOME` so the install path stays the standard one even when iterating from a clone).
+- Path-baked shim for non-standard installs: when installing to a path other than `~/.determinagents`, the shim has the absolute install path baked in via `sed`, so it works without requiring `$DETERMINAGENTS_HOME` to be exported.
+- Installer prints shell-specific completion-enable hint after success (no dotfile edits).
+
+### Added (hub command — First Run flow)
+- `INSTALL.md` hub template now instructs the rendering agent to stat `DESIGN.md`, `docs/determinagents/FEATURE_REGISTRY.md`, and `docs/determinagents/AUDIT_CONTEXT.md` on every invocation, and adapt the "🚀 First Run" section accordingly: omit when all three exist, demote to a single "Re-init" line when some exist, render as-is when none. The hub menu self-heals if artifacts are deleted later.
+- Display-first directive: hub commands must show the menu before doing any shell commands or file searches.
+- Recommendation that materialization leaves a removable marker comment (`generated-by: …/INSTALL.md`) on each generated file so uninstall is deterministic.
+- Rewritten "Uninstall" section in `INSTALL.md` with the full paste-ready cleanup prompt.
+
+### Changed (rebrand: DeterminAgents)
+- Stylized as **DeterminAgents** in titles and prose (README headline, INSTALL.md hub template strings). All CLI tokens, paths, env vars, and the repo slug stay lowercase (`determinagents`, `$DETERMINAGENTS_HOME`, etc.). No code or path churn.
+
+### Changed (README — design principle, attribution)
+- New **"Design principle"** section near the top codifies *simple prompt + good harness > clever prompt + no harness*, links the v0.4 simplification commit, and includes a "when this isn't worth it" note (don't reach for a phased audit on a 200-line script). Promotes the principle from buried-in-the-Acknowledgements to a first-class framing.
+- Acknowledgements rewritten: drops the Anthropic-specific name in favor of "frontier model engineers"; adds *"out loud, against the cultural reflex of secrecy and the collective instinct to grind for the perfect prompt"*; new paragraph crediting Karpathy's "loop until success criteria met" observation and Forrest Chang's [andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills) as a parallel distillation of the same insight.
+
+### Fixed
+- `INSTALL.md` Claude Code file-tree example had its file list duplicated in the same code block; deduped.
+- Gemini CLI hub-command convention corrected to TOML (`description = "..."` + `prompt = """..."""`) — the prior example used Markdown frontmatter, which Gemini does not parse.
+- Materialized commands now recommend including the absolute install path as a fallback alongside `$DETERMINAGENTS_HOME`, so commands work immediately in environments where the env var isn't exported yet.
+
 ### Added (model tier hints)
 - `specs/FORMAT.md` — new "Model tier hints" section documenting three role-based, vendor-neutral tiers: `reasoning` (multi-step hypothesis generation), `default` (workhorse tasks), `fast` (narrow scope / classification). Names describe what the task needs, not what the model is, so they stay useful as model lineups change. Includes a current-mappings table (with the explicit caveat that vendor names rot).
 - Each audit doc declares a `**Model tier**` line near the top. SECURITY_HUNT and TESTING_CREATOR are `reasoning`; DOCS_DRIFT and UX_DESIGN_AUDIT are `fast`; everything else `default`.
@@ -79,5 +113,6 @@ Initial public-shaped release. The library and install flow are usable end-to-en
 - Reports go to `docs/reports/<NAME>_<YYYY-MM-DD>.md` in the target project.
 - `docs/determinagents/AUDIT_CONTEXT.md` (overlay) is read first if present, to apply project-specific calibrations.
 
-[Unreleased]: https://github.com/iansherr/determinagents/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/iansherr/determinagents/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/iansherr/determinagents/releases/tag/v0.5.0
 [0.1.0]: https://github.com/iansherr/determinagents/releases/tag/v0.1.0

@@ -1,8 +1,16 @@
-# Determinagents
+# DeterminAgents
 
 A portable library of **universal, self-discovering audit prompts** for coding agents. Hand any audit to an agent pointed at a repo; the agent discovers the project layout, runs the audit, and produces a structured report. No project-specific configuration required.
 
 These differ from project-specific agent docs (the kind a team writes for one repo, hardcoding its layout) in that they contain **no hardcoded paths or service names**. The agent does discovery first, then applies a universal mental model — so the same audit works on any codebase.
+
+## Design principle
+
+**Simple prompt + good harness > clever prompt + no harness.**
+
+Most of the lift in agentic work comes from the surrounding scaffolding — phases, severity rubrics, report formats, context overlays, fault-injection harnesses — not from clever wording inside the prompt. Every audit here is deliberately plain English; the structure around it does the work, and the structure is what gives the agent something to *loop against* until success criteria are met. The principle applies recursively to the library's own docs: trust over enumeration, defaults over variants. (See the [v0.4 simplification commit](https://github.com/iansherr/determinagents/commit/9ae9d6a6b8dbed1ed30249f4ae4e312c8729816b) for what that looked like applied to DeterminAgents itself.)
+
+**When this isn't worth it.** A 200-line script or a one-off prototype doesn't need a phased audit with a severity rubric and a report file. Use direct prompts for trivial work; reach for an audit when the codebase is large enough that structure beats ad-hoc inspection.
 
 ## Install
 
@@ -14,8 +22,11 @@ Installs to `~/.determinagents/` (override with `$DETERMINAGENTS_HOME`) and a `d
 
 ```sh
 determinagents version             # what's installed
+determinagents doctor              # check the install is healthy
 determinagents update              # check for updates, show diff, apply with confirmation
 determinagents materialize         # install slash commands for your host tool
+determinagents completions <shell> # print tab-completion script (bash, zsh, fish)
+determinagents uninstall           # remove the library (prompts for confirmation)
 determinagents help                # full command list
 ```
 
@@ -134,7 +145,9 @@ The bootstrap prompt for DESIGN.md is in [INVOCATIONS.md](INVOCATIONS.md). The o
 
 Thank you to Mozilla Security for publicly sharing **[Behind the Scenes: Hardening Firefox](https://hacks.mozilla.org/2026/05/behind-the-scenes-hardening-firefox/)** (May 2026). Their description of the agentic-harness pipeline, the inner-loop framing — *"there is a bug in this part of the code, please find it and build a testcase"* — and the severity-by-defect-class rubric directly shaped `audits/SECURITY_HUNT.md` and the broader v0.3 / v0.4 design. Open writeups from teams doing real production work like this is how the rest of us learn.
 
-Thank you also to the engineers at Anthropic and elsewhere who keep saying — out loud, against the cultural reflex to grind for the perfect prompt — that working *with* an agent to improve a prompt produces better prompts than working alone. This library is an outgrowth of that practice: a personal collection of prompts that worked, refined over time, until the scaffolds of a standard set became visible. The spec emerged from the pattern, not the other way around. The hope now is that publishing it helps others skip a few of the same steps.
+Thank you also to the frontier model engineers who keep saying — out loud, against the cultural reflex of secrecy and the collective instinct to grind for the perfect prompt — that working *with* an agent to improve a prompt produces better prompts than working alone. This library is an outgrowth of that practice: a personal collection of prompts that worked, refined over time, until the scaffolds of a standard set became visible. The spec emerged from the pattern, not the other way around. The hope now is that publishing it helps others skip a few of the same steps.
+
+And to Andrej Karpathy, whose [observation](https://x.com/karpathy/status/2015883857489522876) that *"LLMs are exceptionally good at looping until they meet specific goals — don't tell it what to do, give it success criteria and watch it go"* is the cleanest one-line statement of why the harness, not the prompt, does most of the work. (See also Forrest Chang's [andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills) for a compact CLAUDE.md distillation of the same observations.)
 
 ---
 

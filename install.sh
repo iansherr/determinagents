@@ -132,14 +132,37 @@ if [ -z "${DETERMINAGENTS_HOME:-}" ] && [ "$INSTALL_DIR" != "$HOME/.determinagen
   echo ""
 fi
 
+# Suggest shell completion for the detected shell. Hint only — never edit dotfiles.
+DETECTED_SHELL=$(basename "${SHELL:-}")
+case "$DETECTED_SHELL" in
+  bash)
+    echo "tip: enable tab completion (add to ~/.bashrc):"
+    echo "    eval \"\$(determinagents completions bash)\""
+    echo ""
+    ;;
+  zsh)
+    echo "tip: enable tab completion (add to ~/.zshrc):"
+    echo "    eval \"\$(determinagents completions zsh)\""
+    echo ""
+    ;;
+  fish)
+    echo "tip: enable tab completion (run once):"
+    echo "    determinagents completions fish > ~/.config/fish/completions/determinagents.fish"
+    echo ""
+    ;;
+esac
+
 cat <<DONE
 Done.
 
 Next:
   determinagents version           # show installed version
+  determinagents doctor            # check the install is healthy
   determinagents update            # check for updates
   determinagents materialize       # install slash commands for your host tool
 
 To invoke an audit, paste a prompt from $INSTALL_DIR/INVOCATIONS.md
 into your coding agent.
+
+To remove later: determinagents uninstall
 DONE
