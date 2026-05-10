@@ -2,7 +2,17 @@
 # Determinagents shim — wraps git operations and host-tool installation
 set -eu
 
-DETERMINAGENTS_HOME="${DETERMINAGENTS_HOME:-$HOME/.determinagents}"
+# Resolve DETERMINAGENTS_HOME:
+# 1. Environment variable
+# 2. Relative to script (if run from a clone)
+# 3. Default path
+if [ -n "${DETERMINAGENTS_HOME:-}" ]; then
+  : # already set
+elif [ -f "$(dirname "$0")/../INVOCATIONS.md" ]; then
+  DETERMINAGENTS_HOME=$(cd "$(dirname "$0")/.." && pwd)
+else
+  DETERMINAGENTS_HOME="$HOME/.determinagents"
+fi
 
 if [ ! -d "$DETERMINAGENTS_HOME/.git" ]; then
   echo "error: determinagents not installed at $DETERMINAGENTS_HOME" >&2

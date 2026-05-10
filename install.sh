@@ -87,7 +87,13 @@ fi
 
 # Install the determinagents shim
 mkdir -p "$BIN_DIR"
-cp "$INSTALL_DIR/bin/determinagents" "$BIN_DIR/determinagents"
+if [ "$INSTALL_DIR" = "$HOME/.determinagents" ]; then
+  cp "$INSTALL_DIR/bin/determinagents" "$BIN_DIR/determinagents"
+else
+  # Bake the path into the shim for non-standard installs
+  sed "s|DETERMINAGENTS_HOME=\"\$HOME/.determinagents\"|DETERMINAGENTS_HOME=\"$INSTALL_DIR\"|" \
+    "$INSTALL_DIR/bin/determinagents" > "$BIN_DIR/determinagents"
+fi
 chmod +x "$BIN_DIR/determinagents"
 
 # Status
