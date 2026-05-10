@@ -79,7 +79,8 @@ determinagents/
     ├── BOOTSTRAP.md               # how to generate AUDIT_CONTEXT.md (cold + warm)
     ├── FEATURE_REGISTRY.md        # spec for the per-project feature registry
     ├── AUDIT_CONTEXT_TEMPLATE.md  # minimal starting overlay (Global only)
-    └── AUDIT_CONTEXT_SECTIONS.md  # catalog of audit-specific sections (copy as needed)
+    ├── AUDIT_CONTEXT_SECTIONS.md  # catalog of audit-specific sections (copy as needed)
+    └── MAINTENANCE.md             # maintainer-only: keep the library current (refresh / integrate / brainstorm)
 ```
 
 ## Available audits (read-only)

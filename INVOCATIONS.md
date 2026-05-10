@@ -258,6 +258,27 @@ Older than 12 months on a non-conventions entry? Still earns its place?
 Propose deletions and updates as a diff. Do not commit until I approve.
 ```
 
+### Library maintenance (maintainer-only)
+
+Three modes for keeping DeterminAgents itself current as host tools and the surrounding ecosystem evolve. Reports go to `docs/maintenance/` (gitignored).
+
+```
+Read $DETERMINAGENTS_HOME/specs/MAINTENANCE.md and run it in
+--mode=<refresh|integrate|brainstorm>.
+
+  refresh    audit current docs against host-tool reality (default)
+  integrate  fold a specific external source into the library
+             requires --source=<url-or-path-or-description>
+  brainstorm explore where the library should grow
+             optional --seed=<topic>
+
+Report to docs/maintenance/<MODE>_<YYYY-MM-DD>[_<slug>].md.
+Do not commit the report (the directory is gitignored).
+Do not modify any library files; propose edits only.
+```
+
+This is **not** a user audit. End users running DeterminAgents on their projects don't invoke this — it's for the library steward.
+
 ---
 
 ## Authoring new invocations
