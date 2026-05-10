@@ -272,10 +272,8 @@ Read $DETERMINAGENTS_HOME/specs/MAINTENANCE.md and run it in
   brainstorm explore where the library should grow
              optional --seed=<topic>
 
-NOTE: shared conventions do not apply here. This runs on the library
-repo itself, not a target project. Skip the AUDIT_CONTEXT.md check —
-there is none. Reports go to docs/maintenance/<MODE>_<YYYY-MM-DD>[_<slug>].md,
-not docs/reports/. Do not modify any library files; propose edits only.
+Reports go to docs/maintenance/<MODE>_<YYYY-MM-DD>[_<slug>].md (gitignored).
+Do not modify any library files; propose edits only.
 ```
 
 This is **not** a user audit. End users running DeterminAgents on their projects don't invoke this — it's for the library steward.
