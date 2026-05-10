@@ -10,9 +10,7 @@ Anytime. Read-only. Especially valuable after a sprint where features were shipp
 
 ## Time estimate
 
-- **Quick** (30 min): Phase 1 only
-- **Standard** (60 min): Phases 1–3
-- **Deep** (90+ min): All phases
+Default (all phases): 60–90 minutes. Each phase is independently runnable; use `--phases=N` to scope, `--max-time=Xm` for a soft budget. Phase 6 (`+harness`) adds 30+ minutes depending on endpoint count.
 
 ## Output
 

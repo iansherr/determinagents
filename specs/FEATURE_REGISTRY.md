@@ -144,29 +144,9 @@ Multiple tags per entry. The fanout invocation (`test all [admin]`) only works i
 
 ## Invocation patterns
 
-These should work without modification given a registry that follows this spec:
+A registry following this spec supports invocations like "test feature F03," "test all features tagged [critical]," "run visual tests on all [public] at viewports 390/768/1280," and "audit the registry against code for drift."
 
-```
-Read docs/determinagents/FEATURE_REGISTRY.md, section "F03". Test it
-using <Playwright MCP | curl | browser>. Report PASS/FAIL with evidence.
-```
-
-```
-Read docs/determinagents/FEATURE_REGISTRY.md. Test all features tagged
-[critical]. Report PASS/FAIL per feature. Continue past failures.
-```
-
-```
-Read docs/determinagents/FEATURE_REGISTRY.md and DESIGN.md. Run visual
-tests on all [public] features at viewports 390/768/1280. Report any DESIGN.md
-deviations with computed vs. expected values.
-```
-
-```
-Read docs/determinagents/FEATURE_REGISTRY.md and audit it for drift:
-which features in the registry no longer exist in code, and which routes in
-code have no entry. Report both lists.
-```
+For paste-ready prompts and flag conventions, see `INVOCATIONS.md` (FEATURE_REGISTRY section). This spec doc shows the registry's *shape*; INVOCATIONS shows the patterns that consume it.
 
 ---
 
@@ -192,49 +172,17 @@ Report goes to `docs/reports/REGISTRY_DRIFT_<YYYY-MM-DD>.md`.
 
 ---
 
-## Generator prompt (cold bootstrap)
+## Generation and per-feature additions
 
-For a new project that doesn't have a registry yet:
+For paste-ready prompts (cold bootstrap of the full registry, per-feature add during a PR), see `INVOCATIONS.md` (FEATURE_REGISTRY section). The generator must follow these spec-defined rules:
 
-```
-Generate docs/determinagents/FEATURE_REGISTRY.md for this repo following
-the spec at ${DETERMINAGENTS_HOME:-$HOME/.determinagents}/specs/FEATURE_REGISTRY.md.
-
-Discovery steps:
-1. Identify every user-visible route (frontend pages, mobile screens, API
-   endpoints with user-facing behavior). Use the Phase 1 commands from
-   audits/STUB_AND_COMPLETENESS.md.
-2. For each, draft an entry with the required fields. Functional steps should
-   be specific (DOM selectors, network calls, expected statuses) — not
-   "verify it works."
-3. Group by tag. Default tags: [public], [authenticated], [admin], [mobile],
-   [api]. Add domain tags as features cluster.
-4. Write the test infrastructure header. If you don't know the test account
-   convention, leave a placeholder and ask me before committing.
-5. Reference DESIGN.md from the design standards section if it exists.
-
-Do not invent functional steps you cannot verify from the code. If a feature's
-behavior is unclear, mark the Pass criteria as "TBD — needs product input"
-rather than guessing.
-
-Show me the registry in chunks of 5 features at a time for review before
-committing the full file.
-```
-
-## Per-feature add prompt (warm)
-
-For adding a new feature to an existing registry, in the same PR as the feature:
-
-```
-I'm shipping <feature name> in this PR. Add an entry to
-docs/determinagents/FEATURE_REGISTRY.md following the spec at
-${DETERMINAGENTS_HOME:-$HOME/.determinagents}/specs/FEATURE_REGISTRY.md.
-
-The feature: <route(s)>, <auth requirements>, <intended behavior>.
-
-Use the next available ID. Match the tag conventions already in the file.
-Show me the entry before committing.
-```
+- Discovery uses Phase 1 commands from `audits/STUB_AND_COMPLETENESS.md`
+- Functional steps must be specific — DOM selectors, network calls, expected statuses, not "verify it works"
+- Group by tag; default tags: `[public]`, `[authenticated]`, `[admin]`, `[mobile]`, `[api]`
+- Reference `DESIGN.md` from the design standards section if it exists
+- Never invent functional steps you cannot verify from code; mark unclear Pass criteria as "TBD — needs product input"
+- Show registries in chunks of 5 features for review before committing the full file
+- Per-feature additions use the next available ID and match existing tag conventions
 
 ---
 

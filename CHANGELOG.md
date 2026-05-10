@@ -6,6 +6,16 @@ All notable changes to determinagents are documented here. The format is loosely
 
 ## [Unreleased]
 
+### Changed (v0.4 simplification — applying "simple prompt + good harness" to the library itself)
+- **INVOCATIONS.md cut from 590 → ~250 lines** (~57%). Collapsed enumerated invocation variants (4 RESOLVE variants, 4 SECURITY_HUNT variants, etc.) into one invocation per behavior with documented `--scope`, `--target`, `--phases`, `--max-time`, and `+harness` flags. Substituted *trust the user/agent to combine flags* for *enumerate every plausible invocation*.
+- **Dropped `quick`/`standard`/`deep` named scope variants** from every audit doc. Replaced with `--phases=N,M` (run specific phases) and `--max-time=Xm` (soft budget). The agent picks based on actual constraint, not pre-baked slicing. Each audit's "Time estimate" section now states the default duration plus a one-line note about flags.
+- **Split `AUDIT_CONTEXT_TEMPLATE.md` (305 lines → 63 lines)** into a minimal template (`Global` only) and a separate sections catalog (`specs/AUDIT_CONTEXT_SECTIONS.md`). New projects start with the minimal template; sections from the catalog get copied in only when there's something to put in them. Empty `## STUB_AND_COMPLETENESS` sections are noise; sections that grew during a real audit run are signal.
+- **Trimmed inline invocation examples** from `specs/FEATURE_REGISTRY.md` and `specs/BOOTSTRAP.md`. Both now reference `INVOCATIONS.md` as canonical and describe the rules/shape, not the prompts.
+- **RESOLVE_FROM_REPORT Phase 2** converted from 7 numbered sub-phases to a prose loop description + three sub-sections (presentation format, verification rules, commit format, report annotation). Same content, less ceremony.
+- **README**: layout tree updated for new spec files; mutating-docs table includes DATA_FLOW_VERIFY; new "Inspiration" section credits Mozilla Security's Firefox-hardening writeup as the source of the agentic-harness pattern and the v0.4 simplification principle.
+
+This is net deletion: ~700 lines removed, library shape more confidently opinionated, defaults that do the right thing rather than enumerated alternatives.
+
 ### Added (harness expansion — "simple prompt + good harness > clever prompt + no harness")
 - `specs/FORMAT.md` — new "Harness conventions" section codifying the pattern shared by all execution-capable audits: mutating declaration, disposable workspace requirement (Phase 0.1), AUDIT_CONTEXT integration, verification loop pattern, artifact capture, "Attempted but blocked" report section, per-target scope.
 - `audits/DATA_FLOW_VERIFY.md` — mutating sibling to `DATA_FLOW_TRACE.md`. Drives the actual flow (UI or API), captures real wire traffic, snapshots the DB before/after, builds the round-trip table from observed bytes. Catches silent layer drift that static analysis can't see.

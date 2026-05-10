@@ -26,45 +26,11 @@ What does **not** belong:
 
 ## Two modes
 
-### Cold bootstrap (first run)
+For paste-ready prompts, see `INVOCATIONS.md` (AUDIT_CONTEXT section). The two modes are:
 
-Run when adopting these audits in a new project. The agent surveys the repo, asks the user a few targeted questions, and writes an initial `AUDIT_CONTEXT.md`.
+**Cold bootstrap** — first run for a new project. Agent surveys the codebase (auth model, deployment surface, languages, archived dirs), asks up to 5 questions about institutional knowledge that's not visible from code, and writes an initial `AUDIT_CONTEXT.md` from the minimal template at `specs/AUDIT_CONTEXT_TEMPLATE.md`. Sections beyond Global come from the catalog at `specs/AUDIT_CONTEXT_SECTIONS.md` — copied in only when there's something to put in them.
 
-**Prompt:**
-
-```
-Bootstrap docs/determinagents/AUDIT_CONTEXT.md for this repo, following
-the spec at ${DETERMINAGENTS_HOME:-$HOME/.determinagents}/specs/BOOTSTRAP.md.
-
-Survey the codebase: identify the auth model, deployment surface, primary
-languages/frameworks, and any obvious archived/dead directories.
-
-Then ask me up to 5 questions about institutional knowledge that wouldn't be
-visible from the code alone — recent incidents, known weak spots, areas where
-severity should be calibrated differently from the universal P0–P3 rubric.
-
-Use the template at ${DETERMINAGENTS_HOME:-$HOME/.determinagents}/specs/AUDIT_CONTEXT_TEMPLATE.md.
-Leave sections empty rather than inventing content. Commit the result.
-```
-
-### Warm overlay (after an audit)
-
-Run after completing any audit. The agent proposes updates based on what was learned during the audit.
-
-**Prompt:**
-
-```
-You just produced an audit report at docs/reports/<filename>. Propose updates
-to docs/determinagents/AUDIT_CONTEXT.md based on what you learned.
-
-Only propose entries that:
-- Are project-specific institutional knowledge (not findable by discovery)
-- Would change how a future audit runs (skip a path, weight a finding differently,
-  flag a pattern as known)
-
-Do not include findings themselves — those live in the report. Show me a diff
-of proposed changes; don't commit until I approve.
-```
+**Warm overlay** — after any audit run. Agent proposes additions based on what was learned, but only entries that are (a) project-specific institutional knowledge not findable by discovery and (b) would change how a future audit runs. Findings themselves live in the report, never the overlay. Diff is shown; nothing commits without approval per entry.
 
 ## Authoring rules
 

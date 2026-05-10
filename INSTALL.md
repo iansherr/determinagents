@@ -20,16 +20,18 @@ The agent does the rest: detects the host tool, reads `INVOCATIONS.md`, and gene
 
 ## What gets installed
 
-Every entry in `INVOCATIONS.md` becomes one host-tool artifact. The mapping:
+Every behavior in `INVOCATIONS.md` becomes one host-tool artifact. Each invocation has documented `--scope`, `--target`, `--phases`, `--max-time`, and `+harness` flags — these become arguments the slash command passes through to the agent, not separate slash commands.
 
 | Source (in `INVOCATIONS.md`) | Generated artifact |
 |------------------------------|-------------------|
-| Each audit invocation (1.1–1.7) | One slash command / skill per audit |
-| P0-only triage (1.8) | One slash command (parameterized over audit name) |
-| Each RESOLVE_FROM_REPORT variant (2.1–2.4) | One slash command per variant |
-| Each TESTING_CREATOR tier (3.1–3.4) | One slash command per tier |
-| Each bootstrap / sync invocation (4.x) | One slash command per behavior |
-| Maintenance invocations (5.x) | One slash command per behavior |
+| Each audit (one per row in the audits table) | One slash command (`audit-stub`, `audit-security`, etc.) |
+| Cross-audit P0 sweep | One slash command (`audit-p0-sweep`) |
+| RESOLVE_FROM_REPORT | One slash command (`resolve-from-report`) — flags handle scope/finding/category |
+| SECURITY_HUNT | One slash command (`security-hunt`) — flags handle target/confirmed-only/from-report |
+| DATA_FLOW_VERIFY | One slash command (`data-flow-verify`) |
+| TESTING_CREATOR | One slash command (`testing-creator`) — `--tier=N` selects the tier |
+| Per-project bootstraps (DESIGN, FEATURE_REGISTRY, AUDIT_CONTEXT) | One slash command each |
+| Maintenance | One slash command each |
 
 The shared conventions block at the top of `INVOCATIONS.md` should become a **header included in every generated artifact**, so each command is self-contained.
 
@@ -44,9 +46,6 @@ Two conventions, both supported:
 ```
 ~/.claude/commands/
 ├── audit-stub.md
-├── resolve-from-report.md
-├── resolve-p0.md
-├── resolve-finding.md
 ├── audit-security.md
 ├── audit-data-flow.md
 ├── audit-error-handling.md
@@ -54,23 +53,38 @@ Two conventions, both supported:
 ├── audit-docs-drift.md
 ├── audit-ux-design.md
 ├── audit-p0-sweep.md
-├── verify-tier-adversarial.md
-├── verify-tier-chaos.md
-├── verify-tier-simulation.md
-├── verify-tier-forensics.md
+├── resolve-from-report.md
+├── security-hunt.md
+├── data-flow-verify.md
+├── testing-creator.md
 ├── bootstrap-design.md
 ├── bootstrap-feature-registry.md
 ├── bootstrap-audit-context.md
-├── add-feature.md
-├── audit-registry-sync.md
+└── refresh-audit-context.md
+├── audit-security.md
+├── audit-data-flow.md
+├── audit-error-handling.md
+├── audit-test-gaps.md
+├── audit-docs-drift.md
+├── audit-ux-design.md
+├── audit-p0-sweep.md
+├── resolve-from-report.md
+├── security-hunt.md
+├── data-flow-verify.md
+├── testing-creator.md
+├── bootstrap-design.md
+├── bootstrap-feature-registry.md
+├── bootstrap-audit-context.md
 └── refresh-audit-context.md
 ```
+
+The user invokes with flags: `/testing-creator --tier=2 --service=billing`, `/resolve-from-report --scope=P0`, `/audit-stub +harness`, etc. One slash command per behavior, flags handle variation.
 
 **Skills** (richer, for behaviors with multi-file context): `~/.claude/skills/<skill-name>/SKILL.md` plus supporting files. Use this when an invocation needs to reference more than one file from the library at runtime.
 
 For most invocations, slash commands are sufficient. Promote to a skill only when needed.
 
-**Naming convention**: `audit-*` for read-only audits, `verify-tier-*` for TESTING_CREATOR tiers, `bootstrap-*` for cold-start generators, `add-*` for in-PR additions, `refresh-*` for maintenance.
+**Naming convention**: `audit-*` for read-only audits, `resolve-*` and `*-hunt` and `*-verify` for mutating, `bootstrap-*` for cold-start generators, `refresh-*` for maintenance.
 
 ### Gemini CLI
 
@@ -179,7 +193,7 @@ When asked to install, the agent should:
 
 2. **Detect scope**: project-local (`.claude/commands/`) vs. global (`~/.claude/commands/`). Default to global for this library since it's not project-specific. Confirm with user.
 
-3. **Read source**: open `<LIBRARY_PATH>/INVOCATIONS.md` and extract the shared conventions block plus every numbered invocation (1.x, 2.x, 3.x, 4.x).
+3. **Read source**: open `$DETERMINAGENTS_HOME/INVOCATIONS.md` and extract the shared conventions block plus every behavior (audits, mutating docs, bootstraps, maintenance). Each becomes one slash command; flags pass through.
 
 4. **Generate plan**: present the user with a list of files that will be created, e.g.:
    ```

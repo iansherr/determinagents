@@ -16,7 +16,7 @@ Anytime. Read-only. Especially after a "works in dev, mysteriously broken in pro
 
 ## Time estimate
 
-30–60 min.
+Default (Phases 1–5): 30–60 min. Each phase independently runnable; use `--phases=N` to scope. Phase 6 (`+harness`) adds 30+ minutes depending on fault scenarios.
 
 ## Output
 

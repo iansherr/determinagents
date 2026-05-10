@@ -51,10 +51,11 @@ determinagents/
 │   ├── DATA_FLOW_VERIFY.md     # mutating: observed-vs-theorized data flow
 │   └── TESTING_CREATOR.md      # mutating: writes new tests
 └── specs/               # conventions and per-project artifact specs
-    ├── FORMAT.md                 # how to author a new audit
-    ├── BOOTSTRAP.md              # how to generate AUDIT_CONTEXT.md
-    ├── FEATURE_REGISTRY.md       # spec for the per-project feature registry
-    └── AUDIT_CONTEXT_TEMPLATE.md # skeleton for the per-project overlay
+    ├── FORMAT.md                  # how to author a new audit; harness conventions
+    ├── BOOTSTRAP.md               # how to generate AUDIT_CONTEXT.md (cold + warm)
+    ├── FEATURE_REGISTRY.md        # spec for the per-project feature registry
+    ├── AUDIT_CONTEXT_TEMPLATE.md  # minimal starting overlay (Global only)
+    └── AUDIT_CONTEXT_SECTIONS.md  # catalog of audit-specific sections (copy as needed)
 ```
 
 ## Available audits (read-only)
@@ -91,7 +92,7 @@ These describe an artifact each project generates its own instance of.
 | Spec | Project artifact | Purpose |
 |------|------------------|---------|
 | [specs/FEATURE_REGISTRY.md](specs/FEATURE_REGISTRY.md) | `docs/determinagents/FEATURE_REGISTRY.md` | Living catalog of every testable feature with URL, auth, steps, pass criteria, tags |
-| [specs/AUDIT_CONTEXT_TEMPLATE.md](specs/AUDIT_CONTEXT_TEMPLATE.md) | `docs/determinagents/AUDIT_CONTEXT.md` | Project-specific overlay (known incidents, false-positives, severity calibrations) |
+| [specs/AUDIT_CONTEXT_TEMPLATE.md](specs/AUDIT_CONTEXT_TEMPLATE.md) | `docs/determinagents/AUDIT_CONTEXT.md` | Minimal starting overlay (Global only). Audit-specific sections come from [AUDIT_CONTEXT_SECTIONS.md](specs/AUDIT_CONTEXT_SECTIONS.md) — copied in only when filled. |
 
 Supporting docs: [specs/FORMAT.md](specs/FORMAT.md) (audit authoring spec), [specs/BOOTSTRAP.md](specs/BOOTSTRAP.md) (overlay generator workflow).
 
@@ -115,6 +116,12 @@ Every audit:
 - Format: https://stitch.withgoogle.com/docs/design-md/format/
 
 The bootstrap prompt for DESIGN.md is in [INVOCATIONS.md](INVOCATIONS.md). The other six audits do not require DESIGN.md.
+
+## Inspiration
+
+The agentic-harness pattern (and the principle behind v0.4's simplification: *simple prompt + good harness > clever prompt + no harness*) was directly informed by Mozilla Security's writeup of how they used AI agents to harden Firefox: **[Behind the Scenes: Hardening Firefox](https://hacks.mozilla.org/2026/05/behind-the-scenes-hardening-firefox/)** (May 2026). Their pipeline surfaced 271 latent bugs in a single Firefox release; the inner loop ("there is a bug in this part of the code, please find it and build a testcase") and the severity-by-defect-class rubric in `audits/SECURITY_HUNT.md` are theirs.
+
+If you're using AI agents in security work, read it.
 
 ---
 

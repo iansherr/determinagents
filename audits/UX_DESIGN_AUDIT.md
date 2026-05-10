@@ -16,9 +16,7 @@ Before any release that ships visual changes, after a theme/token update, quarte
 
 ## Time estimate
 
-- **Quick** (45 min): Phases 1–3 (token compliance + colors)
-- **Standard** (90 min): Phases 1–6
-- **Deep** (120+ min): All phases including accessibility and dark mode
+Default (all phases): 90–120 minutes. Each phase independently runnable; use `--phases=N` to scope. Phases 5–8 (motion, responsive, accessibility, dark mode) require a running app (`--target=<dev-url>`) or screenshots.
 
 ## Output
 

@@ -188,17 +188,11 @@ User can adjust scope before any code changes.
 
 ## Phase 2: Per-finding resolution loop
 
-For each finding in the actionable set, in severity order (P0 → P3):
+For each finding in the actionable set, in severity order (P0 → P3), the agent runs one continuous loop: verify the issue still exists (reports go stale; re-run the discovery command from the source audit), plan the fix fresh by reading the surrounding code (don't trust the report's suggested-fix verbatim), present the plan using the shorthand format below, implement scoped to the finding (no scope creep — adjacent issues become new findings, not silent commits), run relevant tests, commit per the message format below, and append a row to the report's `## Resolution` section. Loop until the actionable queue is empty, the user types `q`, or a fix verification fails irrecoverably.
 
-### 2.1 Verify the issue exists right now
+### Per-finding presentation format
 
-Re-run the discovery command from the source audit. The report may be days old; the issue may have been fixed independently. If it's already fixed, mark resolved and skip.
-
-### 2.2 Plan the fix
-
-Don't trust the report's "suggested fix" verbatim — read the surrounding code, write a fresh fix plan. The report may have suggested something that doesn't fit the code's current shape.
-
-Present using this shorthand format. Single-letter responses keep the loop conversational:
+Single-letter responses keep the loop conversational. Resist verbose alternatives.
 
 ```
 Finding P0 #1: 10 unregistered Stripe webhook handlers
@@ -209,62 +203,40 @@ Finding P0 #1: 10 unregistered Stripe webhook handlers
     1. Add to server.go (after line 142):
        group := s.router.Group("/api/webhooks/stripe")
        group.POST("/charge.refunded", s.handleChargeRefunded)
-       group.POST("/checkout.session.completed", s.handleCheckoutSessionCompleted)
        ... (8 more)
     2. Verify each handler signature matches gin.HandlerFunc
-    3. Confirm Stripe webhook signature middleware is applied to /api/webhooks/stripe/*
+    3. Confirm Stripe webhook signature middleware is applied
 
   Tests to run after: services/foo/internal/http/...
-  Out-of-scope but worth noting: signature validation appears unimplemented
-  — flag for follow-up.
+  Out-of-scope but worth flagging: signature validation appears unimplemented
+  — surface as a new finding rather than fixing in this commit.
 
-  [y] apply  [n] reject (mark needs-decision)  [d] show me the diff first
-  [e] edit the plan  [s] skip (defer)  [i] mark invalid  [q] quit session
+  [y] apply  [n] reject (mark needs-decision)  [d] show the diff
+  [e] edit the plan  [s] skip (defer)  [i] mark invalid  [q] quit
 ```
-
-**Shorthand legend** (use exactly these letters; resist verbose alternatives):
 
 | Key | Meaning |
 |-----|---------|
-| `y` | apply the proposed fix as shown |
-| `n` | reject this plan; mark "needs decision" with reason |
+| `y` | apply the proposed fix |
+| `n` | reject this plan; mark "needs decision" with a reason |
 | `d` | show the actual diff before deciding |
-| `e` | user wants to modify the plan; iterate |
-| `s` | skip this finding; mark "deferred" with reason |
-| `i` | mark this finding "invalid" (false positive); record reason |
-| `q` | stop the session entirely; annotate report with what's done |
+| `e` | iterate on the plan with user guidance |
+| `s` | skip; mark "deferred" with a reason |
+| `i` | mark "invalid" (false positive); record reason |
+| `q` | stop session; annotate report with what's done |
 
-If the user types prose instead of a letter, treat it as `e` (edit the plan) and incorporate their guidance.
+If the user types prose instead of a letter, treat it as `e` and incorporate their guidance.
 
-### 2.3 Implement
+### Verification rules
 
-After approval, make the change. Stay scoped to the finding — don't refactor surrounding code, don't fix unrelated issues, don't "improve while you're there." If you notice an adjacent problem, surface it as a new finding to add to the report — don't silently expand scope.
+If tests fail because of the fix → revert, re-plan, re-present. If tests were already broken pre-existing → flag and ask whether to proceed anyway. If no tests cover the area → surface that and recommend a `TESTING_CREATOR` Tier 1 follow-up to add coverage.
 
-### 2.4 Verify
+### Commit format
 
-Run relevant tests:
-
-```bash
-# Examples — adapt to project's test framework
-go test ./services/foo/internal/http/...
-npm test -- services/foo
-pytest services/foo/
-```
-
-If tests fail:
-- If failure is caused by the fix → revert the change, re-plan, re-present
-- If failure is pre-existing (test was already broken) → flag and ask user whether to proceed anyway
-
-If no tests cover the area, surface that — recommend a `TESTING_CREATOR` Tier 1 follow-up to add coverage.
-
-### 2.5 Commit
-
-One commit per finding (or per logically-grouped finding cluster — e.g., the 10 Stripe handlers from P0 #1 might be one commit, since they're a single coherent change).
-
-Commit message format:
+One commit per finding (or per logically-grouped cluster — e.g., the 10 Stripe handlers as one commit, since they're a single coherent change).
 
 ```
-<type>: <short description from finding>
+<type>: <short description>
 
 Resolves <REPORT_NAME>:<SEVERITY> #<NUMBER>
 <1-3 sentence rationale>
@@ -272,24 +244,11 @@ Resolves <REPORT_NAME>:<SEVERITY> #<NUMBER>
 Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>
 ```
 
-Example:
+The `Resolves <REPORT>:<SEV> #<N>` line is the durable link from code change back to audit finding — search for it later to trace any commit's origin.
 
-```
-fix(billing): register Stripe webhook handlers
+### Report annotation
 
-Resolves STUB_AUDIT_2026-05-09:P0 #1
-
-10 webhook handlers existed in webhook_handlers.go but had no router
-registrations, so Stripe events for refunds, checkout completion, and
-subscription/payment failures were silently dropped. Routes added under
-/api/webhooks/stripe/* with signature validation middleware.
-
-Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>
-```
-
-### 2.6 Annotate report
-
-Append (or amend) the report's `## Resolution` section:
+Append to the report's `## Resolution` section:
 
 ```markdown
 ## Resolution
@@ -307,10 +266,6 @@ Append (or amend) the report's `## Resolution` section:
 ```
 
 The annotated report is a separate commit at the end of the session, not bundled with fix commits.
-
-### 2.7 Loop or stop
-
-Continue to next finding. If user says "stop" or a fix verification fails irrecoverably, halt and write the resolution annotation for what was completed.
 
 ---
 
