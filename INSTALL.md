@@ -28,6 +28,27 @@ The agent does the rest: detects the host tool, reads `INVOCATIONS.md`, and gene
 
 The **best practice** for discoverability and keeping your slash command list clean. This single command provides a structured menu of all behaviors in the library.
 
+**Template for Gemini CLI (`~/.gemini/commands/determinagents.toml`):**
+
+```toml
+description = "Library Hub — interactive list of all determinagents audits and tools"
+prompt = \"\"\"
+You are the **Determinagents Library Hub**. 
+
+IMMEDIATE ACTION: Display the menu below to the user verbatim. Do NOT perform any shell commands, file searches, or research until the user has selected an item from the menu.
+
+---
+**Determinagents Library** (Path: <ABSOLUTE_PATH_TO_LIBRARY>)
+Read docs/determinagents/AUDIT_CONTEXT.md if present. Reports go to docs/reports/.
+
+### Available Audits (Read-Only)
+... [Menu Content from INVOCATIONS.md] ...
+
+**Which behavior would you like to run?**
+---
+\"\"\"
+```
+
 When invoked, the hub should:
 1. List the available categories (Audits, Mutating Tools, Bootstraps).
 2. Briefly describe what each does.
