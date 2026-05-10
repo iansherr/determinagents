@@ -10,6 +10,13 @@
 
 set -eu
 
+# Detect if running from a local clone
+IN_REPO=false
+if [ -f "bin/determinagents" ] && [ -d ".git" ]; then
+  IN_REPO=true
+fi
+FORCE_UPDATE=false
+
 REPO_URL="${DETERMINAGENTS_REPO_URL:-https://github.com/iansherr/determinagents.git}"
 INSTALL_DIR="${DETERMINAGENTS_HOME:-$HOME/.determinagents}"
 BIN_DIR="${DETERMINAGENTS_BIN:-$HOME/.local/bin}"
@@ -40,14 +47,35 @@ command -v git >/dev/null 2>&1 || {
   exit 1
 }
 
+# Local detection prompt
+if [ "$IN_REPO" = true ] && [ -z "${DETERMINAGENTS_HOME:-}" ] && [ "$INSTALL_DIR" = "$HOME/.determinagents" ] && [ -t 0 ]; then
+  echo "Local repository detected: $(pwd)"
+  echo "  y: Use this local repository (no network call)"
+  echo "  n: Download/update from GitHub (may have newer versions)"
+  printf "Choice? [Y/n] "
+  read -r USE_LOCAL
+  case "$USE_LOCAL" in
+    n|N|no|NO)
+      FORCE_UPDATE=true
+      ;;
+    *)
+      INSTALL_DIR=$(pwd)
+      ;;
+  esac
+fi
+
 echo "Determinagents → $INSTALL_DIR (branch: $BRANCH)"
 
 # Install or update
 if [ -d "$INSTALL_DIR/.git" ]; then
-  echo "  existing checkout found; updating..."
-  git -C "$INSTALL_DIR" fetch --quiet origin "$BRANCH"
-  git -C "$INSTALL_DIR" checkout --quiet "$BRANCH"
-  git -C "$INSTALL_DIR" pull --ff-only --quiet origin "$BRANCH"
+  if [ "$FORCE_UPDATE" = false ] && [ "$INSTALL_DIR" = "$(pwd)" ] && [ "$IN_REPO" = true ]; then
+    echo "  using local repository; skipping network update"
+  else
+    echo "  existing checkout found; updating..."
+    git -C "$INSTALL_DIR" fetch --quiet origin "$BRANCH"
+    git -C "$INSTALL_DIR" checkout --quiet "$BRANCH"
+    git -C "$INSTALL_DIR" pull --ff-only --quiet origin "$BRANCH"
+  fi
 else
   if [ -e "$INSTALL_DIR" ]; then
     echo "error: $INSTALL_DIR exists but is not a git checkout" >&2
