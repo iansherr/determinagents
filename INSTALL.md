@@ -91,13 +91,13 @@ Each audit doc in `$DETERMINAGENTS_HOME/audits/` declares a model tier (`reasoni
 | Cursor | Body recommendation; agent surfaces when invoked |
 | Gemini CLI / others | Body recommendation |
 
-Concrete tier-to-model mapping is the materializing agent's job, using whatever the host tool currently exposes. As of writing:
+Concrete tier-to-model mapping is the materializing agent's job, using whatever the host tool currently exposes. The mapping is conceptually simple — for each vendor:
 
-- `reasoning` → Anthropic Opus / Google Gemini 2.5 Pro Deep Think / OpenAI GPT-5 or o-series / xAI Grok 4 Heavy
-- `default`   → Anthropic Sonnet / Google Gemini 2.5 Pro / OpenAI 4o-class / xAI Grok 4
-- `fast`      → Anthropic Haiku / Google Flash / OpenAI 4o-mini / xAI Grok 4 Fast
+- `reasoning` → the largest / most capable reasoning model in the current lineup
+- `default`   → the mid-tier workhorse general-purpose model
+- `fast`      → the smallest / fastest / cheapest production model
 
-These names *will* rot. The role-based tier in the audit doc won't. Re-run materialization periodically if you want to refresh model bindings.
+Specific model names are intentionally not listed here — vendor lineups change every few months, and any list this file maintained would rot. The materializing agent should look up current names at materialization time. Re-run materialization periodically to refresh bindings as new models ship.
 
 **Skills** (richer, for behaviors with multi-file context): `~/.claude/skills/<skill-name>/SKILL.md` plus supporting files. Use this when an invocation needs to reference more than one file from the library at runtime.
 

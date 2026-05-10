@@ -202,15 +202,15 @@ Some audits genuinely need a flagship reasoning model; others are fine on a fast
 
 ### Why role-based, not vendor-named
 
-Every vendor names tiers differently and renames every release. Hardcoding "use Sonnet 4.6" is wrong in 8 weeks. Role-based tier names describe *what the task needs*, not *what the model is*, so they stay useful as model lineups change. The user (or host tool) maps tiers to current models.
+Every vendor names tiers differently and renames every release. Hardcoding any specific model name is wrong within months. Role-based tier names describe *what the task needs*, not *what the model is*, so they stay useful as model lineups change. The user (or host tool) maps tiers to current models.
 
-Rough mappings as of this writing (will rot — verify against current docs):
+The mapping is just "pick from your vendor's current lineup":
 
-| Tier | Anthropic | Google | OpenAI | xAI |
-|---|---|---|---|---|
-| `reasoning` | Opus | Pro Deep Think | GPT-5 / o-series | Grok 4 Heavy |
-| `default` | Sonnet | Pro | 4o-class | Grok 4 |
-| `fast` | Haiku | Flash | 4o-mini | Grok 4 Fast |
+- `reasoning` → that vendor's largest reasoning-focused model (whatever they currently call their flagship)
+- `default` → that vendor's mid-tier general-purpose model
+- `fast` → that vendor's smallest / fastest model intended for high-throughput work
+
+Vendor naming patterns evolve constantly; consult your vendor's current model docs to pick the specific name. This library will not try to maintain a table — it would be wrong before the next release.
 
 ### Authoring convention
 

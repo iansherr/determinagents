@@ -1,14 +1,19 @@
 {
   "ignorePatterns": [
+    { "pattern": "^https://github.com/iansherr/determinagents" },
+    { "pattern": "^https://raw.githubusercontent.com/iansherr/determinagents" },
+    { "pattern": "^https://hacks\\.mozilla\\.org" }
+  ],
+  "httpHeaders": [
     {
-      "pattern": "^https://github.com/iansherr/determinagents"
-    },
-    {
-      "pattern": "^https://raw.githubusercontent.com/iansherr/determinagents"
+      "urls": ["https://"],
+      "headers": {
+        "User-Agent": "Mozilla/5.0 (compatible; markdown-link-check; +https://github.com/tcort/markdown-link-check)"
+      }
     }
   ],
-  "timeout": "10s",
+  "timeout": "15s",
   "retryOn429": true,
-  "retryCount": 2,
+  "retryCount": 3,
   "fallbackRetryDelay": "30s"
 }
