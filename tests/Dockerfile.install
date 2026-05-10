@@ -28,7 +28,12 @@ RUN cd /home/tester/source && git log -1 --oneline
 # CI may check out a non-main branch (dev, feature, etc.). Ensure a
 # 'main' ref exists locally so install.sh's default --branch=main
 # resolves regardless of which branch the workflow was triggered from.
-RUN cd /home/tester/source && git branch -f main HEAD
+# - If main already exists (the trigger was main), do nothing.
+# - If main doesn't exist (trigger was dev/feature), create it at HEAD.
+# `git branch -f` would error on the first case ("cannot force update
+# the branch used by worktree"), so check first.
+RUN cd /home/tester/source && \
+    (git rev-parse --verify --quiet main >/dev/null || git branch main HEAD)
 
 # Run the installer against the local "remote"
 ENV DETERMINAGENTS_REPO_URL=/home/tester/source
