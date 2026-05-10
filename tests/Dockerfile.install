@@ -25,6 +25,11 @@ COPY --chown=tester:tester . /home/tester/source/
 # Verify the staged repo is intact
 RUN cd /home/tester/source && git log -1 --oneline
 
+# CI may check out a non-main branch (dev, feature, etc.). Ensure a
+# 'main' ref exists locally so install.sh's default --branch=main
+# resolves regardless of which branch the workflow was triggered from.
+RUN cd /home/tester/source && git branch -f main HEAD
+
 # Run the installer against the local "remote"
 ENV DETERMINAGENTS_REPO_URL=/home/tester/source
 RUN sh /home/tester/source/install.sh
