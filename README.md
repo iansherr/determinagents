@@ -25,11 +25,22 @@ To pin a branch (e.g., `dev` for unreleased work):
 curl -fsSL https://raw.githubusercontent.com/iansherr/determinagents/dev/install.sh | sh -s -- --branch=dev
 ```
 
-## Quick start
+## First run
 
-For paste-ready invocation prompts, see **[INVOCATIONS.md](INVOCATIONS.md)**.
+After installing, the lowest-friction path:
 
-For installing this library as slash commands or skills in your host tool (Claude Code, Gemini CLI, Cursor, etc.), see **[INSTALL.md](INSTALL.md)**.
+1. **Pick a repo** — yours or anyone's. The read-only audits don't modify code.
+2. **Run an audit.** `STUB_AND_COMPLETENESS` is a good starter: it surfaces phantom endpoints, dead handlers, and silent failures on most codebases without needing build infrastructure. Hand this prompt to your coding agent (Claude Code, Cursor, Gemini, etc.):
+
+   ```
+   Run audits/STUB_AND_COMPLETENESS.md from $DETERMINAGENTS_HOME against
+   this repo. Report to docs/reports/STUB_AUDIT_<YYYY-MM-DD>.md.
+   ```
+
+3. **Read the report** at `docs/reports/`. Every finding has a file:line, severity, and suggested fix. The report's `## Next steps` section contains paste-ready follow-up prompts.
+4. **Optional next moves**: capture project-specific calibrations in `docs/determinagents/AUDIT_CONTEXT.md` so future audits skip known-false-positives (see [`specs/BOOTSTRAP.md`](specs/BOOTSTRAP.md)); or run `audits/RESOLVE_FROM_REPORT.md` to work through findings with per-finding approval and one commit per fix.
+
+Once that loop is comfortable, browse the audits table below for other audits to try, or **[INVOCATIONS.md](INVOCATIONS.md)** for canonical paste-ready prompts. To install as slash commands in your host tool, see **[INSTALL.md](INSTALL.md)**.
 
 ## Layout
 
