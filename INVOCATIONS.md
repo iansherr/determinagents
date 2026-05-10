@@ -14,7 +14,7 @@ Every invocation in this file assumes the following — agents reading them shou
 2. **Project context first**: if `docs/determinagents/AUDIT_CONTEXT.md` exists in the target repo, read it before running any audit. Apply its calibrations (severity adjustments, known false-positives, ignore paths).
 3. **Reports go to** `docs/reports/<NAME>_<YYYY-MM-DD>.md` in the target repo.
 4. **Findings classified P0–P3** per the rubric in the audit doc.
-5. **Read-only by default.** Three docs mutate the codebase, all gated behind explicit per-action approval and a disposable-workspace requirement: `audits/RESOLVE_FROM_REPORT.md` (works through audit-report findings), `audits/SECURITY_HUNT.md` (agentic vulnerability hunting with execution), and `audits/TESTING_CREATOR.md` (writes new tests across four tiers).
+5. **Read-only by default.** Four docs are fully mutating, all gated behind explicit per-action approval and a disposable-workspace requirement: `audits/RESOLVE_FROM_REPORT.md` (works through audit-report findings), `audits/SECURITY_HUNT.md` (agentic vulnerability hunting), `audits/DATA_FLOW_VERIFY.md` (drives flows to observe vs. theorize), and `audits/TESTING_CREATOR.md` (writes new tests). Two read-only audits (`ERROR_HANDLING.md`, `STUB_AND_COMPLETENESS.md`) include an optional mutating Phase 6 (fault injection, endpoint verification) that follows the harness conventions in `specs/FORMAT.md`.
 6. **Each finding includes file:line and a concrete fix** — never "fix this."
 7. **Discovery first.** Phase 0 of every audit identifies project shape; later phases reference what discovery found.
 
@@ -36,13 +36,18 @@ Each audit has three scope variants. Default is `standard`.
 
 **When**: anytime; especially after sprints that shipped features without integration tests, or when an internal panel "looks empty."
 
-**Variants**: `quick` (Phase 1 only), `standard` (Phases 1–3), `deep` (all phases).
+**Variants**: `quick` (Phase 1 only), `standard` (Phases 1–3), `deep` (all phases). Add `+harness` to any variant to also run the mutating Phase 6 (real HTTP probes against suspected phantom endpoints); requires harness prerequisites per `specs/FORMAT.md`.
 
 ```
 Run audits/STUB_AND_COMPLETENESS.md from the determinagents library at
-$DETERMINAGENTS_HOME against this repo, scope=<quick|standard|deep>.
+$DETERMINAGENTS_HOME against this repo, scope=<quick|standard|deep>[+harness].
 
 Read docs/determinagents/AUDIT_CONTEXT.md first if it exists.
+
+If +harness: confirm I'm in a disposable workspace, read AUDIT_CONTEXT
+STUB_AND_COMPLETENESS section for probe base URL and test account, then
+run Phase 6 to verify suspected phantom endpoints with real HTTP requests.
+Reclassify false positives, escalate 5xx-crashing handlers to P0.
 
 Produce the report per the doc's template at
 docs/reports/STUB_AUDIT_<YYYY-MM-DD>.md. Include file:line for every finding
@@ -69,11 +74,13 @@ If this repo is publicly visible, surface P0 findings to me directly before
 writing them to the public report.
 ```
 
-### 1.3 DATA_FLOW_TRACE
+### 1.3 DATA_FLOW_TRACE (static)
 
 **When**: after a feature ships; after a "works in dev, broken in prod" report; before extracting a service.
 
 **Variants**: per-flow only (no quick/standard/deep — the audit is already scoped to one flow).
+
+For *observed* (not inferred) round-trip verification, see §5.5 DATA_FLOW_VERIFY (mutating, agentic).
 
 ```
 Run audits/DATA_FLOW_TRACE.md from $DETERMINAGENTS_HOME against this repo for the
@@ -91,15 +98,19 @@ docs/reports/DATA_FLOW_<flow-slug>_<YYYY-MM-DD>.md.
 
 **When**: anytime; especially after "I clicked X and nothing happened" support tickets.
 
-**Variants**: `quick` (Phases 1–2 — frontend + backend swallowing), `standard` (Phases 1–4), `deep` (all phases).
+**Variants**: `quick` (Phases 1–2 — frontend + backend swallowing), `standard` (Phases 1–4), `deep` (all phases). Add `+harness` to any variant to also run the mutating Phase 6 (fault injection); requires harness prerequisites per `specs/FORMAT.md`.
 
 ```
 Run audits/ERROR_HANDLING.md from $DETERMINAGENTS_HOME against this repo,
-scope=<quick|standard|deep>.
+scope=<quick|standard|deep>[+harness].
 
 Read docs/determinagents/AUDIT_CONTEXT.md first — pay attention to
 the "Approved silent fallbacks" section so you don't re-flag intentional
 ones.
+
+If +harness: confirm I'm in a disposable workspace, read AUDIT_CONTEXT
+ERROR_HANDLING section for fault-injection tooling preference, then run
+Phase 6 to verify swallowed-error findings empirically.
 
 Report to docs/reports/ERROR_HANDLING_<YYYY-MM-DD>.md. For every finding,
 answer: "what does the user see when this fails?"
@@ -502,6 +513,31 @@ after 30 minutes — whichever first.
 
 Each confirmed finding must include a runnable testcase in the artifacts
 directory. Report only confirmed findings; do not surface speculation.
+```
+
+### 5.5 DATA_FLOW_VERIFY — drive a flow and observe
+
+The mutating counterpart to §1.3 DATA_FLOW_TRACE. Where TRACE infers the round-trip table from code, VERIFY drives the actual flow and observes real bytes. Catches silent layer drift that static analysis can't see.
+
+**Prerequisites**: disposable workspace; app runs locally; AUDIT_CONTEXT.md `DATA_FLOW_VERIFY` section configured (start command, base URL, test account, browser/network tooling, DB inspection commands).
+
+```
+Run audits/DATA_FLOW_VERIFY.md from $DETERMINAGENTS_HOME against the flow:
+<FLOW_NAME — e.g., "save bookmark", "submit application", "update profile">.
+
+Read docs/determinagents/AUDIT_CONTEXT.md first — DATA_FLOW_VERIFY section
+has the start command, base URL, test account, and known-intentional drift.
+
+If a static DATA_FLOW_TRACE report exists for this flow, read it as the
+theorized baseline; flag every observed-vs-theorized divergence.
+
+Drive the flow end-to-end (UI or API). Capture network traffic, take a DB
+snapshot before+after, build the observed round-trip table. Re-read after
+write to check cache behavior. Capture artifacts at
+docs/reports/data-flow-artifacts/<report-name>/.
+
+Report to docs/reports/DATA_FLOW_VERIFY_<flow-slug>_<YYYY-MM-DD>.md.
+Use test data, never real user data. Tear down whatever you created.
 ```
 
 ---

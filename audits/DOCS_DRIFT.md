@@ -133,6 +133,45 @@ For each significant code block (config snippets, command sequences, code exampl
 
 The bash blocks are the highest-yield: try running them in a scratch dir.
 
+### Harness path: clean-container execution
+
+Phase 4 above is described as static inspection ("does it still parse?"). The next-level investment is **executing each code block in a clean container** and reading the actual outcome. This is a pure harness pattern — disposable workspace (the container), execute (run the block), observe (exit code + stdout/stderr), classify (passed / failed / partial).
+
+What this would look like:
+
+```bash
+# For each .md file with bash code blocks:
+docker run --rm -v $(pwd):/repo:ro -w /repo \
+  ubuntu:24.04 bash -c "
+    apt-get update -qq && apt-get install -y curl git make
+    # Extract and execute each fenced bash block in sequence
+    # Record exit code, stdout, stderr per block
+  "
+
+# For each block:
+#   exit 0          → block still works  → OK
+#   exit non-zero   → block is broken    → P0 if in setup section, P2 otherwise
+#   succeeds but    → block runs but outputs differ → P1 (silent drift)
+#     output drifts
+```
+
+For setup instructions specifically (README "Getting Started" sections), the right harness is:
+
+```bash
+# Walk the README from a clean state
+docker run --rm -v $(pwd):/repo:ro \
+  <project base image> bash -c "
+    # Follow steps from README Getting Started
+    # Verify each step's success criterion
+  "
+```
+
+When this audit is run with harness capability:
+- Phase 4 → automated; every fenced bash block is exit-code-checked
+- Phase 1 (README setup) → automated; the entire setup path runs in a clean container
+
+This is not built into this audit yet. The minimal harness is doable in a few hours of project-specific scripting once the container baseline exists. See `specs/FORMAT.md` "Harness conventions" and `audits/SECURITY_HUNT.md` for the structural pattern.
+
 ---
 
 ## Phase 5: Cross-Reference Integrity

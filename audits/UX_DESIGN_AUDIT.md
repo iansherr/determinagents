@@ -187,6 +187,45 @@ Requires running app. With a browser DevTools or Playwright:
 - Modal/drawer/menu open/close: durations match DESIGN.md?
 - Loading skeletons, toasts, page transitions: in the documented motion vocabulary?
 
+### Harness path: Playwright-driven computed-style verification
+
+Phases 5–8 are described as manual ("with browser DevTools, observe..."). The next-level investment turns them into a harness: Playwright (or Puppeteer) loads each route, queries computed CSS for every element, compares to DESIGN.md tokens, and reports every divergence. Visual regression is a known good harness pattern.
+
+What this would look like:
+
+```typescript
+// Pseudocode — adapt to your project
+import { chromium } from 'playwright';
+import { tokens } from './DESIGN.md.parsed.js'; // YAML frontmatter parsed
+
+const violations = [];
+for (const route of routes) {
+  for (const breakpoint of [390, 768, 1280]) {
+    await page.setViewportSize({ width: breakpoint, height: 800 });
+    await page.goto(BASE_URL + route);
+
+    // Sample interactive elements
+    for (const sel of ['button', 'a', 'input', '.card', '.modal']) {
+      const els = await page.$$(sel);
+      for (const el of els) {
+        const computed = await el.evaluate(e => getComputedStyle(e));
+        // Compare computed.color, computed.padding, etc. against tokens
+        // Push divergences to violations[] with selector + expected + actual
+      }
+    }
+    await page.screenshot({ path: `screenshots/${route}_${breakpoint}.png` });
+  }
+}
+```
+
+When this audit is run with harness capability:
+- Phase 5 (motion) → harness asserts each transition's `transition-duration` is in the canonical motion scale; flags divergences
+- Phase 6 (responsive) → harness verifies layout integrity at each breakpoint via screenshot diff against approved baseline
+- Phase 7 (accessibility) → harness uses [axe-core](https://github.com/dequelabs/axe-core) (built-in Playwright integration) for WCAG checks; touch-target sizing via element bounding rects
+- Phase 8 (dark mode) → harness toggles `prefers-color-scheme: dark` and re-runs the same checks against dark tokens
+
+This is not built into this audit yet. If you want the harness version, see `specs/FORMAT.md` "Harness conventions" and `audits/SECURITY_HUNT.md` as the structural reference.
+
 Record any animation that uses a duration not in the canonical scale.
 
 ---

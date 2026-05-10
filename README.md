@@ -48,6 +48,7 @@ determinagents/
 │   ├── UX_DESIGN_AUDIT.md
 │   ├── RESOLVE_FROM_REPORT.md  # mutating: works through report findings
 │   ├── SECURITY_HUNT.md        # mutating: agentic vulnerability hunting
+│   ├── DATA_FLOW_VERIFY.md     # mutating: observed-vs-theorized data flow
 │   └── TESTING_CREATOR.md      # mutating: writes new tests
 └── specs/               # conventions and per-project artifact specs
     ├── FORMAT.md                 # how to author a new audit
@@ -76,7 +77,10 @@ determinagents/
 |-----|--------------|---------------|
 | [audits/RESOLVE_FROM_REPORT.md](audits/RESOLVE_FROM_REPORT.md) | Works through findings in any audit report — one at a time, with per-finding approval, separate commits, and verification | An audit report exists at `docs/reports/`; clean working tree |
 | [audits/SECURITY_HUNT.md](audits/SECURITY_HUNT.md) | Agentic vulnerability hunting — agent gets execution capability to verify or refute bug hypotheses against one target file/function. Inspired by Mozilla's Firefox-hardening pipeline | Project builds locally; sanitizers configured; disposable workspace; AUDIT_CONTEXT.md `SECURITY_HUNT` section configured |
+| [audits/DATA_FLOW_VERIFY.md](audits/DATA_FLOW_VERIFY.md) | Drives a real user flow end-to-end and observes wire traffic + DB state. The "observed" counterpart to `DATA_FLOW_TRACE.md`'s "inferred" — catches silent layer drift static analysis misses | Disposable workspace; app runs locally; AUDIT_CONTEXT.md `DATA_FLOW_VERIFY` section configured |
 | [audits/TESTING_CREATOR.md](audits/TESTING_CREATOR.md) | Implements tests across four tiers — Adversarial, Chaos, Simulation, Forensics — beyond what `TEST_GAPS.md` covers | Run `TEST_GAPS.md` and `SECURITY_PENTEST.md` first |
+
+Two read-only audits — `ERROR_HANDLING.md` and `STUB_AND_COMPLETENESS.md` — include an **optional mutating Phase 6** (fault injection and endpoint verification respectively) that follows the harness conventions in `specs/FORMAT.md`. Use scope `+harness` to enable.
 
 **The standard workflow**: run an audit (read-only) → review the report → run `RESOLVE_FROM_REPORT` to work through findings → re-run the audit to verify clean state. For security-sensitive fixes, optionally chain into `TESTING_CREATOR` Tier 1 (Adversarial) afterwards to add executable coverage.
 

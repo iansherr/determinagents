@@ -6,6 +6,15 @@ All notable changes to determinagents are documented here. The format is loosely
 
 ## [Unreleased]
 
+### Added (harness expansion — "simple prompt + good harness > clever prompt + no harness")
+- `specs/FORMAT.md` — new "Harness conventions" section codifying the pattern shared by all execution-capable audits: mutating declaration, disposable workspace requirement (Phase 0.1), AUDIT_CONTEXT integration, verification loop pattern, artifact capture, "Attempted but blocked" report section, per-target scope.
+- `audits/DATA_FLOW_VERIFY.md` — mutating sibling to `DATA_FLOW_TRACE.md`. Drives the actual flow (UI or API), captures real wire traffic, snapshots the DB before/after, builds the round-trip table from observed bytes. Catches silent layer drift that static analysis can't see.
+- `audits/ERROR_HANDLING.md` Phase 6 — opt-in mutating fault-injection phase. Mock failures (404/500/network error) at the API boundary, drive the UI, observe what the user sees. Distinguishes silent corruption (UI lies about success) from generic-error (UI shows toast) from defended (graceful handling).
+- `audits/STUB_AND_COMPLETENESS.md` Phase 6 — opt-in mutating endpoint verification. Issues real HTTP probes against suspected phantom endpoints; reclassifies false positives (proxy rewrites caught the URL) and escalates 5xx-crashing handlers to P0.
+- `INVOCATIONS.md`: new §5.5 DATA_FLOW_VERIFY; `+harness` scope variant on §1.1 STUB and §1.4 ERROR_HANDLING for opt-in Phase 6.
+- AUDIT_CONTEXT_TEMPLATE: new sections for `DATA_FLOW_VERIFY`, `ERROR_HANDLING (Phase 6)`, `STUB_AND_COMPLETENESS (Phase 6)` — project-specific configuration for the harness phases.
+- "Harness path" subsections in `TEST_GAPS.md`, `UX_DESIGN_AUDIT.md`, `DOCS_DRIFT.md` — describes the next-level investment (mutation-testing tools / Playwright computed-style verification / clean-container code-block execution) for users who want to climb the harness ladder. Not built into these audits yet; references SECURITY_HUNT as the structural model.
+
 ### Added
 - `audits/RESOLVE_FROM_REPORT.md` — mutating doc that takes any audit report and works through findings one at a time with per-finding approval, separate commits, and verification. Closes the audit→fix loop without conflating read-only and mutating sessions. Standard workflow: audit → review → resolve → re-audit.
 - 4 invocation variants in `INVOCATIONS.md` §2: resolve-all-actionable, P0-only, single-finding, by-category.

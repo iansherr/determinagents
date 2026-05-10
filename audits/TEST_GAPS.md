@@ -143,6 +143,24 @@ Common mutations:
 
 If no test catches the mutation, that path is **untested in any meaningful sense** even if line coverage shows green.
 
+### Harness path: automated mutation testing
+
+Phase 3 above is manual — pick a few mutations, ask the question. The next-level investment is **automated mutation testing**: a tool systematically mutates every line, runs the suite, and reports each surviving mutation as an untested scenario. Maps directly onto the harness pattern in `specs/FORMAT.md` — mutate (experiment), run tests (execute), observe pass/fail, classify.
+
+Tools by language:
+- **Python**: [mutmut](https://github.com/boxed/mutmut), [cosmic-ray](https://github.com/sixty-north/cosmic-ray)
+- **JavaScript/TypeScript**: [Stryker](https://stryker-mutator.io)
+- **Go**: [go-mutesting](https://github.com/zimmski/go-mutesting), [gremlins](https://gremlins.dev)
+- **Rust**: [mutants.rs / cargo-mutants](https://mutants.rs)
+- **Java**: [PIT](https://pitest.org)
+
+When this audit is run with harness capability:
+- Replace Phase 3 with `<mutation tool> --target <handler> --since-commit <baseline>`
+- Each surviving mutation is a P0/P1 finding (depending on file criticality) with the mutation diff as the artifact
+- Run scoped per-handler (whole-suite mutation runs are slow); the critical-path list from Phase 1 is the natural target list
+
+This is not built into this audit yet — `audits/TEST_GAPS.md` stays as a static analysis. If you want the harness version, see `specs/FORMAT.md` "Harness conventions" and follow `audits/SECURITY_HUNT.md` as the structural reference.
+
 ---
 
 ## Phase 4: Integration Boundary Tests

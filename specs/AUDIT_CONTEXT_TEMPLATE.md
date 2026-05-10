@@ -169,6 +169,95 @@ _Example:_ Admin-panel gaps are P1, not P0. Admins know to report breakage out-o
 - If you discover a pattern during an audit that would belong here, propose an addition (see `BOOTSTRAP.md` warm-overlay mode).
 - Do not duplicate content that lives in `ARCHITECTURE.md`, `START_HERE.md`, `CONTRIBUTING.md`, or the universal audit docs. Link instead.
 
+## DATA_FLOW_VERIFY
+
+### Stack start command
+
+> How does the user start the application stack for verification work?
+
+_Example:_ `docker compose -f deployments/docker/local-dev/docker-compose.yml up -d`
+
+### Base URL
+
+> Where the running app is reachable for the agent to drive.
+
+_Example:_ `http://localhost:8080` (local), `https://staging.example.com` (staging — require explicit per-session approval)
+
+### Test account credentials
+
+> Reference (do NOT inline credentials in this overlay if the repo is public).
+
+_Example:_ See `docs/operations/TEST_ACCOUNTS.md` for personas (admin, paid, free, banned).
+
+### Network capture / browser tooling preference
+
+> Which tool to use for driving the UI and capturing traffic.
+
+_Example:_ Playwright MCP for UI, curl for API-only flows. mitmproxy if cross-cutting capture is needed.
+
+### DB inspection commands
+
+> How the agent inspects persistence to verify writes.
+
+```
+# Examples:
+psql -h localhost -U postgres -d <dbname> -c "<query>"
+redis-cli GET <key>
+```
+
+### Known intentional drift
+
+> Drifts that are project conventions, not bugs. Do not re-flag these.
+
+_Example:_ All API responses use camelCase; all DB columns use snake_case. The conversion happens in `services/foo/internal/serialize.go` AfterFind hook.
+
+### Known cache layers (invalidation contract)
+
+| Layer | Key pattern | Invalidation trigger |
+|---|---|---|
+
+---
+
+## ERROR_HANDLING (Phase 6 fault injection)
+
+### Fault-injection tooling preference
+
+> How the agent injects faults to verify error paths.
+
+_Example:_ Playwright `page.route` for SPA frontend; `nock` for Node services; `Toxiproxy` for inter-service flakiness.
+
+### Approved fault scenarios
+
+> Faults the user pre-authorizes for the disposable workspace. Scope this carefully — denial-of-service patterns may need explicit per-session approval.
+
+_Example:_ 5xx responses on any internal API; 503 on Stripe; 30s delay on Redis. Do NOT bring DB completely down without per-session approval.
+
+### Approved silent fallbacks (also see top-level ERROR_HANDLING)
+
+> Cases where graceful degradation is intentional. Verified-OK responses to faults here are the desired behavior.
+
+---
+
+## STUB_AND_COMPLETENESS (Phase 6 endpoint verification)
+
+### Probe base URL
+
+> Where suspected phantom endpoints get probed.
+
+_Example:_ Same as DATA_FLOW_VERIFY base URL.
+
+### Test account for probing
+
+> Which account to use. Often a low-privilege user; for admin endpoints, a separate admin probe account.
+
+### Intentionally-unimplemented endpoints (do not flag as P0)
+
+> URLs that intentionally 404 or 501 (planned features, deprecated routes scheduled for removal). Phase 6 will see these as confirmed-phantom; mark them P2 (planned) rather than P0.
+
+_Example:_ `POST /api/v2/billing` — planned for Q3 2026, see issue #1234
+
+---
+
 ## SECURITY_HUNT
 
 ### Build / test commands

@@ -125,6 +125,71 @@ The `## Next steps` block is filled in by the agent producing the report. The `<
 
 The `## Patterns observed` and `## Recommendations` sections are distinct: patterns are *what's true*; recommendations are *what to do about it that's not already covered by per-finding fixes*.
 
+## Harness conventions (for audits that execute code)
+
+Some audits do their best work when given **execution capability** — the ability to build, modify, run, and observe the project under test, not just read its source. The pattern is *simple prompt + good harness > clever prompt + no harness*: a verification loop catches false positives that no amount of prose-prompting can.
+
+Audits using a harness MUST follow these conventions so users have a consistent mental model and so the safety properties are predictable.
+
+### 1. Mutating declaration
+
+The doc's purpose section states clearly that it mutates the codebase. The README's mutating-docs table lists it.
+
+### 2. Disposable workspace requirement (Phase 0.1)
+
+The first phase verifies the user is in a disposable workspace — a git worktree, dedicated branch, container, or VM. Never the user's primary checkout.
+
+If the workspace is unclear, the agent stops and asks: *"I'll be modifying source. Confirm this checkout at `<PATH>` is disposable (worktree, branch, or container)?"* No silent assumptions.
+
+The agent never runs git operations on uncommitted user work. See `audits/RESOLVE_FROM_REPORT.md` Phase 0.1 for the canonical commit/stash/worktree-options pattern.
+
+### 3. AUDIT_CONTEXT integration
+
+Each harness-using audit has a section in `AUDIT_CONTEXT.md` (template in `specs/AUDIT_CONTEXT_TEMPLATE.md`) for project-specific configuration:
+
+- Build / test / run commands
+- Tool-specific flags (sanitizers, instrumentation, fault-injection libraries)
+- Known-blocked patterns (don't waste cycles re-attempting defenses that already work)
+- Past confirmed findings (dedup)
+
+Without this section, the audit either stops or runs in a degraded "static-only" mode that's documented as such.
+
+### 4. Verification loop pattern
+
+The inner loop, common to all harness audits:
+
+1. **Hypothesize**: agent reads code, proposes a finding (a bug, a flow break, an error path, a token drift)
+2. **Test**: agent constructs a minimal experiment that would either confirm or refute the hypothesis
+3. **Execute**: experiment runs in the disposable workspace
+4. **Observe**: agent reads the outcome (sanitizer output, network capture, computed styles, exit code)
+5. **Classify**: confirmed → finding; refuted by defense → "Attempted but blocked" entry; refuted by no-bug → discard; ambiguous → iterate
+6. **Capture**: the testcase / repro / observation goes into an artifacts directory under the report
+
+Only confirmed findings reach the report's main severity tables. Speculation does not.
+
+### 5. Artifact capture
+
+Every confirmed finding includes a permanent artifact (testcase, repro script, network capture, screenshot, computed-style diff) under `docs/reports/<audit>-artifacts/<report-name>/<finding-N>/`. The disposable workspace will be torn down; the artifact persists so the finding stays reproducible.
+
+### 6. "Attempted but blocked" report section
+
+When the agent's experiment confirms a defense thwarts a hypothesized bug, that's *positive signal about hardening* — log it under "Attempted but blocked" in the report. Validating that defenses work is part of the audit's value, not a non-finding.
+
+### 7. Per-target scope
+
+Harness sessions are usually scoped per-target (file, function, flow, page, component) rather than whole-codebase. Whole-codebase harness runs lose focus and produce useless reports. The user runs multiple sessions for parallelism.
+
+### Reference implementations
+
+- `audits/SECURITY_HUNT.md` — agentic vulnerability discovery (canonical example)
+- `audits/DATA_FLOW_VERIFY.md` — observed-vs-theorized data flow tracing
+- `audits/ERROR_HANDLING.md` Phase 5 — fault injection
+- `audits/STUB_AND_COMPLETENESS.md` Phase 6 — endpoint verification
+
+When authoring a new harness audit, read these for shape, not for content.
+
+---
+
 ## Authoring checklist
 
 Before committing a new audit doc:

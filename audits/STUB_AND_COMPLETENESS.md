@@ -264,6 +264,76 @@ done
 
 ---
 
+## Phase 6: Endpoint verification (mutating; opt-in)
+
+This phase is **mutating** and **optional**. Phases 1–5 produce *suspected* phantom endpoints from a static cross-reference. URL normalization is imperfect — `:id` vs `{id}` vs `<id>`, optional trailing slash, proxy rewrites — so some "phantom" findings turn out to be false positives once a real request gets routed through middleware.
+
+This phase issues real HTTP requests against suspected phantom endpoints and observes the actual response. False positives drop substantially.
+
+Inherits the harness conventions from `specs/FORMAT.md`.
+
+### 6.1 Prerequisites
+
+- Disposable workspace (per harness conventions)
+- App runs locally and is reachable
+- AUDIT_CONTEXT.md `STUB_AND_COMPLETENESS` section configured: start command, base URL, test account credentials, list of intentionally-unimplemented endpoints to skip
+
+If prerequisites are missing, surface the Phase 1–5 results without verification and note that the static findings carry their normal false-positive rate.
+
+### 6.2 Build the verification list
+
+From Phase 1.3's phantom-endpoint output, build a list of `{method, url}` pairs to verify. Include any AUDIT_CONTEXT "intentional unimplemented" entries as a do-not-flag list.
+
+### 6.3 Probe each candidate
+
+```bash
+BASE_URL="<from AUDIT_CONTEXT>"
+TOKEN="<from AUDIT_CONTEXT — test account>"
+
+while IFS=$'\t' read -r method path; do
+  status=$(curl -s -o /tmp/body -w "%{http_code}" \
+    -X "$method" "$BASE_URL$path" \
+    -H "Authorization: Bearer $TOKEN" \
+    -H "Content-Type: application/json" \
+    -d '{}')
+  case "$status" in
+    404) echo "CONFIRMED-PHANTOM: $method $path -> 404" ;;
+    501) echo "CONFIRMED-STUB: $method $path -> 501 Not Implemented" ;;
+    200|201|204) echo "FALSE-POSITIVE: $method $path -> $status (route exists; static cross-ref missed it)" ;;
+    400|422)     echo "EXISTS-BUT-VALIDATION-FAILED: $method $path -> $status (route exists; needs better request body)" ;;
+    401|403)     echo "EXISTS-BUT-UNAUTHORIZED: $method $path -> $status (route exists; auth required)" ;;
+    405)         echo "WRONG-METHOD: $method $path -> 405 (path exists, this method doesn't)" ;;
+    5*)          echo "EXISTS-BUT-CRASHES: $method $path -> $status (route exists but handler is broken — possibly a P0)" ;;
+    *)           echo "UNCLEAR: $method $path -> $status" ;;
+  esac
+done < /tmp/phantom_candidates.tsv
+```
+
+### 6.4 Reclassify findings
+
+Use the verification output to update the report:
+
+| Probe result | Final classification |
+|--------------|----------------------|
+| 404 | Confirmed phantom (P0/P1 stays) |
+| 501 | Confirmed intentional stub (downgrade to P2 unless undocumented) |
+| 200/201/204 | False positive — remove from phantom list (probably a proxy rewrite) |
+| 400/422 | Route exists; finding was a false positive |
+| 401/403 | Route exists; flagged auth boundary; route is fine |
+| 405 | Path exists but method is missing — re-flag as wrong-method gap, not phantom |
+| 5xx | Route exists but handler crashes — **escalate to P0**; handler returns 500 to real users |
+| Network error | App not reachable; abort the phase |
+
+### 6.5 Capture artifacts
+
+For each verified P0 (especially 5xx crashes), capture the response body and headers under `docs/reports/stub-artifacts/<report-name>/<finding-N>/` so the bug stays reproducible after the workspace is destroyed.
+
+### 6.6 Attempted but blocked
+
+If a probe gets 401/403 because the test account doesn't have the right role, that's an auth-boundary finding to surface separately — not a phantom. Note these under "Attempted but blocked" so the report shows what scope the verification covered.
+
+---
+
 ## Severity rubric
 
 | Severity | Criteria |

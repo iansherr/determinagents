@@ -199,6 +199,76 @@ Outbound HTTP calls without a timeout = potential indefinite hang. Worth flaggin
 
 ---
 
+## Phase 6: Fault injection (mutating; opt-in)
+
+This phase is **mutating** and **optional**. It moves error-handling auditing from "I think this catch swallows errors" (Phases 1–5) to "I observed this catch swallow a real error" (Phase 6). For codebases with build/run infrastructure, this catches the entire class of false negatives that static analysis can't.
+
+Inherits the harness conventions from `specs/FORMAT.md` (disposable workspace, AUDIT_CONTEXT integration, verification loop, artifact capture).
+
+### 6.1 Prerequisites
+
+- Disposable workspace (per harness conventions)
+- App runs locally; user has authorized fault injection against this environment
+- AUDIT_CONTEXT.md `ERROR_HANDLING` section configured: start command, fault-injection tooling preference (mock service worker, Playwright route interception, Toxiproxy, network-namespace tools)
+
+If prerequisites are missing, stop and report — do not skip silently to Phases 1–5 results, because the user invoked a harness phase expecting harness rigor.
+
+### 6.2 Build the fault catalog
+
+For each finding from Phases 1–3 that you'd like to verify, write a corresponding fault. Examples:
+
+| Suspected pattern | Fault to inject | Observation |
+|-------------------|-----------------|-------------|
+| `.catch(() => [])` on a list fetch | Make the list endpoint return 500 | Does UI show error or empty state? |
+| `await fetch()` with no try | Make the call reject (network error) | Does the page crash, hang, or surface? |
+| Generic 500 error UI | Trigger 500 | Is the message specific enough to act on? |
+| Logged-but-not-surfaced server error | Trigger the error path | Is it visible in the UI within reasonable time? |
+
+### 6.3 Inject and observe
+
+The mechanism depends on the project's stack and what the AUDIT_CONTEXT recommends:
+
+**For SPA frontends** — Playwright route interception:
+
+```typescript
+await page.route('**/api/list', route => route.fulfill({
+  status: 500,
+  body: JSON.stringify({ error: 'simulated' }),
+}));
+// drive the UI; observe what user sees
+```
+
+**For Node services** — wrap the HTTP client with a fault layer (`nock`, `msw/node`).
+
+**For Go/Python services** — Toxiproxy or a stub server replacing the real dependency.
+
+**For external dependencies** (DB, Redis, Stripe) — bring the dependency to an unhealthy state in the disposable env (compose stop, iptables drop, mock 503).
+
+For each fault: drive the user-facing path, capture what the user sees (screenshot, console log, error toast, full-page error, indefinite spinner, blank screen).
+
+### 6.4 Classify outcomes
+
+| Outcome observed | Severity escalation |
+|------------------|---------------------|
+| Indefinite spinner | P0 if user-critical, P1 otherwise |
+| Blank screen / page crash | P0 if user-critical, P1 otherwise |
+| Generic "something went wrong" with no recovery | P1 if path is reachable in normal use |
+| Error toast that disappears, no inline indicator | P2 |
+| Specific error message + retry affordance | OK — defense working |
+| Action no-ops, UI shows success | P0 — silent corruption pattern |
+
+The harness lets you distinguish P0-critical (UI lies about success) from P1-degraded (UI shows generic error) from OK (graceful handling). Static analysis can't distinguish these because they're behavioral, not structural.
+
+### 6.5 Capture artifacts
+
+Per harness convention: every confirmed finding includes a screenshot/recording at `docs/reports/error-handling-artifacts/<report-name>/<finding-N>/` plus the fault that triggered it. Stays reproducible after the disposable workspace is gone.
+
+### 6.6 Attempted but blocked
+
+Faults the system handled gracefully are positive signal — log them under "Attempted but blocked" in the report. Validates that error-handling investments are paying off.
+
+---
+
 ## Severity rubric
 
 | Severity | Criteria |
