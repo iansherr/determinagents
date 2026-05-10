@@ -14,7 +14,7 @@ Every invocation in this file assumes the following — agents reading them shou
 2. **Project context first**: if `docs/determinagents/AUDIT_CONTEXT.md` exists in the target repo, read it before running any audit. Apply its calibrations (severity adjustments, known false-positives, ignore paths).
 3. **Reports go to** `docs/reports/<NAME>_<YYYY-MM-DD>.md` in the target repo.
 4. **Findings classified P0–P3** per the rubric in the audit doc.
-5. **Read-only by default.** Two docs mutate the codebase, both gated behind explicit per-action approval: `audits/RESOLVE_FROM_REPORT.md` (works through audit-report findings) and `audits/TESTING_CREATOR.md` (writes new tests across four tiers).
+5. **Read-only by default.** Three docs mutate the codebase, all gated behind explicit per-action approval and a disposable-workspace requirement: `audits/RESOLVE_FROM_REPORT.md` (works through audit-report findings), `audits/SECURITY_HUNT.md` (agentic vulnerability hunting with execution), and `audits/TESTING_CREATOR.md` (writes new tests across four tiers).
 6. **Each finding includes file:line and a concrete fix** — never "fix this."
 7. **Discovery first.** Phase 0 of every audit identifies project shape; later phases reference what discovery found.
 
@@ -439,9 +439,76 @@ of proposed changes; do not commit until I approve each entry.
 
 ---
 
-## 5. Maintenance invocations
+## 5. Vulnerability hunting (mutating, agentic)
 
-### 5.1 Refresh AUDIT_CONTEXT
+`SECURITY_HUNT.md` is the agentic counterpart to `SECURITY_PENTEST.md`. It modifies code, builds, and executes — give it a disposable workspace, never your primary checkout.
+
+**Prerequisites for all variants**: project builds locally; sanitizers configured; AUDIT_CONTEXT.md `SECURITY_HUNT` section configured (build/test commands, trust boundaries, known-blocked patterns); user is in a disposable workspace (worktree, branch, or container).
+
+### 5.1 Hunt a single file
+
+```
+Run audits/SECURITY_HUNT.md from $DETERMINAGENTS_HOME against the file
+<TARGET_FILE_PATH>.
+
+Read docs/determinagents/AUDIT_CONTEXT.md first — pay attention to the
+SECURITY_HUNT section: build commands, sanitizer flags, trust boundaries,
+and known-blocked attack patterns.
+
+Confirm I'm in a disposable workspace before starting. Then verify the
+build succeeds. Generate hypotheses, verify each by writing and running
+testcases under sanitizers. Only confirmed bugs reach the report. Log
+attempts thwarted by existing defenses under "Attempted but blocked."
+
+Severity by observable defect class (UAF/OOB/type-confusion = P0),
+NOT by ability to build an end-to-end exploit.
+
+Report to docs/reports/SECURITY_HUNT_<target-slug>_<YYYY-MM-DD>.md and
+copy testcases to docs/reports/hunt-artifacts/<report-name>/.
+```
+
+### 5.2 Hunt a single function
+
+```
+Run audits/SECURITY_HUNT.md from $DETERMINAGENTS_HOME against the function
+<FUNCTION_NAME> in <TARGET_FILE_PATH>.
+
+Same workflow as 5.1, but scope hypotheses to the function and its
+immediate call graph. Skip whole-file analysis.
+```
+
+### 5.3 Hunt high-risk surface from a SECURITY_PENTEST report
+
+```
+Run audits/SECURITY_HUNT.md from $DETERMINAGENTS_HOME, taking targets
+from the most recent SECURITY_PENTEST report at docs/reports/SECURITY_AUDIT_*.md.
+
+Pick the top 3 highest-risk targets the static audit identified
+(P0-flagged files, files at trust boundaries, files with elevated
+calibration in AUDIT_CONTEXT). Run a SECURITY_HUNT session per target,
+producing one report per target.
+
+Surface a triage summary at the end: confirmed P0 count per target.
+```
+
+### 5.4 Confirmed-only triage (fast surface)
+
+When you only want bugs you can immediately demonstrate:
+
+```
+Run audits/SECURITY_HUNT.md from $DETERMINAGENTS_HOME against
+<TARGET_FILE_PATH>. Stop after producing 3 confirmed P0/P1 findings, or
+after 30 minutes — whichever first.
+
+Each confirmed finding must include a runnable testcase in the artifacts
+directory. Report only confirmed findings; do not surface speculation.
+```
+
+---
+
+## 6. Maintenance invocations
+
+### 6.1 Refresh AUDIT_CONTEXT
 
 **When**: quarterly; after a significant refactor.
 
@@ -456,7 +523,7 @@ Review docs/determinagents/AUDIT_CONTEXT.md. For each entry:
 Propose deletions and updates as a diff. Do not commit until I approve.
 ```
 
-### 5.2 Sweep all audits at P0-only
+### 6.2 Sweep all audits at P0-only
 
 **When**: pre-release sanity check; ~30 minutes total.
 

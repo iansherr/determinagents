@@ -169,6 +169,48 @@ _Example:_ Admin-panel gaps are P1, not P0. Admins know to report breakage out-o
 - If you discover a pattern during an audit that would belong here, propose an addition (see `BOOTSTRAP.md` warm-overlay mode).
 - Do not duplicate content that lives in `ARCHITECTURE.md`, `START_HERE.md`, `CONTRIBUTING.md`, or the universal audit docs. Link instead.
 
+## SECURITY_HUNT
+
+### Build / test commands
+
+> Required. SECURITY_HUNT cannot run without these.
+
+```
+build:    <command>            # e.g., cargo build --release
+test:     <command>            # e.g., cargo test
+asan:     <command or flags>   # e.g., RUSTFLAGS="-Z sanitizer=address" cargo test
+ubsan:    <command or flags>
+tsan:     <command or flags>   # if applicable
+fuzz:     <harness path>       # if a fuzzing harness exists
+```
+
+### Disposable workspace convention
+
+> How does the user typically create a disposable workspace for security work?
+
+_Example:_ `git worktree add ../<repo>-hunt origin/main` followed by container build.
+
+### Trust boundaries in this codebase
+
+> Where attacker-controlled input meets privileged code. Highest-value targets for SECURITY_HUNT.
+
+### Sensitive paths (elevated severity)
+
+> Paths where findings deserve elevated severity treatment, beyond the universal P-rubric.
+
+### Known-blocked attack patterns (do not re-attempt)
+
+> Architectural defenses that already prevent certain bug classes. SECURITY_HUNT logs attempts that target these as "Attempted but blocked" rather than wasting cycles.
+
+_Example:_ Prototype freezing on parent-process objects prevents prototype-pollution sandbox escapes — do not re-explore this vector.
+
+### Past confirmed bugs in this target (dedup input)
+
+| Date | Bug class | Target | Reference |
+|---|---|---|---|
+
+---
+
 ## TEST_VERIFICATION
 - Preferred simulation stack (e.g., Python + Docker Compose)
 - Known non-idempotent setup steps to skip or fix

@@ -10,9 +10,17 @@ All notable changes to determinagents are documented here. The format is loosely
 - `audits/RESOLVE_FROM_REPORT.md` — mutating doc that takes any audit report and works through findings one at a time with per-finding approval, separate commits, and verification. Closes the audit→fix loop without conflating read-only and mutating sessions. Standard workflow: audit → review → resolve → re-audit.
 - 4 invocation variants in `INVOCATIONS.md` §2: resolve-all-actionable, P0-only, single-finding, by-category.
 - README "standard workflow" guidance describing the audit → resolve → re-audit chain.
+- RESOLVE Phase 0.1 now offers commit / stash / worktree options with copy-paste commands and a recommendation matrix when a dirty tree is detected. Never auto-executes git ops.
+- Universal report sections in `specs/FORMAT.md`: `## Severity rubric (this audit)` (verbatim copy of the audit's rubric, so reports are self-contained) and `## Next steps` (paste-ready RESOLVE_FROM_REPORT invocations with the report's path pre-filled).
+- `audits/SECURITY_HUNT.md` — agentic vulnerability discovery with execution capability. The agent gets a disposable workspace, builds the project, generates bug hypotheses, and verifies each with a runnable testcase under sanitizers. Severity by observable defect class (UAF/OOB/type-confusion = P0), not by exploitability. Logs attempts thwarted by defenses as positive signal. Pattern and rubric drawn from Mozilla's Firefox-hardening pipeline (May 2026).
+- 4 invocation variants in `INVOCATIONS.md` §5: hunt-file, hunt-function, hunt-from-pentest-report, confirmed-only-triage.
+- `SECURITY_HUNT` section in `specs/AUDIT_CONTEXT_TEMPLATE.md` for project-specific configuration: build/test commands, sanitizer flags, disposable workspace convention, trust boundaries, known-blocked attack patterns, dedup history.
 
 ### Changed
 - README footer attribution: "Built by [Ian Sherr](https://iansherr.com) at [Time Worthy Media](https://timeworthymedia.com)."
+- `SECURITY_PENTEST.md` reframed as the static counterpart to `SECURITY_HUNT.md` — same surface, different mode. Run static first; run hunt against the high-risk targets surfaced.
+- Each audit doc's Report template section now references `specs/FORMAT.md` for the universal sections, so audit-specific templates only need to define their audit-specific structure.
+- RESOLVE per-finding loop now uses single-letter shorthand (`y/n/d/e/s/i/q`) instead of free-form approval. INVOCATIONS §2.1 reflects this; auto-discovery of most recent report when path omitted.
 
 ## [0.1.0] — 2026-05-09
 

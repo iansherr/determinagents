@@ -47,6 +47,7 @@ determinagents/
 │   ├── DOCS_DRIFT.md
 │   ├── UX_DESIGN_AUDIT.md
 │   ├── RESOLVE_FROM_REPORT.md  # mutating: works through report findings
+│   ├── SECURITY_HUNT.md        # mutating: agentic vulnerability hunting
 │   └── TESTING_CREATOR.md      # mutating: writes new tests
 └── specs/               # conventions and per-project artifact specs
     ├── FORMAT.md                 # how to author a new audit
@@ -67,11 +68,14 @@ determinagents/
 | [audits/DOCS_DRIFT.md](audits/DOCS_DRIFT.md) | Claims in README and docs that the code no longer matches | 30–60 min |
 | [audits/UX_DESIGN_AUDIT.md](audits/UX_DESIGN_AUDIT.md) | CSS that violates DESIGN.md tokens — colors, spacing, radii, motion, typography | 60–120 min |
 
+`SECURITY_PENTEST.md` is the **static** half of security. For serious vulnerability discovery in codebases with build/test infrastructure, also use the agentic [SECURITY_HUNT.md](audits/SECURITY_HUNT.md) below.
+
 ## Available creators (mutating — writes code)
 
 | Doc | What it does | Prerequisites |
 |-----|--------------|---------------|
 | [audits/RESOLVE_FROM_REPORT.md](audits/RESOLVE_FROM_REPORT.md) | Works through findings in any audit report — one at a time, with per-finding approval, separate commits, and verification | An audit report exists at `docs/reports/`; clean working tree |
+| [audits/SECURITY_HUNT.md](audits/SECURITY_HUNT.md) | Agentic vulnerability hunting — agent gets execution capability to verify or refute bug hypotheses against one target file/function. Inspired by Mozilla's Firefox-hardening pipeline | Project builds locally; sanitizers configured; disposable workspace; AUDIT_CONTEXT.md `SECURITY_HUNT` section configured |
 | [audits/TESTING_CREATOR.md](audits/TESTING_CREATOR.md) | Implements tests across four tiers — Adversarial, Chaos, Simulation, Forensics — beyond what `TEST_GAPS.md` covers | Run `TEST_GAPS.md` and `SECURITY_PENTEST.md` first |
 
 **The standard workflow**: run an audit (read-only) → review the report → run `RESOLVE_FROM_REPORT` to work through findings → re-run the audit to verify clean state. For security-sensitive fixes, optionally chain into `TESTING_CREATOR` Tier 1 (Adversarial) afterwards to add executable coverage.
