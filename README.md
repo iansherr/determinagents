@@ -71,15 +71,17 @@ determinagents/
 
 ## Available audits (read-only)
 
-| Audit | Finds | Time |
-|-------|-------|------|
-| [audits/STUB_AND_COMPLETENESS.md](audits/STUB_AND_COMPLETENESS.md) | Phantom endpoints, dead handlers, silent error swallowing, compiled-without-source files | 30–90 min |
-| [audits/SECURITY_PENTEST.md](audits/SECURITY_PENTEST.md) | Auth bypass, injection, IDOR, hardcoded secrets, JWT issues, exposed internals | 60–180 min |
-| [audits/DATA_FLOW_TRACE.md](audits/DATA_FLOW_TRACE.md) | Where a user action breaks between UI, network, handler, and DB | 30–60 min per flow |
-| [audits/ERROR_HANDLING.md](audits/ERROR_HANDLING.md) | Silent catches, missing error UI, errors logged but not surfaced | 30–60 min |
-| [audits/TEST_GAPS.md](audits/TEST_GAPS.md) | Scenarios the test suite would miss — error paths, edge cases, integration boundaries | 60–90 min |
-| [audits/DOCS_DRIFT.md](audits/DOCS_DRIFT.md) | Claims in README and docs that the code no longer matches | 30–60 min |
-| [audits/UX_DESIGN_AUDIT.md](audits/UX_DESIGN_AUDIT.md) | CSS that violates DESIGN.md tokens — colors, spacing, radii, motion, typography | 60–120 min |
+| Audit | Finds |
+|-------|-------|
+| [audits/STUB_AND_COMPLETENESS.md](audits/STUB_AND_COMPLETENESS.md) | Phantom endpoints, dead handlers, silent error swallowing, compiled-without-source files |
+| [audits/SECURITY_PENTEST.md](audits/SECURITY_PENTEST.md) | Auth bypass, injection, IDOR, hardcoded secrets, JWT issues, exposed internals |
+| [audits/DATA_FLOW_TRACE.md](audits/DATA_FLOW_TRACE.md) | Where a user action breaks between UI, network, handler, and DB |
+| [audits/ERROR_HANDLING.md](audits/ERROR_HANDLING.md) | Silent catches, missing error UI, errors logged but not surfaced |
+| [audits/TEST_GAPS.md](audits/TEST_GAPS.md) | Scenarios the test suite would miss — error paths, edge cases, integration boundaries |
+| [audits/DOCS_DRIFT.md](audits/DOCS_DRIFT.md) | Claims in README and docs that the code no longer matches |
+| [audits/UX_DESIGN_AUDIT.md](audits/UX_DESIGN_AUDIT.md) | CSS that violates DESIGN.md tokens — colors, spacing, radii, motion, typography |
+
+Most audits run in 30–180 minutes at default scope, scaling with codebase size. Each audit doc supports `--phases=N,M` and `--max-time=Xm` to scope tighter.
 
 `SECURITY_PENTEST.md` is the **static** half of security. For serious vulnerability discovery in codebases with build/test infrastructure, also use the agentic [SECURITY_HUNT.md](audits/SECURITY_HUNT.md) below.
 
@@ -128,11 +130,11 @@ Every audit:
 
 The bootstrap prompt for DESIGN.md is in [INVOCATIONS.md](INVOCATIONS.md). The other six audits do not require DESIGN.md.
 
-## Inspiration
+## Acknowledgements
 
-The agentic-harness pattern (and the principle behind v0.4's simplification: *simple prompt + good harness > clever prompt + no harness*) was directly informed by Mozilla Security's writeup of how they used AI agents to harden Firefox: **[Behind the Scenes: Hardening Firefox](https://hacks.mozilla.org/2026/05/behind-the-scenes-hardening-firefox/)** (May 2026). Their pipeline surfaced 271 latent bugs in a single Firefox release; the inner loop ("there is a bug in this part of the code, please find it and build a testcase") and the severity-by-defect-class rubric in `audits/SECURITY_HUNT.md` are theirs.
+Thank you to Mozilla Security for publicly sharing **[Behind the Scenes: Hardening Firefox](https://hacks.mozilla.org/2026/05/behind-the-scenes-hardening-firefox/)** (May 2026). Their description of the agentic-harness pipeline, the inner-loop framing — *"there is a bug in this part of the code, please find it and build a testcase"* — and the severity-by-defect-class rubric directly shaped `audits/SECURITY_HUNT.md` and the broader v0.3 / v0.4 design. Open writeups from teams doing real production work like this is how the rest of us learn.
 
-If you're using AI agents in security work, read it.
+Thank you also to the engineers at Anthropic and elsewhere who keep saying — out loud, against the cultural reflex to grind for the perfect prompt — that working *with* an agent to improve a prompt produces better prompts than working alone. This library is an outgrowth of that practice: a personal collection of prompts that worked, refined over time, until the scaffolds of a standard set became visible. The spec emerged from the pattern, not the other way around. The hope now is that publishing it helps others skip a few of the same steps.
 
 ---
 
