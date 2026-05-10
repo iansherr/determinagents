@@ -10,6 +10,9 @@ Drifted docs are worse than missing docs: they lie confidently to new contributo
 
 Quarterly. Before publishing externally. After a major refactor or service merge/split. Read-only.
 
+
+**Model tier**: `fast` — (Static comparison + regex/find work; flagship reasoning is wasteful here.)
+
 ## Time estimate
 
 30–60 min.

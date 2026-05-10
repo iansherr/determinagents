@@ -47,6 +47,9 @@ If any prerequisite is missing, stop and surface that. Do not proceed without in
 - Continuously against high-churn files (the more code changes, the more latent bugs)
 - Forecasted future use: against patches as they land in CI (scope=patch, see "Future" below)
 
+
+**Model tier**: `reasoning` — (Novel hypothesis generation and exploit reasoning. Do not downgrade.)
+
 ## Time estimate
 
 Open-ended; per-session typically 30 min to several hours depending on:

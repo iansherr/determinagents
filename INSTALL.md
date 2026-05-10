@@ -80,6 +80,25 @@ Two conventions, both supported:
 
 The user invokes with flags: `/testing-creator --tier=2 --service=billing`, `/resolve-from-report --scope=P0`, `/audit-stub +harness`, etc. One slash command per behavior, flags handle variation.
 
+### Honoring `Model tier` hints
+
+Each audit doc in `$DETERMINAGENTS_HOME/audits/` declares a model tier (`reasoning` / `default` / `fast`) near the top — see `specs/FORMAT.md` "Model tier hints." Materialization should encode this into the slash command in the cleanest way the host tool supports:
+
+| Host tool | Mechanism |
+|-----------|-----------|
+| Claude Code (recent versions) | Add `model: <name>` to the slash command's frontmatter, mapping the tier to a concrete model. The user can override at any time. |
+| Older Claude Code / no frontmatter `model:` field | Add a body line: *"This audit prefers `reasoning`-tier models — use `/model opus` if you're not already on it."* The agent surfaces it. |
+| Cursor | Body recommendation; agent surfaces when invoked |
+| Gemini CLI / others | Body recommendation |
+
+Concrete tier-to-model mapping is the materializing agent's job, using whatever the host tool currently exposes. As of writing:
+
+- `reasoning` → Anthropic Opus / Google Gemini 2.5 Pro Deep Think / OpenAI GPT-5 or o-series / xAI Grok 4 Heavy
+- `default`   → Anthropic Sonnet / Google Gemini 2.5 Pro / OpenAI 4o-class / xAI Grok 4
+- `fast`      → Anthropic Haiku / Google Flash / OpenAI 4o-mini / xAI Grok 4 Fast
+
+These names *will* rot. The role-based tier in the audit doc won't. Re-run materialization periodically if you want to refresh model bindings.
+
 **Skills** (richer, for behaviors with multi-file context): `~/.claude/skills/<skill-name>/SKILL.md` plus supporting files. Use this when an invocation needs to reference more than one file from the library at runtime.
 
 For most invocations, slash commands are sufficient. Promote to a skill only when needed.

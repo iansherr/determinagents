@@ -14,6 +14,9 @@ This audit requires `DESIGN.md` at the project root (see [google-labs-code/desig
 
 Before any release that ships visual changes, after a theme/token update, quarterly otherwise. Read-only on the codebase. Phases 5–8 use a running app or screenshots.
 
+
+**Model tier**: `fast` — (Static phases are pattern-matching against DESIGN.md tokens; live phases 5-8 may benefit from default-tier if driving a browser.)
+
 ## Time estimate
 
 Default (all phases): 90–120 minutes. Each phase independently runnable; use `--phases=N` to scope. Phases 5–8 (motion, responsive, accessibility, dark mode) require a running app (`--target=<dev-url>`) or screenshots.

@@ -18,6 +18,9 @@ After reviewing an audit report and deciding to act on it. Not all findings need
 
 This is **not** the right tool for refactors that span many findings as one architectural change. If a single change naturally addresses 5 findings together, do that change manually and check off the findings in the report. The resolver is for the common case where each finding is a discrete fix.
 
+
+**Model tier**: `default`
+
 ## Time estimate
 
 Open-ended — depends on how many findings, how complex each fix is, and whether tests run. Plan in batches:

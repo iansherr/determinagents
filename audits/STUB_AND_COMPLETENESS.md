@@ -8,6 +8,9 @@ Find code that was written aspirationally — frontends calling backends that do
 
 Anytime. Read-only. Especially valuable after a sprint where features were shipped without integration tests, or when an admin/internal panel "looks empty for some reason."
 
+
+**Model tier**: `default`
+
 ## Time estimate
 
 Default (all phases): 60–90 minutes. Each phase is independently runnable; use `--phases=N` to scope, `--max-time=Xm` for a soft budget. Phase 6 (`+harness`) adds 30+ minutes depending on endpoint count.

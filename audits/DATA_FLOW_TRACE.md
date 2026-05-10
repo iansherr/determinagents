@@ -10,6 +10,9 @@ This audit is a microscope, not a survey. One flow per run. Run it on multiple f
 
 After a feature ships, after a "works in dev but not prod" report, before extracting a service, or whenever the stack feels like a black box.
 
+
+**Model tier**: `default`
+
 ## Time estimate
 
 30–60 min per flow.

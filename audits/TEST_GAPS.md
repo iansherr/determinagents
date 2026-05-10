@@ -12,6 +12,9 @@ Find **scenarios** the test suite would miss — not lines uncovered. Line cover
 
 Before a release that touches a critical path; after an incident, to find sibling bugs the test suite also wouldn't catch; quarterly as a forcing function.
 
+
+**Model tier**: `default`
+
 ## Time estimate
 
 60–90 min.

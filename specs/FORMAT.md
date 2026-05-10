@@ -190,6 +190,46 @@ When authoring a new harness audit, read these for shape, not for content.
 
 ---
 
+## Model tier hints
+
+Some audits genuinely need a flagship reasoning model; others are fine on a fast/cheap one. To document this without locking the library to specific vendor names that change every quarter, audits use **three role-based tiers**.
+
+### The three tiers
+
+- **`reasoning`** — multi-step hypothesis generation, novel exploit construction, architectural synthesis, anything where the model is doing real thinking that simpler models can't fake. Examples: SECURITY_HUNT, TESTING_CREATOR Tier 3 (simulation) and Tier 4 (forensics).
+- **`default`** — workhorse tasks: code understanding, planning fixes, generating tests from clear specs, cross-layer tracing, applying known patterns to a moderate-size problem. The right model for most things.
+- **`fast`** — narrow scope, well-defined pattern application, classification, sweeps. Cheap and quick wins here. Examples: P0-only triage, DOCS_DRIFT static phases, UX_DESIGN_AUDIT static phases.
+
+### Why role-based, not vendor-named
+
+Every vendor names tiers differently and renames every release. Hardcoding "use Sonnet 4.6" is wrong in 8 weeks. Role-based tier names describe *what the task needs*, not *what the model is*, so they stay useful as model lineups change. The user (or host tool) maps tiers to current models.
+
+Rough mappings as of this writing (will rot — verify against current docs):
+
+| Tier | Anthropic | Google | OpenAI | xAI |
+|---|---|---|---|---|
+| `reasoning` | Opus | Pro Deep Think | GPT-5 / o-series | Grok 4 Heavy |
+| `default` | Sonnet | Pro | 4o-class | Grok 4 |
+| `fast` | Haiku | Flash | 4o-mini | Grok 4 Fast |
+
+### Authoring convention
+
+Each audit declares its tier near the top of the doc, under "When to run":
+
+```markdown
+**Model tier**: reasoning   (or `default`, or `fast`)
+```
+
+Add a one-sentence rationale only if the tier is non-obvious for the audit. No more.
+
+### Honoring the hint
+
+This is a hint, not a hard requirement. The user knows their host tool, their budget, and their constraints better than the library does. A small model often surprises on a focused task; a flagship model is wasteful on a sweep. Treat the hint as a *default* the user can override.
+
+Host-tool installation (`INSTALL.md`) maps tier to the host's mechanism: `model:` frontmatter where supported, agent-surfaced recommendation otherwise.
+
+---
+
 ## Authoring checklist
 
 Before committing a new audit doc:
@@ -202,3 +242,4 @@ Before committing a new audit doc:
 - [ ] No prose where a command would do.
 - [ ] No advice where a check would do.
 - [ ] Report template includes `## Severity rubric (this audit)` and `## Next steps` sections.
+- [ ] Doc declares a `**Model tier**: reasoning|default|fast` near the top.

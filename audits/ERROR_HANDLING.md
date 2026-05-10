@@ -14,6 +14,9 @@ The user-visible symptom is "the feature just doesn't work" with no error to gre
 
 Anytime. Read-only. Especially after a "works in dev, mysteriously broken in prod" report, or when support tickets read "I clicked X and nothing happened."
 
+
+**Model tier**: `default`
+
 ## Time estimate
 
 Default (Phases 1–5): 30–60 min. Each phase independently runnable; use `--phases=N` to scope. Phase 6 (`+harness`) adds 30+ minutes depending on fault scenarios.

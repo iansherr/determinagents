@@ -26,6 +26,9 @@ If `TEST_GAPS.md` and `SECURITY_PENTEST.md` haven't been run, stop and run them.
 - After an incident, to install permanent regression coverage at the right tier.
 - Before a security audit, to ensure adversarial controls are testable.
 
+
+**Model tier**: `reasoning` — (Tier 3 simulation and Tier 4 forensics need real reasoning; Tiers 1-2 work on default.)
+
 ## Time estimate
 
 Open-ended — this doc *implements* tests, so wall time scales with how many gaps exist. Plan in tier-sized chunks: a single tier for one service is ~half a day to a day.

@@ -6,6 +6,11 @@ All notable changes to determinagents are documented here. The format is loosely
 
 ## [Unreleased]
 
+### Added (model tier hints)
+- `specs/FORMAT.md` — new "Model tier hints" section documenting three role-based, vendor-neutral tiers: `reasoning` (multi-step hypothesis generation), `default` (workhorse tasks), `fast` (narrow scope / classification). Names describe what the task needs, not what the model is, so they stay useful as model lineups change. Includes a current-mappings table (with the explicit caveat that vendor names rot).
+- Each audit doc declares a `**Model tier**` line near the top. SECURITY_HUNT and TESTING_CREATOR are `reasoning`; DOCS_DRIFT and UX_DESIGN_AUDIT are `fast`; everything else `default`.
+- `INSTALL.md` — documents how host-tool materialization should honor the tier hint: `model:` frontmatter where supported (Claude Code), agent-surfaced recommendation otherwise (Cursor, Gemini CLI). The materializing agent maps tier to the host's current model names.
+
 ### Changed (v0.4 simplification — applying "simple prompt + good harness" to the library itself)
 - **INVOCATIONS.md cut from 590 → ~250 lines** (~57%). Collapsed enumerated invocation variants (4 RESOLVE variants, 4 SECURITY_HUNT variants, etc.) into one invocation per behavior with documented `--scope`, `--target`, `--phases`, `--max-time`, and `+harness` flags. Substituted *trust the user/agent to combine flags* for *enumerate every plausible invocation*.
 - **Dropped `quick`/`standard`/`deep` named scope variants** from every audit doc. Replaced with `--phases=N,M` (run specific phases) and `--max-time=Xm` (soft budget). The agent picks based on actual constraint, not pre-baked slicing. Each audit's "Time estimate" section now states the default duration plus a one-line note about flags.
