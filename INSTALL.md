@@ -41,6 +41,9 @@ IMMEDIATE ACTION: Display the menu below to the user verbatim. Do NOT perform an
 **Determinagents Library** (Path: <ABSOLUTE_PATH_TO_LIBRARY>)
 Read docs/determinagents/AUDIT_CONTEXT.md if present. Reports go to docs/reports/.
 
+### 🚀 First Run (Recommended)
+- **Initialize Project**: Survey codebase and bootstrap missing core artifacts (DESIGN, FEATURE_REGISTRY, AUDIT_CONTEXT) to calibrate future audits.
+
 ### Available Audits (Read-Only)
 ... [Menu Content from INVOCATIONS.md] ...
 

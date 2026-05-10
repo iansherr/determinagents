@@ -168,6 +168,28 @@ Report to docs/reports/TEST_VERIFICATION_<service>_<YYYY-MM-DD>.md.
 
 ---
 
+## Project Initialization (First Run)
+
+The recommended "cold start" for a new repository. Calibrates all future audits.
+
+```
+Run PROJECT_INIT from $DETERMINAGENTS_HOME.
+
+Phase 0: Survey codebase for existing DESIGN.md,
+docs/determinagents/FEATURE_REGISTRY.md, and
+docs/determinagents/AUDIT_CONTEXT.md.
+
+Phase 1: Propose a plan to bootstrap the missing artifacts in order:
+  1. DESIGN.md (Look-and-feel tokens)
+  2. FEATURE_REGISTRY.md (User-visible route discovery)
+  3. AUDIT_CONTEXT.md (Project calibration & institutional knowledge)
+
+Get approval for the plan, then work through each bootstrap following
+the per-artifact instructions in INVOCATIONS.md.
+```
+
+---
+
 ## Per-project artifact bootstraps
 
 ### DESIGN.md
