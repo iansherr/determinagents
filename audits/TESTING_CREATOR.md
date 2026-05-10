@@ -31,7 +31,7 @@ If `TEST_GAPS.md` and `SECURITY_PENTEST.md` haven't been run, stop and run them.
 
 ## Time estimate
 
-Open-ended — this doc *implements* tests, so wall time scales with how many gaps exist. Plan in tier-sized chunks: a single tier for one service is ~half a day to a day.
+Open-ended; depends on how many gaps exist, the surface area of the service, and the agent's model tier. Plan in tier-sized chunks: a single tier for one service is its own session.
 
 ## Output
 

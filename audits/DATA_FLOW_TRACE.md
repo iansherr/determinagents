@@ -15,7 +15,7 @@ After a feature ships, after a "works in dev but not prod" report, before extrac
 
 ## Time estimate
 
-30–60 min per flow.
+Per flow; depends on flow complexity and the agent's model tier. Use `--max-time=Xm` to bound.
 
 ## Output
 

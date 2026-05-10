@@ -43,7 +43,7 @@ If any prerequisite is missing, stop and surface that. The point of this doc is 
 
 ## Time estimate
 
-30–60 min per flow. Most of the time is in setup (auth, fixtures, network capture); the actual flow drive is fast.
+Per flow; depends on flow complexity. Most of the time is in setup (auth, fixtures, network capture); the actual flow drive is fast. Use `--max-time=Xm` to bound.
 
 ## Output
 

@@ -52,12 +52,7 @@ If any prerequisite is missing, stop and surface that. Do not proceed without in
 
 ## Time estimate
 
-Open-ended; per-session typically 30 min to several hours depending on:
-- Target complexity (a 200-line utility vs. a 5,000-line JIT compiler)
-- Build/test cycle time
-- How many hypotheses the agent investigates
-
-Plan in target-sized chunks: one file per session, parallelize across sessions if you want coverage of many files.
+Open-ended; depends on target complexity, build/test cycle time, hypothesis count, and the agent's model tier. Plan in target-sized chunks: one file per session, parallelize across sessions if you want coverage of many files.
 
 ## Output
 

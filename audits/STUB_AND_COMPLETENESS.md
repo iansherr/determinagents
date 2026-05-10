@@ -13,7 +13,7 @@ Anytime. Read-only. Especially valuable after a sprint where features were shipp
 
 ## Time estimate
 
-Default (all phases): 60–90 minutes. Each phase is independently runnable; use `--phases=N` to scope, `--max-time=Xm` for a soft budget. Phase 6 (`+harness`) adds 30+ minutes depending on endpoint count.
+Depends on codebase size and the agent's model tier. Use `--phases=N,M` or `--max-time=Xm` to scope. Phase 6 (`+harness`) adds runtime cost proportional to endpoint count.
 
 ## Output
 

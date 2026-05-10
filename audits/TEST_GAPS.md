@@ -17,7 +17,7 @@ Before a release that touches a critical path; after an incident, to find siblin
 
 ## Time estimate
 
-60–90 min.
+Depends on codebase size and the agent's model tier. Use `--phases=N,M` or `--max-time=Xm` to scope.
 
 ## Output
 

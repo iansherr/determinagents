@@ -23,11 +23,7 @@ This is **not** the right tool for refactors that span many findings as one arch
 
 ## Time estimate
 
-Open-ended — depends on how many findings, how complex each fix is, and whether tests run. Plan in batches:
-
-- **One severity tier**: a session
-- **One category** (e.g., all "phantom endpoints" from a STUB report): a session
-- **One specific finding**: minutes
+Open-ended; depends on the number of findings, fix complexity, test cycle time, and the agent's model tier. Plan in batches: one severity tier per session, or one category, or a single finding for a quick fix.
 
 ## Output
 

@@ -19,7 +19,7 @@ Anytime. Read-only. Especially after a "works in dev, mysteriously broken in pro
 
 ## Time estimate
 
-Default (Phases 1–5): 30–60 min. Each phase independently runnable; use `--phases=N` to scope. Phase 6 (`+harness`) adds 30+ minutes depending on fault scenarios.
+Depends on codebase size and the agent's model tier. Use `--phases=N,M` or `--max-time=Xm` to scope. Phase 6 (`+harness`) adds runtime cost proportional to the number of fault scenarios tested.
 
 ## Output
 

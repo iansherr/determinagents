@@ -19,7 +19,7 @@ Before any release that ships visual changes, after a theme/token update, quarte
 
 ## Time estimate
 
-Default (all phases): 90–120 minutes. Each phase independently runnable; use `--phases=N` to scope. Phases 5–8 (motion, responsive, accessibility, dark mode) require a running app (`--target=<dev-url>`) or screenshots.
+Depends on style surface and the agent's model tier. Use `--phases=N,M` or `--max-time=Xm` to scope. Phases 5–8 (motion, responsive, accessibility, dark mode) require a running app (`--target=<dev-url>`) or screenshots.
 
 ## Output
 

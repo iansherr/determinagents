@@ -15,7 +15,7 @@ Quarterly. Before publishing externally. After a major refactor or service merge
 
 ## Time estimate
 
-30–60 min.
+Depends on docs surface and the agent's model tier. Use `--phases=N,M` or `--max-time=Xm` to scope.
 
 ## Output
 
