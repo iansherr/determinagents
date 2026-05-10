@@ -35,10 +35,14 @@ This release consolidates four months of in-tree work (the v0.3 harness expansio
 - New **"Design principle"** section near the top codifies *simple prompt + good harness > clever prompt + no harness*, links the v0.4 simplification commit, and includes a "when this isn't worth it" note (don't reach for a phased audit on a 200-line script). Promotes the principle from buried-in-the-Acknowledgements to a first-class framing.
 - Acknowledgements rewritten: drops the Anthropic-specific name in favor of "frontier model engineers"; adds *"out loud, against the cultural reflex of secrecy and the collective instinct to grind for the perfect prompt"*; new paragraph crediting Karpathy's "loop until success criteria met" observation and Forrest Chang's [andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills) as a parallel distillation of the same insight.
 
+### Added (vocabulary — OWASP only)
+- `audits/SECURITY_PENTEST.md` now asks the agent to cite the relevant **OWASP Top 10** category in each finding (e.g., `**OWASP**: A01 Broken Access Control`). Explicit non-claim about SOC 2 / ISO 27001 / HIPAA / PCI: those are organizational control frameworks, not code-level vulnerability taxonomies, and DeterminAgents does not assess them. OWASP earns the citation because it's a code-level taxonomy that lines up with what the audit actually produces.
+
 ### Fixed
 - `INSTALL.md` Claude Code file-tree example had its file list duplicated in the same code block; deduped.
 - Gemini CLI hub-command convention corrected to TOML (`description = "..."` + `prompt = """..."""`) — the prior example used Markdown frontmatter, which Gemini does not parse.
 - Materialized commands now recommend including the absolute install path as a fallback alongside `$DETERMINAGENTS_HOME`, so commands work immediately in environments where the env var isn't exported yet.
+- `bin/determinagents` shellcheck warnings: dropped the unused `SUBCOMMANDS` placeholder (the eval'd completion bodies need their own literal lists, so the var was dead code dressed up as a single-source-of-truth) and converted the `uninstall` cleanup-prompt block from per-line `echo` to a heredoc, eliminating the SC2088 tilde-in-quotes warning. CI green.
 
 ### Added (model tier hints)
 - `specs/FORMAT.md` — new "Model tier hints" section documenting three role-based, vendor-neutral tiers: `reasoning` (multi-step hypothesis generation), `default` (workhorse tasks), `fast` (narrow scope / classification). Names describe what the task needs, not what the model is, so they stay useful as model lineups change. Includes a current-mappings table (with the explicit caveat that vendor names rot).
