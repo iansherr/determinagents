@@ -6,6 +6,18 @@ All notable changes to determinagents are documented here. The format is loosely
 
 ## [Unreleased]
 
+## [0.5.1] — 2026-05-10
+
+### Added
+- `specs/MAINTENANCE.md` — maintainer's tool for keeping the library current. Three modes: `--mode=refresh` (audit host-tool conventions for drift, surface new tools, check model-tier language); `--mode=integrate --source=<...>` (fold an external source into the library with explicit additive/redundant/misaligned verdicts); `--mode=brainstorm [--seed=<topic>]` (structured exploration of coverage/harness/workflow gaps). Reports go to `docs/maintenance/` (gitignored). Wired into `INVOCATIONS.md` §Maintenance.
+- `docs/determinagents/AUDIT_CONTEXT.md` for the library repo itself. The shared conventions tell every invocation to read this file if present; rather than special-casing maintenance runs with an override note, the library now has a real context (POSIX-sh-only, no API/DB/frontend, which audits apply and which don't, the `docs/` path distinction between library and target projects).
+
+### Changed
+- `determinagents materialize` prompt now explicitly handles the re-materialize case: if DeterminAgents commands already exist in the host tool, the agent regenerates unchanged files silently, prompts before overwriting hand-edited ones, and reports what changed. Previously the agent had to discover this from `INSTALL.md` on its own.
+
+### Fixed
+- Maintenance invocation no longer needs a special override note telling the agent to skip `AUDIT_CONTEXT.md` — the file now exists, making the library consistent with the pattern it teaches.
+
 ## [0.5.0] — 2026-05-10
 
 This release consolidates four months of in-tree work (the v0.3 harness expansion and v0.4 simplification pass referenced below were never tagged) plus a fresh batch covering installer ergonomics, the hub command flow, the rebrand to **DeterminAgents**, and shim-side quality-of-life features (doctor, completions, paste-ready uninstall cleanup).
@@ -119,6 +131,7 @@ Initial public-shaped release. The library and install flow are usable end-to-en
 - Reports go to `docs/reports/<NAME>_<YYYY-MM-DD>.md` in the target project.
 - `docs/determinagents/AUDIT_CONTEXT.md` (overlay) is read first if present, to apply project-specific calibrations.
 
-[Unreleased]: https://github.com/iansherr/determinagents/compare/v0.5.0...HEAD
+[Unreleased]: https://github.com/iansherr/determinagents/compare/v0.5.1...HEAD
+[0.5.1]: https://github.com/iansherr/determinagents/compare/v0.5.0...v0.5.1
 [0.5.0]: https://github.com/iansherr/determinagents/releases/tag/v0.5.0
 [0.1.0]: https://github.com/iansherr/determinagents/releases/tag/v0.1.0
