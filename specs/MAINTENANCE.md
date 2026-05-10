@@ -2,7 +2,9 @@
 
 ## Purpose
 
-Keep DeterminAgents honest and alive over time. Host tools change their command conventions, model lineups shift every few months, and useful ideas surface in other repos and writeups. This is the maintainer's tool for noticing those things, integrating them, and exploring where the library should grow.
+Keep DeterminAgents honest and alive over time.
+
+> **Context override**: this runs on the library repo itself, not a target project. The shared INVOCATIONS.md conventions (read `docs/determinagents/AUDIT_CONTEXT.md`, report to `docs/reports/`) do not apply. There is no AUDIT_CONTEXT here. Reports go to `docs/maintenance/` (gitignored). Host tools change their command conventions, model lineups shift every few months, and useful ideas surface in other repos and writeups. This is the maintainer's tool for noticing those things, integrating them, and exploring where the library should grow.
 
 This is **not** a user-facing audit. End users running DeterminAgents on their own projects never invoke this. It lives in `specs/` rather than `audits/` for that reason.
 
