@@ -10,28 +10,44 @@ Point an agent at this file from inside a host tool and ask it to install the li
 
 ```
 Read ${DETERMINAGENTS_HOME:-$HOME/.determinagents}/INSTALL.md and install the
-determinagents library for this host tool. Identify the host tool from
-context (e.g., this is Claude Code if you have access to .claude/), pick the
-appropriate target convention from the table below, and generate the
-install files. Show the plan before writing any files.
+determinagents library for this host tool.
+
+Identify the host tool from context, pick the appropriate target convention,
+and generate the install files. Start by creating the primary
+`/determinagents` hub command that lists all available audits. Then, ask
+if I want the full suite of individual slash commands or just the hub.
+
+Show the plan before writing files.
 ```
 
 The agent does the rest: detects the host tool, reads `INVOCATIONS.md`, and generates the host-tool-specific files.
 
 ## What gets installed
 
-Every behavior in `INVOCATIONS.md` becomes one host-tool artifact. Each invocation has documented `--scope`, `--target`, `--phases`, `--max-time`, and `+harness` flags — these become arguments the slash command passes through to the agent, not separate slash commands.
+### The Hub: `/determinagents` (Primary)
+
+The **best practice** for discoverability and keeping your slash command list clean. This single command provides a structured menu of all behaviors in the library.
+
+When invoked, the hub should:
+1. List the available categories (Audits, Mutating Tools, Bootstraps).
+2. Briefly describe what each does.
+3. Provide the full prompt for the user's chosen behavior (or just start it if the tool supports interactive selection).
+
+### Individual Commands (Optional)
+
+For power users who want one-keystroke access to specific audits, the full suite remains available.
 
 | Source (in `INVOCATIONS.md`) | Generated artifact |
 |------------------------------|-------------------|
-| Each audit (one per row in the audits table) | One slash command (`audit-stub`, `audit-security`, etc.) |
-| Cross-audit P0 sweep | One slash command (`audit-p0-sweep`) |
-| RESOLVE_FROM_REPORT | One slash command (`resolve-from-report`) — flags handle scope/finding/category |
-| SECURITY_HUNT | One slash command (`security-hunt`) — flags handle target/confirmed-only/from-report |
-| DATA_FLOW_VERIFY | One slash command (`data-flow-verify`) |
-| TESTING_CREATOR | One slash command (`testing-creator`) — `--tier=N` selects the tier |
-| Per-project bootstraps (DESIGN, FEATURE_REGISTRY, AUDIT_CONTEXT) | One slash command each |
-| Maintenance | One slash command each |
+| The Library Hub | `/determinagents` |
+| Each audit (one per row in the audits table) | `/audit-stub`, `/audit-security`, etc. |
+| Cross-audit P0 sweep | `/audit-p0-sweep` |
+| RESOLVE_FROM_REPORT | `/resolve-from-report` |
+| SECURITY_HUNT | `/security-hunt` |
+| DATA_FLOW_VERIFY | `/data-flow-verify` |
+| TESTING_CREATOR | `/testing-creator` |
+| Per-project bootstraps (DESIGN, FEATURE_REGISTRY, AUDIT_CONTEXT) | `/bootstrap-design`, etc. |
+| Maintenance | `/refresh-audit-context` |
 
 The shared conventions block at the top of `INVOCATIONS.md` should become a **header included in every generated artifact**, so each command is self-contained.
 
@@ -107,9 +123,18 @@ For most invocations, slash commands are sufficient. Promote to a skill only whe
 
 ### Gemini CLI
 
-Gemini CLI uses `~/.gemini/commands/` with a similar markdown-file convention. Same naming as Claude Code.
+Gemini CLI uses `~/.gemini/commands/` for global commands. Unlike other tools, it requires commands to be in **TOML format** with a **`.toml`** extension.
 
-If the convention differs at install time, check Gemini's current docs and adapt.
+**File template (`~/.gemini/commands/audit-stub.toml`):**
+
+```toml
+description = "Run STUB_AND_COMPLETENESS audit"
+prompt = \"\"\"
+Library at \$DETERMINAGENTS_HOME. Read docs/determinagents/AUDIT_CONTEXT.md if present.
+
+Read \$DETERMINAGENTS_HOME/audits/STUB_AND_COMPLETENESS.md and run it...
+\"\"\"
+```
 
 ### Cursor
 

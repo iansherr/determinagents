@@ -80,31 +80,20 @@ case "$cmd" in
     ;;
 
   materialize|install-commands)
-    HOST="${1:-}"
-    if [ -z "$HOST" ]; then
-      # Auto-detect
-      if [ -d "$HOME/.claude" ] || [ -d ".claude" ]; then
-        HOST="claude-code"
-      elif [ -d "$HOME/.gemini" ]; then
-        HOST="gemini"
-      elif [ -d "$HOME/.cursor" ] || [ -d ".cursor" ]; then
-        HOST="cursor"
-      else
-        echo "could not auto-detect host tool"
-        echo "usage: determinagents materialize <claude-code|gemini|cursor|other>"
-        exit 1
-      fi
-      echo "auto-detected: $HOST"
-    fi
-
     cat <<MSG
-To complete materialization, hand this prompt to a coding agent in $HOST:
+To complete materialization, hand this prompt to a coding agent in your tool
+(Claude Code, Gemini, Cursor, etc.):
 
 ---
-Read $DETERMINAGENTS_HOME/INSTALL.md and install the determinagents
-library for $HOST. Read $DETERMINAGENTS_HOME/INVOCATIONS.md and generate
-one slash command per invocation following the conventions in INSTALL.md.
-Show me the plan before writing files.
+Read ${DETERMINAGENTS_HOME}/INSTALL.md and install the determinagents
+library for this host tool.
+
+Identify the host tool from context, pick the appropriate target convention,
+and generate the install files. Start by creating the primary
+\`/determinagents\` hub command that lists all available audits. Then, ask
+if I want the full suite of individual slash commands or just the hub.
+
+Show the plan before writing files.
 ---
 
 The agent does the actual file generation. This shim cannot directly write
