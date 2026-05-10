@@ -91,13 +91,18 @@ To complete materialization, hand this prompt to a coding agent in your tool
 (Claude Code, Gemini, Cursor, etc.):
 
 ---
-Read ${DETERMINAGENTS_HOME}/INSTALL.md and install the determinagents
+Read ${DETERMINAGENTS_HOME}/INSTALL.md and install the DeterminAgents
 library for this host tool.
 
 Identify the host tool from context, pick the appropriate target convention,
 and generate the install files. Start by creating the primary
 \`/determinagents\` hub command that lists all available audits. Then, ask
 if I want the full suite of individual slash commands or just the hub.
+
+If DeterminAgents commands already exist in the host tool, treat this as a
+re-materialize: regenerate unchanged files silently, prompt me before
+overwriting any I've hand-edited (see INSTALL.md "Updating installed
+commands"), and report what changed.
 
 Show the plan before writing files.
 ---
