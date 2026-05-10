@@ -138,5 +138,5 @@ Thank you also to the engineers at Anthropic and elsewhere who keep saying — o
 
 ---
 
-Built by [Ian Sherr](https://iansherr.com) at [Time Worthy Media](https://timeworthymedia.com).
+Orchestrated by [Ian Sherr](https://iansherr.com) at [Time Worthy Media](https://timeworthymedia.com).
 
