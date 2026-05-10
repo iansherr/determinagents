@@ -10,6 +10,8 @@ All notable changes to determinagents are documented here. The format is loosely
 
 This release consolidates four months of in-tree work (the v0.3 harness expansion and v0.4 simplification pass referenced below were never tagged) plus a fresh batch covering installer ergonomics, the hub command flow, the rebrand to **DeterminAgents**, and shim-side quality-of-life features (doctor, completions, paste-ready uninstall cleanup).
 
+> **Action required after `determinagents update`**: re-run `determinagents materialize` for this release. The hub command template gained the conditional First Run logic, which is baked in at materialization time and won't update automatically. Audit content changes (e.g., the new OWASP citation in `SECURITY_PENTEST.md`) flow through without re-materialization, per the thin-pointer convention in `INSTALL.md`.
+
 ### Added (shim — quality of life)
 - `determinagents doctor` — read-only health check across install, shim, remote, and shell completion. Reports `ok` / `warn` / `fail` per check; exits non-zero on any fail. Catches stale checkouts, dirty working trees, missing PATH entries, unreachable origin, and unsupported shells before they bite during a real run.
 - `determinagents completions <shell>` — prints a tab-completion script for `bash`, `zsh`, or `fish` to stdout. Single source of truth for the subcommand list lives in the shim, so adding a subcommand later only touches one place. Installer detects `$SHELL` and prints the one-liner to enable it; never edits dotfiles.

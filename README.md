@@ -30,6 +30,8 @@ determinagents uninstall           # remove the library (prompts for confirmatio
 determinagents help                # full command list
 ```
 
+**After `determinagents update`**: audit content (phases, severity rubrics, the doc bodies themselves) flows through automatically — materialized slash commands are thin pointers that re-read the audit doc each time they run. **Re-run `determinagents materialize` only when** a new behavior is added (new slash command), the shared invocation header changes, or the hub command template changes. Each release that requires re-materialization will say so at the top of its CHANGELOG entry.
+
 To pin a branch (e.g., `dev` for unreleased work):
 
 ```sh
