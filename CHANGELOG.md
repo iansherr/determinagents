@@ -6,6 +6,13 @@ All notable changes to determinagents are documented here. The format is loosely
 
 ## [Unreleased]
 
+### Added
+- `specs/AUTOMATED_REPORTING.md` and `specs/SIGNAL_SCHEMA.md` — project-facing automated reporting harness for synthesizing existing audit reports and runtime snapshots into `SYSTEM_DIGEST` reports. Includes baseline/trend/incident/change-review/portfolio modes, read-only safeguards, and a normalized JSON signal schema. Wired into `INVOCATIONS.md` as `auto-report`.
+- `README.md` now lists `AUTOMATED_REPORTING.md` and `SIGNAL_SCHEMA.md` in the specs tree and per-project specs table.
+
+### Changed
+- `README.md` now has a clearer front-door narrative: concise positioning, value bullets, behavior chooser, example finding, and workflow diagram.
+
 ## [0.5.1] — 2026-05-10
 
 ### Added

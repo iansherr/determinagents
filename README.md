@@ -1,8 +1,16 @@
 # DeterminAgents
 
-A portable library of **universal, self-discovering audit prompts** for coding agents. Hand any audit to an agent pointed at a repo; the agent discovers the project layout, runs the audit, and produces a structured report. No project-specific configuration required.
+Universal audit harnesses for coding agents.
 
-These differ from project-specific agent docs (the kind a team writes for one repo, hardcoding its layout) in that they contain **no hardcoded paths or service names**. The agent does discovery first, then applies a universal mental model — so the same audit works on any codebase.
+DeterminAgents is a portable library of **self-discovering audit prompts**. Hand one to an agent pointed at a repo; the agent discovers the project layout, runs a structured audit, and writes a report with severity, evidence, and concrete next steps.
+
+What you get:
+
+- **Portable audits** with no hardcoded service names or repo paths
+- **Repeatable harnesses**: discovery phases, rubrics, report templates, and follow-up workflows
+- **Decision-ready artifacts** in `docs/reports/`, including optional system digests via `auto-report`
+
+Use it when a codebase is large enough that structure beats ad-hoc prompting.
 
 ## Design principle
 
@@ -10,7 +18,7 @@ These differ from project-specific agent docs (the kind a team writes for one re
 
 Most of the lift in agentic work comes from the surrounding scaffolding — phases, severity rubrics, report formats, context overlays, fault-injection harnesses — not from clever wording inside the prompt. Every audit here is deliberately plain English; the structure around it does the work, and the structure is what gives the agent something to *loop against* until success criteria are met. The principle applies recursively to the library's own docs: trust over enumeration, defaults over variants. (See the [v0.4 simplification commit](https://github.com/iansherr/determinagents/commit/9ae9d6a6b8dbed1ed30249f4ae4e312c8729816b) for what that looked like applied to DeterminAgents itself.)
 
-**When this isn't worth it.** A 200-line script or a one-off prototype doesn't need a phased audit with a severity rubric and a report file. Use direct prompts for trivial work; reach for an audit when the codebase is large enough that structure beats ad-hoc inspection.
+**When this isn't worth it.** A 200-line script or a one-off prototype doesn't need a phased audit with a severity rubric and a report file. Use direct prompts for trivial work.
 
 ## Install
 
@@ -31,6 +39,10 @@ determinagents help                # full command list
 ```
 
 **After `determinagents update`**: audit content (phases, severity rubrics, the doc bodies themselves) flows through automatically — materialized slash commands are thin pointers that re-read the audit doc each time they run. **Re-run `determinagents materialize` only when** a new behavior is added (new slash command), the shared invocation header changes, or the hub command template changes. Each release that requires re-materialization will say so at the top of its CHANGELOG entry.
+
+Materialization now defaults to one canonical command family: use `/determinagents` for onboarding and `/determinagents <behavior> [flags]` for direct runs.
+
+Troubleshooting wrong invocation: if you run `determinagents --help` while trying to execute an audit, you are on the installer CLI surface. Return to your host tool and run `/determinagents <behavior> [flags]` (example: `/determinagents error-handling`).
 
 To pin a branch (e.g., `dev` for unreleased work):
 
@@ -55,6 +67,36 @@ After installing, the lowest-friction path:
 
 Once that loop is comfortable, browse the audits table below for other audits to try, or **[INVOCATIONS.md](INVOCATIONS.md)** for canonical paste-ready prompts. To install as slash commands in your host tool, see **[INSTALL.md](INSTALL.md)**.
 
+## Choose a behavior
+
+| Need | Run |
+|------|-----|
+| Find stubs, phantom paths, and incomplete implementations | `/determinagents stub` |
+| Run a security sweep | `/determinagents security` |
+| Trace where a user action breaks | `/determinagents data-flow --target=<flow>` |
+| Review runtime capacity and resource pressure | `/determinagents resource-capacity` |
+| Create a weekly or post-change system digest | `/determinagents auto-report --mode=baseline` |
+| Work through report findings with approval gates | `/determinagents resolve --report=<path>` |
+
+Reports are meant to be read by humans and reused by agents. A typical finding looks like:
+
+```md
+### P1: Save failures are logged but not surfaced to the user
+- Evidence: src/api/client.ts:42
+- Impact: failed writes can leave the UI showing stale success state
+- Suggested fix: return a typed error from saveProfile() and render retryable error state in SavePanel
+- Next step: /determinagents resolve --report=docs/reports/ERROR_HANDLING_2026-05-11.md
+```
+
+```mermaid
+flowchart LR
+  Repo --> Discovery
+  Discovery --> Audit
+  Audit --> Report
+  Report --> Resolve
+  Report --> Digest[System Digest]
+```
+
 ## Layout
 
 ```
@@ -70,6 +112,7 @@ determinagents/
 │   ├── TEST_GAPS.md
 │   ├── DOCS_DRIFT.md
 │   ├── UX_DESIGN_AUDIT.md
+│   ├── RESOURCE_CAPACITY.md
 │   ├── RESOLVE_FROM_REPORT.md  # mutating: works through report findings
 │   ├── SECURITY_HUNT.md        # mutating: agentic vulnerability hunting
 │   ├── DATA_FLOW_VERIFY.md     # mutating: observed-vs-theorized data flow
@@ -78,6 +121,8 @@ determinagents/
     ├── FORMAT.md                  # how to author a new audit; harness conventions
     ├── BOOTSTRAP.md               # how to generate AUDIT_CONTEXT.md (cold + warm)
     ├── FEATURE_REGISTRY.md        # spec for the per-project feature registry
+    ├── AUTOMATED_REPORTING.md     # project-facing system digest orchestrator
+    ├── SIGNAL_SCHEMA.md           # JSON schema for auto-report signal output
     ├── AUDIT_CONTEXT_TEMPLATE.md  # minimal starting overlay (Global only)
     ├── AUDIT_CONTEXT_SECTIONS.md  # catalog of audit-specific sections (copy as needed)
     └── MAINTENANCE.md             # maintainer-only: keep the library current (refresh / integrate / brainstorm)
@@ -94,6 +139,7 @@ determinagents/
 | [audits/TEST_GAPS.md](audits/TEST_GAPS.md) | Scenarios the test suite would miss — error paths, edge cases, integration boundaries |
 | [audits/DOCS_DRIFT.md](audits/DOCS_DRIFT.md) | Claims in README and docs that the code no longer matches |
 | [audits/UX_DESIGN_AUDIT.md](audits/UX_DESIGN_AUDIT.md) | CSS that violates DESIGN.md tokens — colors, spacing, radii, motion, typography |
+| [audits/RESOURCE_CAPACITY.md](audits/RESOURCE_CAPACITY.md) | Runtime-agnostic capacity and resource-pressure risks across k8s, docker/compose, bare metal, or unraid-style deployments |
 
 Most audits run in 30–180 minutes at default scope, scaling with codebase size. Each audit doc supports `--phases=N,M` and `--max-time=Xm` to scope tighter.
 
@@ -120,6 +166,7 @@ These describe an artifact each project generates its own instance of.
 |------|------------------|---------|
 | [specs/FEATURE_REGISTRY.md](specs/FEATURE_REGISTRY.md) | `docs/determinagents/FEATURE_REGISTRY.md` | Living catalog of every testable feature with URL, auth, steps, pass criteria, tags |
 | [specs/AUDIT_CONTEXT_TEMPLATE.md](specs/AUDIT_CONTEXT_TEMPLATE.md) | `docs/determinagents/AUDIT_CONTEXT.md` | Minimal starting overlay (Global only). Audit-specific sections come from [AUDIT_CONTEXT_SECTIONS.md](specs/AUDIT_CONTEXT_SECTIONS.md) — copied in only when filled. |
+| [specs/AUTOMATED_REPORTING.md](specs/AUTOMATED_REPORTING.md) | `docs/reports/SYSTEM_DIGEST_<YYYY-MM-DD>.md` plus optional `docs/reports/signals/SYSTEM_DIGEST_<YYYY-MM-DD>.json` | Read-only synthesis harness that turns existing audit reports and explicit runtime snapshots into decision-ready system digests. JSON follows [SIGNAL_SCHEMA.md](specs/SIGNAL_SCHEMA.md). |
 
 Supporting docs: [specs/FORMAT.md](specs/FORMAT.md) (audit authoring spec), [specs/BOOTSTRAP.md](specs/BOOTSTRAP.md) (overlay generator workflow).
 
@@ -155,4 +202,3 @@ And to Andrej Karpathy, whose [observation](https://x.com/karpathy/status/201588
 ---
 
 Orchestrated by [Ian Sherr](https://iansherr.com) at [Time Worthy Media](https://timeworthymedia.com).
-
