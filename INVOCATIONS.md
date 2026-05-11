@@ -15,6 +15,44 @@ This file is the canonical source. Individual audit/spec docs may show one examp
 5. **Read-only by default.** Mutating docs (RESOLVE_FROM_REPORT, SECURITY_HUNT, DATA_FLOW_VERIFY, TESTING_CREATOR) require a disposable workspace and per-action approval. Two read-only audits (STUB_AND_COMPLETENESS, ERROR_HANDLING) have an opt-in mutating Phase 6 enabled with `+harness`.
 6. **Each finding** includes file:line and a concrete suggested fix
 7. **Discovery first.** Phase 0 of every audit identifies project shape
+8. **Execution surface boundary.** Shell `determinagents` is installer/maintenance only (`update`, `materialize`, `doctor`, etc.) and does not execute audits.
+9. **Wrong-surface recovery.** If shell `determinagents` was invoked while trying to run an audit, stop that path and continue in-band with `/determinagents <behavior> [flags]`.
+
+### Routing vocabulary (`/determinagents <behavior> [flags]`)
+
+Use these behavior tokens for direct routing on the same command:
+
+| Token | Expands to |
+|-------|------------|
+| `stub` | `STUB_AND_COMPLETENESS` |
+| `security` | `SECURITY_PENTEST` |
+| `data-flow` | `DATA_FLOW_TRACE` |
+| `error-handling` | `ERROR_HANDLING` |
+| `test-gaps` | `TEST_GAPS` |
+| `docs-drift` | `DOCS_DRIFT` |
+| `ux` | `UX_DESIGN_AUDIT` |
+| `resource-capacity` | `RESOURCE_CAPACITY` |
+| `p0` | Cross-audit P0 sweep |
+| `resolve` | `RESOLVE_FROM_REPORT` |
+| `security-hunt` | `SECURITY_HUNT` |
+| `flow-verify` | `DATA_FLOW_VERIFY` |
+| `testing` | `TESTING_CREATOR` |
+| `init` | Initialize Project bootstrap |
+| `design` | `DESIGN.md` bootstrap |
+| `registry` | `FEATURE_REGISTRY.md` bootstrap |
+| `context` | `AUDIT_CONTEXT.md` bootstrap |
+| `refresh-context` | Refresh AUDIT_CONTEXT |
+| `auto-report` | `AUTOMATED_REPORTING` orchestrator |
+
+Example direct runs:
+
+```
+/determinagents ux --target=http://localhost:3000
+/determinagents security --p0-only
+/determinagents resource-capacity
+/determinagents p0 --p0-only
+/determinagents auto-report --mode=baseline
+```
 
 Short preface that establishes these conventions for an agent that hasn't seen them:
 
@@ -54,6 +92,7 @@ Substitute `<AUDIT>` with one of:
 | `TEST_GAPS` | Scenarios the test suite would miss |
 | `DOCS_DRIFT` | Claims in README/docs that the code no longer matches |
 | `UX_DESIGN_AUDIT` | CSS that violates DESIGN.md tokens. For live phases (5–8) requires `--target=<dev-url>`. |
+| `RESOURCE_CAPACITY` | Runtime-agnostic capacity and resource-pressure risks across k8s, docker/compose, bare metal, or unraid-style deployments. |
 
 ### Cross-audit P0 sweep
 
@@ -250,6 +289,29 @@ the report's job). Show diff; do not commit until I approve each entry.
 
 ## Maintenance
 
+### Automated reporting (project-facing)
+
+Use this to generate recurring, decision-ready digests from existing
+DeterminAgents audit outputs and runtime snapshots.
+
+```
+Read $DETERMINAGENTS_HOME/specs/AUTOMATED_REPORTING.md and run it in
+--mode=<baseline|trend|incident|change-review|portfolio>.
+
+Optional:
+  --window=<7d|30d|custom>
+  --since=<timestamp-or-release-tag>
+  --services=<csv>
+  --max-findings=<N>
+
+Write report to docs/reports/SYSTEM_DIGEST_<YYYY-MM-DD>.md and, if possible,
+docs/reports/signals/SYSTEM_DIGEST_<YYYY-MM-DD>.json.
+JSON output must follow $DETERMINAGENTS_HOME/specs/SIGNAL_SCHEMA.md.
+
+Do not auto-mutate code or infrastructure. Recommend exact follow-up
+determinagent invocation(s) when action is required.
+```
+
 ### Refresh AUDIT_CONTEXT
 
 ```
@@ -274,6 +336,11 @@ Read $DETERMINAGENTS_HOME/specs/MAINTENANCE.md and run it in
 
 Reports go to docs/maintenance/<MODE>_<YYYY-MM-DD>[_<slug>].md (gitignored).
 Do not modify any library files; propose edits only.
+
+If you maintain an automated, read-only signal digest (for example
+capacity/reliability/cost/drift snapshots), feed it through
+`--mode=integrate --source=<digest-path>` rather than auto-editing library
+content.
 ```
 
 This is **not** a user audit. End users running DeterminAgents on their projects don't invoke this — it's for the library steward.
