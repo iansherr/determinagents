@@ -138,9 +138,23 @@ The user invokes with flags: `/testing-creator --tier=2 --service=billing`, `/re
 | `effort` | Thinking budget for reasoning-tier models: `low / medium / high / xhigh / max` |
 | `context: fork` | Run the command in a subagent rather than inline (useful for heavy audits) |
 
-**opencode compatibility:** Commands installed at `~/.claude/commands/` (and `~/.claude/skills/`) are also picked up by [opencode](https://opencode.ai), which uses the same convention as a fallback. A single install serves both tools.
+**opencode compatibility:** A single install at `~/.claude/commands/` (or `~/.claude/skills/`) serves both Claude Code and opencode — see [§ opencode](#opencode) below.
 
 **Docs:** [code.claude.com/docs/en/slash-commands](https://code.claude.com/docs/en/slash-commands)
+
+### opencode
+
+[opencode](https://opencode.ai) uses the same markdown-with-YAML-frontmatter convention as Claude Code's slash commands, and explicitly reads `~/.claude/skills/` as a fallback. This means **a single install serves both tools** — you do not need a separate materialization pass for opencode.
+
+**Native path:** `.opencode/commands/` (project-local) or `~/.opencode/commands/` (global). Markdown files; the filename minus `.md` becomes the command name.
+
+**Shared path (recommended):** Install at `~/.claude/commands/` or `~/.claude/skills/`. opencode picks these up automatically. Users of both tools get one source of truth.
+
+**Frontmatter:** Same fields as Claude Code slash commands (`description`, `model`, `argument-hint`, `allowed-tools`). Model names map to Claude (Anthropic) model IDs since opencode defaults to Claude as its model provider.
+
+**When to use the native path instead:** Only if you want opencode-only commands that Claude Code should never see, or if the user isn't running Claude Code at all.
+
+**Docs:** [opencode.ai/docs/rules](https://opencode.ai/docs/rules/)
 
 ### Honoring `Model tier` hints
 
@@ -149,6 +163,7 @@ Each audit doc in `$DETERMINAGENTS_HOME/audits/` declares a model tier (`reasoni
 | Host tool | Mechanism |
 |-----------|-----------|
 | Claude Code | Add `model: <name>` to the slash command's frontmatter, mapping the tier to a concrete model. The user can override at any time. |
+| opencode | Same as Claude Code — `model: <name>` in frontmatter. opencode defaults to Claude, so tier → Claude model name. |
 | Cursor | Body recommendation; agent surfaces when invoked |
 | Gemini CLI / others | Body recommendation |
 
@@ -303,10 +318,10 @@ Day-to-day audit improvements (Phase changes, new commands, severity rubric upda
 When asked to install, the agent should:
 
 1. **Detect host tool** by inspecting environment:
-   - `.claude/` exists or working in Claude Code? → Claude Code (also serves opencode)
+   - `.claude/` exists or working in Claude Code? → Claude Code. If `.opencode/` also exists, note that the install will serve both tools automatically.
+   - `.opencode/` exists but no `.claude/`? → opencode. Install to `~/.claude/commands/` (shared convention) unless user prefers `~/.opencode/commands/`.
    - `~/.gemini/` exists? → Gemini CLI
    - `.cursor/` exists? → Cursor
-   - `.opencode/` exists but no `.claude/`? → opencode (use Claude Code convention — shared compatibility)
    - Otherwise: ask the user.
 
 2. **Detect scope**: project-local (`.claude/commands/`) vs. global (`~/.claude/commands/`). Default to global for this library since it's not project-specific. Confirm with user.
