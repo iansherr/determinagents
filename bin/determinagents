@@ -96,8 +96,9 @@ library for this host tool.
 
 Identify the host tool from context, pick the appropriate target convention,
 and generate the install files. Start by creating the primary
-\`/determinagents\` hub command that lists all available audits. Then, ask
-if I want the full suite of individual slash commands or just the hub.
+\`/determinagents\` command and use it as both hub and router:
+\`/determinagents\` for menu mode and \`/determinagents <behavior> [flags]\`
+for direct selection.
 
 If DeterminAgents commands already exist in the host tool, treat this as a
 re-materialize: regenerate unchanged files silently, prompt me before
@@ -111,6 +112,10 @@ The agent does the actual file generation. This shim cannot directly write
 host-tool files because they require host-tool context (frontmatter
 conventions, command vs. skill choice) that an agent decides better than a
 shell script.
+
+Important boundary: this CLI does not execute audits. Use your host-tool
+slash command flow (\`/determinagents\` or \`/determinagents <behavior>\`)
+to run audits.
 MSG
     ;;
 
@@ -341,6 +346,11 @@ USAGE
     cat <<HELP
 determinagents — universal, self-discovering audit prompts for coding agents
 
+boundary:
+  this CLI does not execute audits.
+  use host-tool slash commands: /determinagents or
+  /determinagents <behavior> [flags].
+
 usage: determinagents <command>
 
   version              show installed version (SHA, branch, date)
@@ -367,6 +377,7 @@ HELP
 
   *)
     echo "unknown command: $cmd" >&2
+    echo "note: audits run via /determinagents in your host tool, not this CLI" >&2
     echo "run 'determinagents help' for usage" >&2
     exit 1
     ;;

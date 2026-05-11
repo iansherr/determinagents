@@ -227,3 +227,48 @@ _Example:_ 5xx responses on any internal API; 503 on Stripe; 30s delay on Redis.
 
 - Preferred simulation stack (e.g., Python + Docker Compose)
 - Known non-idempotent setup steps to skip or fix
+
+---
+
+## RESOURCE_CAPACITY
+
+### Runtime profile
+> Which deployment surfaces this project actively uses.
+
+_Example:_ `k8s (prod), docker-compose (local), bare-metal workers for batch`
+
+### Critical services and SLOs
+> Services where capacity regression is highest risk.
+
+- `api-gateway` — p95 < 300ms, error rate < 0.5%
+- `billing-worker` — queue lag < 2m
+
+### Primary dependencies
+> DB/queue/cache/LB systems whose saturation drives incidents.
+
+- PostgreSQL primary
+- Redis cache
+- Kafka broker
+- Ingress/LB tier
+
+### Capacity constraints
+> Hard limits and guardrails that shape scaling decisions.
+
+- Budget caps
+- Max node class / host size
+- HA minimum replica requirements
+
+### Telemetry sources
+> Where to look for capacity signals first.
+
+- Prometheus: `<URL or query notes>`
+- Grafana dashboards: `<names>`
+- Alert rules path: `<repo path>`
+- Runbooks: `<repo path>`
+
+### Known bottlenecks / seasonal load patterns
+> Pre-known pressure windows or hotspots.
+
+- End-of-month billing spikes
+- Parity check windows (Unraid)
+- Nightly ETL batch contention

@@ -14,8 +14,9 @@ determinagents library for this host tool.
 
 Identify the host tool from context, pick the appropriate target convention,
 and generate the install files. Start by creating the primary
-`/determinagents` hub command that lists all available audits. Then, ask
-if I want the full suite of individual slash commands or just the hub.
+`/determinagents` command and use it as both hub and router:
+`/determinagents` for menu mode and `/determinagents <behavior> [flags]`
+for direct selection.
 
 Show the plan before writing files.
 ```
@@ -28,6 +29,8 @@ The agent does the rest: detects the host tool, reads `INVOCATIONS.md`, and gene
 
 The **best practice** for discoverability and keeping your slash command list clean. This single command provides a structured menu of all behaviors in the library.
 
+Recommended pairing: keep one canonical command surface. Use `/determinagents` alone for both discovery and direct routing.
+
 **Template for Gemini CLI (`~/.gemini/commands/determinagents.toml`):**
 
 ```toml
@@ -36,6 +39,14 @@ prompt = \"\"\"
 You are the **DeterminAgents Library Hub**.
 
 IMMEDIATE ACTION: Display the menu below to the user verbatim. Do NOT perform any shell commands, file searches, or research until the user has selected an item from the menu.
+
+Execution surface rule: do not use shell `determinagents` commands to run audits.
+The shell CLI is install/update/materialize/doctor only. Audit execution
+must stay in this slash-command flow.
+
+If wrong-surface detected (example: `determinagents --help` used during an
+audit run), recover immediately with one line and continue in-band:
+"That CLI is installer-only. Continue here with `/determinagents <behavior> [flags]` or a menu choice."
 
 ONE EXCEPTION — adapt the "First Run" section based on which core
 project artifacts already exist. Check for these three files in the
@@ -59,6 +70,10 @@ listings should be shown to the user. Then display the menu.
 **DeterminAgents Library** (Path: <ABSOLUTE_PATH_TO_LIBRARY>)
 Read docs/determinagents/AUDIT_CONTEXT.md if present. Reports go to docs/reports/.
 
+Tip: for direct routing, use `/determinagents <behavior> [flags]`.
+Example: `/determinagents ux --target=<dev-url>`.
+Example: `/determinagents p0 --p0-only`.
+
 ### 🚀 First Run (Recommended)
 - **Initialize Project**: Survey codebase and bootstrap missing core artifacts (DESIGN, FEATURE_REGISTRY, AUDIT_CONTEXT) to calibrate future audits.
 
@@ -75,9 +90,16 @@ When invoked, the hub should:
 2. Briefly describe what each does.
 3. Provide the full prompt for the user's chosen behavior (or just start it if the tool supports interactive selection).
 
-### Individual Commands (Optional)
+### Direct Routing on the Same Command
 
-For power users who want one-keystroke access to specific audits, the full suite remains available.
+Use `/determinagents` as a single command family:
+
+| Mode | Behavior |
+|------|----------|
+| `/determinagents` | Opens interactive hub/menu |
+| `/determinagents <behavior> [flags]` | Runs behavior directly |
+
+Behavior tokens: `stub`, `security`, `data-flow`, `error-handling`, `test-gaps`, `docs-drift`, `ux`, `p0`, plus mutating tools (`resolve`, `security-hunt`, `flow-verify`, `testing`) and bootstraps (`init`, `design`, `registry`, `context`, `refresh-context`).
 
 | Source (in `INVOCATIONS.md`) | Generated artifact |
 |------------------------------|-------------------|

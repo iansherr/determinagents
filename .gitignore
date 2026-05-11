@@ -13,3 +13,6 @@ __pycache__/
 # Maintainer-only: reports from `specs/MAINTENANCE.md` runs (refresh /
 # integrate / brainstorm). Working notes, not library content.
 docs/maintenance/
+.sisyphus/
+PROGRESS.md
+TODO.md
