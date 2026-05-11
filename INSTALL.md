@@ -97,9 +97,13 @@ The shared conventions block at the top of `INVOCATIONS.md` should become a **he
 
 ### Claude Code
 
-Two conventions, both supported:
+Two conventions, both supported. Skills are the current recommended path; slash commands are the legacy path and remain fully functional.
 
-**Slash commands** (simpler, recommended default): Markdown files in `.claude/commands/` (project-local) or `~/.claude/commands/` (global). The filename becomes the command name.
+**Skills** (recommended): `~/.claude/skills/<skill-name>/SKILL.md` (global) or `.claude/skills/<skill-name>/SKILL.md` (project-local). Each skill is a directory with a `SKILL.md` entry point. Follows the [AgentSkills.io](https://agentskills.io) open standard.
+
+**Slash commands** (legacy, still fully supported): Markdown files in `~/.claude/commands/` (global) or `.claude/commands/` (project-local). The filename minus `.md` becomes the command name.
+
+For most DeterminAgents invocations, **slash commands are still sufficient** — each invocation is a thin pointer to one audit doc. Promote to a skill only if you need to bundle supporting files alongside the command.
 
 ```
 ~/.claude/commands/
@@ -123,14 +127,28 @@ Two conventions, both supported:
 
 The user invokes with flags: `/testing-creator --tier=2 --service=billing`, `/resolve-from-report --scope=P0`, `/audit-stub +harness`, etc. One slash command per behavior, flags handle variation.
 
+**Frontmatter fields (Claude Code slash commands):**
+
+| Field | Notes |
+|-------|-------|
+| `description` | Required — shown in `/` menu |
+| `model` | Concrete model name; user can override at any time |
+| `argument-hint` | Short hint shown in autocomplete |
+| `allowed-tools` | Pre-approve tools to reduce permission prompts per invocation |
+| `effort` | Thinking budget for reasoning-tier models: `low / medium / high / xhigh / max` |
+| `context: fork` | Run the command in a subagent rather than inline (useful for heavy audits) |
+
+**opencode compatibility:** Commands installed at `~/.claude/commands/` (and `~/.claude/skills/`) are also picked up by [opencode](https://opencode.ai), which uses the same convention as a fallback. A single install serves both tools.
+
+**Docs:** [code.claude.com/docs/en/slash-commands](https://code.claude.com/docs/en/slash-commands)
+
 ### Honoring `Model tier` hints
 
 Each audit doc in `$DETERMINAGENTS_HOME/audits/` declares a model tier (`reasoning` / `default` / `fast`) near the top — see `specs/FORMAT.md` "Model tier hints." Materialization should encode this into the slash command in the cleanest way the host tool supports:
 
 | Host tool | Mechanism |
 |-----------|-----------|
-| Claude Code (recent versions) | Add `model: <name>` to the slash command's frontmatter, mapping the tier to a concrete model. The user can override at any time. |
-| Older Claude Code / no frontmatter `model:` field | Add a body line: *"This audit prefers `reasoning`-tier models — use `/model opus` if you're not already on it."* The agent surfaces it. |
+| Claude Code | Add `model: <name>` to the slash command's frontmatter, mapping the tier to a concrete model. The user can override at any time. |
 | Cursor | Body recommendation; agent surfaces when invoked |
 | Gemini CLI / others | Body recommendation |
 
@@ -142,32 +160,63 @@ Concrete tier-to-model mapping is the materializing agent's job, using whatever 
 
 Specific model names are intentionally not listed here — vendor lineups change every few months, and any list this file maintained would rot. The materializing agent should look up current names at materialization time. Re-run materialization periodically to refresh bindings as new models ship.
 
-**Skills** (richer, for behaviors with multi-file context): `~/.claude/skills/<skill-name>/SKILL.md` plus supporting files. Use this when an invocation needs to reference more than one file from the library at runtime.
-
-For most invocations, slash commands are sufficient. Promote to a skill only when needed.
+**Vendor notes (as of 2026-05):**
+- *Anthropic (Claude)*: Reasoning-tier models support a thinking-budget dial via the `effort` frontmatter field (`low` → `max`). This is not a separate tier — it's a per-invocation cost/quality knob available on Opus and some Sonnet variants.
+- *Google (Gemini)*: A Flash-Lite sub-tier (cheaper/faster than Flash) exists below the standard three tiers. Pro/Ultra models support a "Deep Think" mode (separately billed reasoning tokens), analogous to Claude's extended thinking.
+- *OpenAI (GPT)*: The separate o-series "reasoning model" family has been consolidated into the GPT-5 line, where internal reasoning is always on. The fast/default split is now GPT-5.x mini vs. GPT-5.x — no distinct reasoning-tier model family.
 
 **Naming convention**: `audit-*` for read-only audits, `resolve-*` and `*-hunt` and `*-verify` for mutating, `bootstrap-*` for cold-start generators, `refresh-*` for maintenance.
 
 ### Gemini CLI
 
-Gemini CLI uses `~/.gemini/commands/` for global commands. Unlike other tools, it requires commands to be in **TOML format** with a **`.toml`** extension.
+Gemini CLI uses `~/.gemini/commands/` for global commands and `.gemini/commands/` for project-local. Commands must be in **TOML format** with a **`.toml`** extension.
+
+**Subdirectory namespacing** is supported: a file at `.gemini/commands/group/name.toml` is invoked as `/group:name`. Use this to namespace DeterminAgents commands if desired (e.g., `.gemini/commands/da/audit-stub.toml` → `/da:audit-stub`).
+
+**Prompt body interpolation** (within the `prompt` value):
+- `{{args}}` — injects arguments the user passes at invocation time
+- `!{command}` — executes a shell command and injects its output (user confirmation required)
+- `@{path}` — injects file or directory content (multimodal support)
 
 **File template (`~/.gemini/commands/audit-stub.toml`):**
 
 ```toml
 description = "Run STUB_AND_COMPLETENESS audit"
-prompt = \"\"\"
-Library at \$DETERMINAGENTS_HOME. Read docs/determinagents/AUDIT_CONTEXT.md if present.
+prompt = """
+Library at $DETERMINAGENTS_HOME. Read docs/determinagents/AUDIT_CONTEXT.md if present.
 
-Read \$DETERMINAGENTS_HOME/audits/STUB_AND_COMPLETENESS.md and run it...
-\"\"\"
+Read $DETERMINAGENTS_HOME/audits/STUB_AND_COMPLETENESS.md and run it
+against this repo. Additional flags: {{args}}
+
+Report to docs/reports/STUB_AUDIT_<YYYY-MM-DD>.md.
+"""
 ```
+
+**Docs:** [github.com/google-gemini/gemini-cli/blob/main/docs/cli/custom-commands.md](https://github.com/google-gemini/gemini-cli/blob/main/docs/cli/custom-commands.md)
 
 ### Cursor
 
-Cursor uses **Rules** (`.cursor/rules/*.mdc` for project-local, settings for global). Each invocation can become a Rule with a trigger condition or a Command that's invoked manually.
+Cursor uses **Rules** (`.cursor/rules/*.mdc` for project-local). Each `.mdc` file is a rule with YAML frontmatter.
 
-For invocations that should run on demand (which is most of them), prefer the **Commands** path if available, otherwise create Rules with manual triggers.
+**Note:** The legacy `.cursorrules` single-file format is deprecated and ignored in Agent mode. Do not generate it.
+
+**Frontmatter fields:**
+
+| Field | Notes |
+|-------|-------|
+| `description` | Shown to the agent when deciding whether to apply the rule |
+| `globs` | File patterns for auto-attach (e.g., `src/**/*.ts`) |
+| `alwaysApply` | If `true`, always load — use sparingly |
+
+**Activation mode** is set by which fields are present:
+- `alwaysApply: true` → loaded into every context
+- `globs:` set → auto-attached when matching files are open
+- Only `description:` → agent-requested (AI decides when to apply)
+- No trigger fields → manual (user invokes via `@rule-name`)
+
+For DeterminAgents invocations (run on demand), use **agent-requested** mode: set `description:` only and let the agent surface the rule when relevant.
+
+**Docs:** [cursor.com/docs/rules](https://cursor.com/docs/rules)
 
 ### Other tools (Cline, Aider, Continue, etc.)
 
@@ -254,9 +303,10 @@ Day-to-day audit improvements (Phase changes, new commands, severity rubric upda
 When asked to install, the agent should:
 
 1. **Detect host tool** by inspecting environment:
-   - `.claude/` exists or working in Claude Code? → Claude Code
+   - `.claude/` exists or working in Claude Code? → Claude Code (also serves opencode)
    - `~/.gemini/` exists? → Gemini CLI
    - `.cursor/` exists? → Cursor
+   - `.opencode/` exists but no `.claude/`? → opencode (use Claude Code convention — shared compatibility)
    - Otherwise: ask the user.
 
 2. **Detect scope**: project-local (`.claude/commands/`) vs. global (`~/.claude/commands/`). Default to global for this library since it's not project-specific. Confirm with user.
@@ -294,7 +344,7 @@ Remove every DeterminAgents slash command from this host tool.
 These are files generated by an earlier `materialize` step and live in
 the host tool's prompt-as-file directory:
 
-  - Claude Code: ~/.claude/commands/  (or .claude/commands/ if installed per-project)
+  - Claude Code: ~/.claude/commands/ or ~/.claude/skills/  (or .claude/ equivalents if installed per-project)
   - Gemini CLI:  ~/.gemini/commands/
   - Cursor:      .cursor/rules/  (project-local)
   - Other tools: see ${DETERMINAGENTS_HOME:-$HOME/.determinagents}/INSTALL.md
