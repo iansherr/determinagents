@@ -205,6 +205,57 @@ Report to docs/maintenance/<MODE>_<YYYY-MM-DD>[_<slug>].md.
 Do not commit the report (the directory is gitignored).
 ```
 
+## Optional automation: maintenance signal report (maintainer-only)
+
+Use this only if you want a recurring, low-noise input into `--mode=integrate` or `--mode=brainstorm`. This does **not** replace normal maintenance runs and does **not** mutate library files.
+
+### Purpose
+
+Generate a periodic, read-only snapshot of operational and ecosystem signals that may justify library updates.
+
+### Output
+
+`docs/maintenance/AUTO_SIGNAL_<YYYY-MM-DD>.md` (gitignored, same privacy model as other maintenance reports).
+
+### Allowed data sources (read-only)
+
+- Existing audit outputs under a target project's `docs/reports/` (especially capacity and reliability-oriented reports)
+- Command outputs from read-only checks/runbooks (for example: resource pressure, restart counts, HTTP error rates, latency summaries)
+- Tool/vendor release notes and changelogs relevant to DeterminAgents conventions
+
+### Recommended signal groups
+
+- **Capacity pressure**: sustained CPU/memory pressure, storage headroom decline, pod/container restarts
+- **Reliability pressure**: elevated 5xx rates, timeout/connect-failure bursts, p95/p99 latency regressions
+- **Dependency pressure**: DB/cache/queue saturation or timeout trends
+- **Convention drift pressure**: host tool format/frontmatter/dispatch changes
+
+### Safeguards (non-negotiable)
+
+1. **Read-only collection only**. No mutating checks, no load generation.
+2. **No auto-commit / no auto-PR by default**. The report proposes; maintainer decides.
+3. **Redact secrets and sensitive identifiers** before writing the report.
+4. **Bounded retention** for generated artifacts (keep recent windows, prune old runs).
+5. **Escalation thresholds, not raw dumps**: summarize only when thresholds are crossed.
+6. **Human approval gate** before any library edit derived from automation.
+
+### Trigger thresholds (starter defaults)
+
+Tune to your environment, but start with concrete triggers to avoid report spam:
+
+- Error-rate trigger: sustained 5xx above 1% for 15m+
+- Latency trigger: p95 increase above 30% vs. recent baseline window
+- Resource trigger: sustained CPU or memory above 70% during normal workload windows
+- Stability trigger: repeated restart loops or recurrent timeout/connect-failure patterns
+- Drift trigger: any documented host-tool convention mismatch vs. `INSTALL.md`/`INVOCATIONS.md`
+
+### How to use in this spec
+
+1. Generate `AUTO_SIGNAL` report on a fixed cadence (for example weekly).
+2. If no thresholds are crossed and no drift appears, record a short "no-action" summary.
+3. If triggers fire, run `--mode=integrate --source=<AUTO_SIGNAL report path>` and decide what to adopt.
+4. Proposed edits still follow this doc's normal rules (explicit diffs, honest non-recommendations, no direct mutation).
+
 ## Conventions
 
 - **No mutating actions on the library itself.** This audit only *proposes* edits to `INSTALL.md`, `INVOCATIONS.md`, audit docs, README, etc. The maintainer reviews and applies them by hand (or via RESOLVE_FROM_REPORT pointed at the maintenance report).
