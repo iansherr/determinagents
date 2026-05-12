@@ -13,17 +13,17 @@ DETERMINAGENTS_BAKED_HOME=""
 
 # Resolve DETERMINAGENTS_HOME:
 # 1. Environment variable (manual override)
-# 2. Relative to script (if run from a clone — priority for developers)
-# 3. Baked path (set during last install)
+# 2. Baked path (set during last install — ensures we remember the user's choice)
+# 3. Relative to script (if run from a clone — priority for developers)
 # 4. Default path
 if [ -n "${DETERMINAGENTS_HOME:-}" ]; then
   RESOLVED_VIA="env"
-elif [ -f "$(dirname "$0")/../INVOCATIONS.md" ] && ([ -d "$(dirname "$0")/../.git" ] || [ -d "$(dirname "$0")/../.sisyphus" ]); then
-  DETERMINAGENTS_HOME=$(cd "$(dirname "$0")/.." && pwd)
-  RESOLVED_VIA="relative"
 elif [ -n "$DETERMINAGENTS_BAKED_HOME" ]; then
   DETERMINAGENTS_HOME="$DETERMINAGENTS_BAKED_HOME"
   RESOLVED_VIA="baked"
+elif [ -f "$(dirname "$0")/../INVOCATIONS.md" ] && ([ -d "$(dirname "$0")/../.git" ] || [ -d "$(dirname "$0")/../.sisyphus" ]); then
+  DETERMINAGENTS_HOME=$(cd "$(dirname "$0")/.." && pwd)
+  RESOLVED_VIA="relative"
 else
   DETERMINAGENTS_HOME="$HOME/.determinagents"
   RESOLVED_VIA="default"
@@ -108,20 +108,20 @@ library for this host tool.
 
 Identify the host tool from context, pick the appropriate target convention,
 and generate the install files. Start by creating the primary
-`/determinagents` command and use it as both hub and router.
+\`/determinagents\` command and use it as both hub and router.
 
 **Discovery & Autocomplete Strategy:**
-- **Claude Code**: Use `argument-hint` in the single `/determinagents`
+- **Claude Code**: Use \`argument-hint\` in the single \`/determinagents\`
   command for discovery.
-- **Gemini CLI**: Use **subdirectory namespacing** (`/determinagents:<name>`)
+- **Gemini CLI**: Use **subdirectory namespacing** (\`/determinagents:<name>\`)
   because its custom commands don't yet support argument autocomplete.
 - **Cursor**: Use agent-requested MDC rules.
 
 If DeterminAgents commands already exist in the host tool, treat this as a
 re-materialize. Compare the existing files against the new library path and
-the latest `INVOCATIONS.md`.
+the latest \`INVOCATIONS.md\`.
 
-- If a file lacks the `generated-by` marker or points to a different
+- If a file lacks the \`generated-by\` marker or points to a different
   library path: treat it as a 'legacy' or 'hand-edited' file and PROMPT
   ME before overwriting.
 - If a file has the marker and correct path but the content differs from

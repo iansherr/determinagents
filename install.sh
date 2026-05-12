@@ -62,7 +62,11 @@ if [ "$IN_REPO" = true ] && [ -z "${DETERMINAGENTS_HOME:-}" ] && [ "$INSTALL_DIR
     3)
       FORCE_UPDATE=true
       ;;
+    1|"")
+      INSTALL_DIR=$(pwd)
+      ;;
     *)
+      echo "invalid choice; defaulting to in-place [1]"
       INSTALL_DIR=$(pwd)
       ;;
   esac
@@ -106,7 +110,8 @@ if [ "$IN_REPO" = true ] && [ -f "bin/determinagents" ]; then
   SHIM_SOURCE="bin/determinagents"
 fi
 
-sed "s|DETERMINAGENTS_BAKED_HOME=\"\"|DETERMINAGENTS_BAKED_HOME=\"$INSTALL_DIR\"|" \
+# Use a more robust sed that replaces any existing baked value
+sed "s|DETERMINAGENTS_BAKED_HOME=.*|DETERMINAGENTS_BAKED_HOME=\"$INSTALL_DIR\"|" \
   "$SHIM_SOURCE" > "$BIN_DIR/determinagents"
 chmod +x "$BIN_DIR/determinagents"
 

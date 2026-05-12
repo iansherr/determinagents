@@ -4,6 +4,25 @@ All notable changes to determinagents are documented here. The format is loosely
 
 `determinagents update` shows the relevant entries when updating.
 
+## [0.5.7] — 2026-05-12
+
+> **Action required after `determinagents update`**: re-run `determinagents materialize`. This release fixes a critical path-resolution issue where the shim would "forget" its installation path if run from inside the repository. It also overhauled Gemini CLI materialization to use namespacing for better discovery and autocomplete.
+
+### Changed (shim — path resolution & memory)
+- `bin/determinagents` resolution hierarchy updated to prioritize the **baked path** (`DETERMINAGENTS_BAKED_HOME`) over relative-to-script detection. This ensures that even if you are working inside the repository, the shim honors your last installation choice (e.g., `~/.determinagents`).
+- `install.sh` now uses a more robust "sticky" `sed` pattern that correctly replaces any previous baked path, ensuring new installations always take precedence.
+- `install.sh` local detection prompt hardened: invalid choices no longer silently re-bake the shim to the repository path.
+- `materialize` prompt quoted to prevent shell syntax errors from backticked examples.
+
+### Changed (Gemini CLI — autocomplete)
+- `INSTALL.md` and `materialize` prompt now explicitly require **subdirectory namespacing** for Gemini CLI. TOML files are now generated in `~/.gemini/commands/determinagents/` and invoked as `/determinagents:<behavior>`.
+- This enables Gemini's native command-name autocomplete (e.g., typing `/det:` will list all behaviors), which was previously missing in the single-command hub model.
+
+### Improved (diagnostics)
+- `determinagents doctor` now specifically warns when an environment variable (`$DETERMINAGENTS_HOME`) is overriding a different baked path.
+- `determinagents version` surfaces the resolution source (`baked`, `relative`, `env`, or `default`) for better transparency.
+- `install.sh` warns during installation if a contradictory `$DETERMINAGENTS_HOME` is already set.
+
 ## [0.5.6] — 2026-05-12
 
 Calibration pass on v0.5.5: tier correction, structural-correctness fix in PICK_NEXT, README trim. No new behaviors; no re-materialize required.
