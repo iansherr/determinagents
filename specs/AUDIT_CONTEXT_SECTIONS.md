@@ -272,3 +272,57 @@ _Example:_ `k8s (prod), docker-compose (local), bare-metal workers for batch`
 - End-of-month billing spikes
 - Parity check windows (Unraid)
 - Nightly ETL batch contention
+
+---
+
+## STRUCTURAL_ENTROPY
+
+### Exempt paths
+> Files or directories above the LOC threshold but legitimately large. Skip them — don't re-flag every run.
+
+- `src/generated/**` — codegen output
+- `src/routes/*.tsx` — Next.js route handlers, framework-shaped
+- `lib/migrations/**` — sequential migration files
+
+### Per-area thresholds
+> Override the project-wide p95 LOC threshold for specific surfaces. Use sparingly; the project-relative default is usually right.
+
+- `src/components/**` — flag at p90 (UI churn velocity is higher here)
+- `lib/parser/` — flag only above 2000 LOC (parser tables are legitimately long)
+
+### What counts as "one responsibility" here
+> Project-specific calibration of the Phase 1 category list. Add categories the universal list misses; collapse categories that are conventionally co-located in this codebase.
+
+- "Auth context + permission gating" counts as one responsibility (always co-located in this project)
+- Add category: "Telemetry emission" — instrumentation is intentionally not centralized
+
+### Known god-files being actively refactored
+> Files currently mid-decomposition across multiple sessions. Don't re-flag as new findings; track progress via the seams already proposed.
+
+- `src/components/agent-workspace.tsx` — 3 of 5 seams complete as of 2026-05-12
+
+### Recent incidents linked to god-files
+> Past production issues traceable to structural entropy. Use these to escalate severity (a god-file with an incident history is P0, not P1).
+
+- 2026-03 outage — root cause in `chat-pane.tsx` SSE handler tangled with render state
+
+---
+
+## STRUCTURAL_REFACTOR
+
+### Test coverage policy for decomposition
+> What "covered" means for the prerequisite gate. Options: integration tests pass / unit tests exist for moved code / explicit "no tests, proceeding anyway" with reason.
+
+### Approved destination patterns
+> Where extracted responsibilities should land in this codebase. Without this, the agent guesses based on common conventions and may not match house style.
+
+- Hooks → `src/hooks/use<Name>.ts`
+- Services → `src/services/<name>Service.ts`
+- Domain logic → `src/domain/<area>/`
+- UI sub-components → colocated under the parent component's directory
+
+### Forbidden destinations
+> Directories that look plausible but should not receive extracted code (e.g., legacy/deprecated areas, vendored code).
+
+### Seam-ordering overrides
+> Cases where the report's "lowest coupling first" heuristic produces the wrong order for this project (e.g., a shared store that must be extracted before any consumer can move). Rare.

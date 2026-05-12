@@ -75,6 +75,7 @@ Once that loop is comfortable, browse the audits table below for other audits to
 | Run a security sweep | `/determinagents security` |
 | Trace where a user action breaks | `/determinagents data-flow --target=<flow>` |
 | Review runtime capacity and resource pressure | `/determinagents resource-capacity` |
+| Find god-files and propose extraction seams | `/determinagents structural-entropy` |
 | Create a weekly or post-change system digest | `/determinagents auto-report --mode=baseline` |
 | Work through report findings with approval gates | `/determinagents resolve --report=<path>` |
 
@@ -113,7 +114,9 @@ determinagents/
 │   ├── DOCS_DRIFT.md
 │   ├── UX_DESIGN_AUDIT.md
 │   ├── RESOURCE_CAPACITY.md
+│   ├── STRUCTURAL_ENTROPY.md
 │   ├── RESOLVE_FROM_REPORT.md  # mutating: works through report findings
+│   ├── STRUCTURAL_REFACTOR.md  # mutating: executes structural-entropy seams
 │   ├── SECURITY_HUNT.md        # mutating: agentic vulnerability hunting
 │   ├── DATA_FLOW_VERIFY.md     # mutating: observed-vs-theorized data flow
 │   └── TESTING_CREATOR.md      # mutating: writes new tests
@@ -140,6 +143,7 @@ determinagents/
 | [audits/DOCS_DRIFT.md](audits/DOCS_DRIFT.md) | Claims in README and docs that the code no longer matches |
 | [audits/UX_DESIGN_AUDIT.md](audits/UX_DESIGN_AUDIT.md) | CSS that violates DESIGN.md tokens — colors, spacing, radii, motion, typography |
 | [audits/RESOURCE_CAPACITY.md](audits/RESOURCE_CAPACITY.md) | Runtime-agnostic capacity and resource-pressure risks across k8s, docker/compose, bare metal, or unraid-style deployments |
+| [audits/STRUCTURAL_ENTROPY.md](audits/STRUCTURAL_ENTROPY.md) | God-files and god-modules. Severity is driven by responsibility count, fan-in/out, and change velocity — not LOC alone. Outputs seam proposals consumed by `STRUCTURAL_REFACTOR.md` |
 
 Most audits run in 30–180 minutes at default scope, scaling with codebase size. Each audit doc supports `--phases=N,M` and `--max-time=Xm` to scope tighter.
 
@@ -150,6 +154,7 @@ Most audits run in 30–180 minutes at default scope, scaling with codebase size
 | Doc | What it does | Prerequisites |
 |-----|--------------|---------------|
 | [audits/RESOLVE_FROM_REPORT.md](audits/RESOLVE_FROM_REPORT.md) | Works through findings in any audit report — one at a time, with per-finding approval, separate commits, and verification | An audit report exists at `docs/reports/`; clean working tree |
+| [audits/STRUCTURAL_REFACTOR.md](audits/STRUCTURAL_REFACTOR.md) | Executes seam proposals from a `STRUCTURAL_ENTROPY` report. Per-seam loop with contract-before-code gate; one contract commit + one move commit per seam; before/after dependency artifacts | `STRUCTURAL_ENTROPY` report exists; disposable workspace; tests cover the target file |
 | [audits/SECURITY_HUNT.md](audits/SECURITY_HUNT.md) | Agentic vulnerability hunting — agent gets execution capability to verify or refute bug hypotheses against one target file/function. Inspired by Mozilla's Firefox-hardening pipeline | Project builds locally; sanitizers configured; disposable workspace; AUDIT_CONTEXT.md `SECURITY_HUNT` section configured |
 | [audits/DATA_FLOW_VERIFY.md](audits/DATA_FLOW_VERIFY.md) | Drives a real user flow end-to-end and observes wire traffic + DB state. The "observed" counterpart to `DATA_FLOW_TRACE.md`'s "inferred" — catches silent layer drift static analysis misses | Disposable workspace; app runs locally; AUDIT_CONTEXT.md `DATA_FLOW_VERIFY` section configured |
 | [audits/TESTING_CREATOR.md](audits/TESTING_CREATOR.md) | Implements tests across four tiers — Adversarial, Chaos, Simulation, Forensics — beyond what `TEST_GAPS.md` covers | Run `TEST_GAPS.md` and `SECURITY_PENTEST.md` first |

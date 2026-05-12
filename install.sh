@@ -98,13 +98,16 @@ fi
 
 # Install the determinagents shim
 mkdir -p "$BIN_DIR"
-if [ "$INSTALL_DIR" = "$HOME/.determinagents" ]; then
-  cp "$INSTALL_DIR/bin/determinagents" "$BIN_DIR/determinagents"
-else
-  # Bake the path into the shim for non-standard installs
-  sed "s|DETERMINAGENTS_HOME=\"\$HOME/.determinagents\"|DETERMINAGENTS_HOME=\"$INSTALL_DIR\"|" \
-    "$INSTALL_DIR/bin/determinagents" > "$BIN_DIR/determinagents"
+# Bake the path into the shim so it's deterministic and unambiguous.
+# This ensures the shim always points to the library it was installed from.
+# We replace the DETERMINAGENTS_BAKED_HOME placeholder.
+SHIM_SOURCE="$INSTALL_DIR/bin/determinagents"
+if [ "$IN_REPO" = true ] && [ -f "bin/determinagents" ]; then
+  SHIM_SOURCE="bin/determinagents"
 fi
+
+sed "s|DETERMINAGENTS_BAKED_HOME=\"\"|DETERMINAGENTS_BAKED_HOME=\"$INSTALL_DIR\"|" \
+  "$SHIM_SOURCE" > "$BIN_DIR/determinagents"
 chmod +x "$BIN_DIR/determinagents"
 
 # Status
@@ -124,6 +127,14 @@ case ":$PATH:" in
     echo ""
     ;;
 esac
+
+# Env var check
+if [ -n "${DETERMINAGENTS_HOME:-}" ] && [ "$DETERMINAGENTS_HOME" != "$INSTALL_DIR" ]; then
+  echo "warning: \$DETERMINAGENTS_HOME is set to $DETERMINAGENTS_HOME"
+  echo "  but you are installing to $INSTALL_DIR"
+  echo "  your environment variable will override this install!"
+  echo ""
+fi
 
 # Suggest the env var if not set, so subsequent invocations resolve correctly
 if [ -z "${DETERMINAGENTS_HOME:-}" ] && [ "$INSTALL_DIR" != "$HOME/.determinagents" ]; then

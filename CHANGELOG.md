@@ -4,6 +4,36 @@ All notable changes to determinagents are documented here. The format is loosely
 
 `determinagents update` shows the relevant entries when updating.
 
+## [0.5.4] — 2026-05-12
+
+> **Action required after `determinagents update`**: re-run `determinagents materialize`. Two new slash commands ship in this release (`structural-entropy`, `structural-refactor`) and Gemini CLI materialization now uses a subdirectory-namespacing pattern (`/determinagents:<name>`) for discovery — existing Gemini installs need re-materialization to pick up the new convention.
+
+### Added (audits — structural entropy)
+- `audits/STRUCTURAL_ENTROPY.md` — read-only audit for god-files and god-modules. Severity is driven by **responsibility count** (UI / state / I/O / streaming / shaping / routing / persistence / domain mixed in one module), with fan-in/out and change-velocity as amplifiers; LOC alone never escalates above P3. Outputs **seam proposals** (what / where / contract / order), not refactors. `default` model tier.
+- `audits/STRUCTURAL_REFACTOR.md` — mutating companion that executes a structural-entropy report's seams. Specialization of `RESOLVE_FROM_REPORT` that defers to it for workspace + parsing machinery and adds three things: **contract-before-code gate** (interface committed before any code moves), **per-seam loop** (one contract commit + one move commit per seam, lowest-coupling first), and **before/after dependency-graph artifacts** under `docs/reports/refactor-artifacts/`. `reasoning` tier. Requires test coverage on the target file — escalates to `TESTING_CREATOR` Tier 1 as a prerequisite if missing.
+- `specs/AUDIT_CONTEXT_SECTIONS.md` — new `STRUCTURAL_ENTROPY` and `STRUCTURAL_REFACTOR` sections (exempt paths, per-area thresholds, "what counts as one responsibility here," known mid-refactor files, approved/forbidden destinations).
+- `INVOCATIONS.md` — `structural-entropy` and `structural-refactor` behavior tokens; full paste-ready invocations for both.
+- `README.md` — `STRUCTURAL_ENTROPY` in audits table; `STRUCTURAL_REFACTOR` in creators table; behavior chooser entry; layout-tree update.
+
+### Changed (shim — deterministic path resolution)
+- `bin/determinagents` now resolves the library via a four-level chain: **env var → relative-to-script (when running from a clone) → baked path → default**. The previous chain was three levels and silently fell back to the default path when the relative-script check failed for any reason. Each level is reported by `version` and `doctor` as `RESOLVED_VIA=<env|relative|baked|default>` so users can see why a given install resolved the way it did.
+- Relative-to-script resolution now requires `INVOCATIONS.md` **and** a sentinel (`.git/` or `.sisyphus/`) to confirm the parent really is a DeterminAgents checkout. Previously a stray `INVOCATIONS.md` would falsely trigger relative mode.
+- Library-presence check switched from `$DETERMINAGENTS_HOME/.git` to `$DETERMINAGENTS_HOME/audits`. Local copies of the library (no `.git`) are now valid installs; the prior check rejected them.
+- `version` and `doctor` output reorganized around the new resolution model: shim section reports the running shim vs. PATH shim consistency; library section reports resolution source and (when applicable) baked-path vs. env-var conflicts.
+
+### Changed (installer — baked path placeholder)
+- `install.sh` now always bakes the install path into the shim via a `DETERMINAGENTS_BAKED_HOME` placeholder, instead of branching between "copy" and "sed-on-non-default-path". One install code path replaces two; the shim is deterministic regardless of where it was installed from.
+- Installer warns when `$DETERMINAGENTS_HOME` is set to a different path than the one being installed to — the env var will silently override and the warning prevents head-scratching later.
+
+### Changed (Gemini CLI — subdirectory namespacing)
+- `INSTALL.md` Gemini section rewritten around **subdirectory namespacing** (`~/.gemini/commands/determinagents/<behavior>.toml` → `/determinagents:<behavior>`). Reason: Gemini CLI v1 does not autocomplete arguments inside a single command, so a flat `/determinagents` hub provides no discovery. Subdir namespacing turns each behavior into its own command and lets the CLI list them on `/determinagents:` tab-completion.
+- Gemini TOML template updated to use the absolute library path instead of `$DETERMINAGENTS_HOME` (Gemini's shell-out boundary does not reliably expand env vars in prompt bodies).
+- `bin/determinagents` materialize prompt expanded to spell out the per-host discovery strategy (Claude Code: `argument-hint` on the single command; Gemini: subdirectory namespacing; Cursor: agent-requested MDC rules) instead of leaving it implicit.
+
+### Changed (re-materialize safety)
+- `INSTALL.md` "Updating installed commands" section gains an explicit **safety protocol** for re-materialize: agents must inspect each existing file for the `generated-by` marker and library path, and **prompt before overwriting** any file that lacks the marker, points at a different library path, or has been hand-edited. Previously the prompt said "regenerate unchanged files silently" without a precise definition of "unchanged."
+- `bin/determinagents` materialize prompt mirrors this protocol so it's enforced regardless of which document the agent reads first.
+
 ## [0.5.3] — 2026-05-11
 
 ### Added

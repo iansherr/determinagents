@@ -8,21 +8,33 @@ set -eu
 # being eval'd, so a runtime variable wouldn't reach them — duplication is
 # the honest shape here.
 
+# This line is replaced by the installer. Do not edit manually.
+DETERMINAGENTS_BAKED_HOME=""
+
 # Resolve DETERMINAGENTS_HOME:
-# 1. Environment variable
-# 2. Relative to script (if run from a clone)
-# 3. Default path
+# 1. Environment variable (manual override)
+# 2. Relative to script (if run from a clone — priority for developers)
+# 3. Baked path (set during last install)
+# 4. Default path
 if [ -n "${DETERMINAGENTS_HOME:-}" ]; then
-  : # already set
-elif [ -f "$(dirname "$0")/../INVOCATIONS.md" ]; then
+  RESOLVED_VIA="env"
+elif [ -f "$(dirname "$0")/../INVOCATIONS.md" ] && ([ -d "$(dirname "$0")/../.git" ] || [ -d "$(dirname "$0")/../.sisyphus" ]); then
   DETERMINAGENTS_HOME=$(cd "$(dirname "$0")/.." && pwd)
+  RESOLVED_VIA="relative"
+elif [ -n "$DETERMINAGENTS_BAKED_HOME" ]; then
+  DETERMINAGENTS_HOME="$DETERMINAGENTS_BAKED_HOME"
+  RESOLVED_VIA="baked"
 else
   DETERMINAGENTS_HOME="$HOME/.determinagents"
+  RESOLVED_VIA="default"
 fi
 
-if [ ! -d "$DETERMINAGENTS_HOME/.git" ]; then
-  echo "error: determinagents not installed at $DETERMINAGENTS_HOME" >&2
-  echo "  run the installer:" >&2
+if [ ! -d "$DETERMINAGENTS_HOME/audits" ]; then
+  echo "error: determinagents library not found at $DETERMINAGENTS_HOME" >&2
+  echo "  (resolved via $RESOLVED_VIA)" >&2
+  [ -n "$DETERMINAGENTS_BAKED_HOME" ] && [ "$DETERMINAGENTS_HOME" != "$DETERMINAGENTS_BAKED_HOME" ] && echo "  (baked path was: $DETERMINAGENTS_BAKED_HOME)" >&2
+  echo "" >&2
+  echo "  run the installer to fix your paths:" >&2
   echo "  curl -fsSL https://raw.githubusercontent.com/iansherr/determinagents/main/install.sh | sh" >&2
   exit 1
 fi
@@ -40,7 +52,7 @@ case "$cmd" in
     SUBJECT=$(git log -1 --format=%s)
     echo "determinagents $SHA  ($BRANCH, $DATE)"
     echo "  $SUBJECT"
-    echo "  installed at: $DETERMINAGENTS_HOME"
+    echo "  library: $DETERMINAGENTS_HOME ($RESOLVED_VIA)"
     ;;
 
   path)
@@ -96,16 +108,29 @@ library for this host tool.
 
 Identify the host tool from context, pick the appropriate target convention,
 and generate the install files. Start by creating the primary
-\`/determinagents\` command and use it as both hub and router:
-\`/determinagents\` for menu mode and \`/determinagents <behavior> [flags]\`
-for direct selection.
+`/determinagents` command and use it as both hub and router.
+
+**Discovery & Autocomplete Strategy:**
+- **Claude Code**: Use `argument-hint` in the single `/determinagents`
+  command for discovery.
+- **Gemini CLI**: Use **subdirectory namespacing** (`/determinagents:<name>`)
+  because its custom commands don't yet support argument autocomplete.
+- **Cursor**: Use agent-requested MDC rules.
 
 If DeterminAgents commands already exist in the host tool, treat this as a
-re-materialize: regenerate unchanged files silently, prompt me before
-overwriting any I've hand-edited (see INSTALL.md "Updating installed
-commands"), and report what changed.
+re-materialize. Compare the existing files against the new library path and
+the latest `INVOCATIONS.md`.
 
-Show the plan before writing files.
+- If a file lacks the `generated-by` marker or points to a different
+  library path: treat it as a 'legacy' or 'hand-edited' file and PROMPT
+  ME before overwriting.
+- If a file has the marker and correct path but the content differs from
+  the new source: report the change and prompt me.
+- If everything matches (path, marker, content): skip it silently or
+  report as "unchanged."
+
+Show the plan (what will be created, updated, or migrated) and wait for
+my approval before writing files.
 ---
 
 The agent does the actual file generation. This shim cannot directly write
@@ -166,52 +191,62 @@ UNINSTALL_MSG
 
     echo "determinagents doctor"
     echo ""
-    echo "install:"
+    echo "library:"
 
-    # 1. Library directory and git checkout (we already passed the early exit
-    #    above, but re-check explicitly so doctor output is self-contained).
+    # 1. Library directory and resolution source
+    if [ -d "$DETERMINAGENTS_HOME/audits" ]; then
+      ok "library found at $DETERMINAGENTS_HOME ($RESOLVED_VIA)"
+    else
+      fail "library missing at $DETERMINAGENTS_HOME ($RESOLVED_VIA)"
+    fi
+
+    # 2. Git status
     if [ -d "$DETERMINAGENTS_HOME/.git" ]; then
-      ok "library at $DETERMINAGENTS_HOME"
+      BRANCH=$(git -C "$DETERMINAGENTS_HOME" rev-parse --abbrev-ref HEAD 2>/dev/null || echo "?")
+      SHA=$(git -C "$DETERMINAGENTS_HOME" rev-parse --short HEAD 2>/dev/null || echo "?")
+      AGE_DAYS=$(( ( $(date +%s) - $(git -C "$DETERMINAGENTS_HOME" log -1 --format=%ct 2>/dev/null || echo 0) ) / 86400 ))
+      if [ "$AGE_DAYS" -gt 60 ]; then
+        warn "branch $BRANCH @ $SHA — last commit ${AGE_DAYS}d ago (run 'determinagents update')"
+      else
+        ok "branch $BRANCH @ $SHA — ${AGE_DAYS}d old"
+      fi
+      if [ -n "$(git -C "$DETERMINAGENTS_HOME" status --porcelain 2>/dev/null)" ]; then
+        warn "working tree has local changes (will block 'determinagents update')"
+      fi
     else
-      fail "library not a git checkout: $DETERMINAGENTS_HOME"
-    fi
-
-    # 2. Branch + age
-    BRANCH=$(git -C "$DETERMINAGENTS_HOME" rev-parse --abbrev-ref HEAD 2>/dev/null || echo "?")
-    SHA=$(git -C "$DETERMINAGENTS_HOME" rev-parse --short HEAD 2>/dev/null || echo "?")
-    AGE_DAYS=$(( ( $(date +%s) - $(git -C "$DETERMINAGENTS_HOME" log -1 --format=%ct 2>/dev/null || echo 0) ) / 86400 ))
-    if [ "$AGE_DAYS" -gt 60 ]; then
-      warn "branch $BRANCH @ $SHA — last commit ${AGE_DAYS}d ago (run 'determinagents update')"
-    else
-      ok "branch $BRANCH @ $SHA — ${AGE_DAYS}d old"
-    fi
-
-    # 3. Working tree clean (warn only — local edits are allowed but worth flagging)
-    if [ -z "$(git -C "$DETERMINAGENTS_HOME" status --porcelain 2>/dev/null)" ]; then
-      ok "working tree clean"
-    else
-      warn "working tree has local changes (will block 'determinagents update')"
+      warn "library is not a git checkout (automatic updates disabled)"
     fi
 
     echo ""
     echo "shim:"
 
-    # 4. Shim resolution: where did `determinagents` we ran from come from,
-    #    and does it match $DETERMINAGENTS_HOME?
-    SHIM_PATH=$(command -v determinagents 2>/dev/null || echo "")
-    if [ -n "$SHIM_PATH" ]; then
-      ok "shim on PATH: $SHIM_PATH"
+    # 3. Shim resolution: where did `determinagents` we ran from come from?
+    RUNNING_BIN="$0"
+    PATH_BIN=$(command -v determinagents 2>/dev/null || echo "")
+
+    if [ -n "$PATH_BIN" ]; then
+      ok "shim on PATH: $PATH_BIN"
+      # Check if the one we are running is the one on the PATH
+      if [ "$(cd "$(dirname "$RUNNING_BIN")" && pwd)/$(basename "$RUNNING_BIN")" = "$(cd "$(dirname "$PATH_BIN")" && pwd)/$(basename "$PATH_BIN")" ]; then
+        : # Running the one on the PATH, good.
+      else
+        warn "you are running $RUNNING_BIN but $PATH_BIN is first on your PATH"
+      fi
     else
       warn "shim not on PATH (you ran by absolute path)"
     fi
 
-    # 5. Env var sanity
-    if [ -n "${DETERMINAGENTS_HOME:-}" ]; then
-      ok "\$DETERMINAGENTS_HOME set: $DETERMINAGENTS_HOME"
-    elif [ "$DETERMINAGENTS_HOME" = "$HOME/.determinagents" ]; then
-      ok "using default install path (\$DETERMINAGENTS_HOME unset)"
-    else
-      warn "\$DETERMINAGENTS_HOME unset, but resolved to non-default $DETERMINAGENTS_HOME — set it in your shell rc"
+    # 4. Consistency check
+    if [ "$RESOLVED_VIA" = "relative" ]; then
+      warn "running in-place from repository ($DETERMINAGENTS_HOME)"
+    elif [ "$RESOLVED_VIA" = "env" ]; then
+      if [ -n "$DETERMINAGENTS_BAKED_HOME" ] && [ "$DETERMINAGENTS_HOME" != "$DETERMINAGENTS_BAKED_HOME" ]; then
+        warn "\$DETERMINAGENTS_HOME ($DETERMINAGENTS_HOME) overrides baked path ($DETERMINAGENTS_BAKED_HOME)"
+      else
+        ok "\$DETERMINAGENTS_HOME environment variable is set"
+      fi
+    elif [ "$RESOLVED_VIA" = "baked" ]; then
+      ok "using baked path: $DETERMINAGENTS_HOME"
     fi
 
     echo ""
@@ -354,18 +389,18 @@ boundary:
 usage: determinagents <command>
 
   version              show installed version (SHA, branch, date)
-  path                 print install path
+  path                 print library path
   update               check for updates and apply with confirmation
   materialize          instructions to install slash commands for your host
                        tool (the agent detects Claude Code / Gemini / Cursor /
                        etc. from its own context — same prompt for all)
   uninstall            remove the library
-  doctor               run health checks (install, shim, remote, completions)
+  doctor               run health checks (library, shim, remote, completions)
   completions <shell>  print shell completion script (bash, zsh, fish)
   help                 this message
 
 env:
-  DETERMINAGENTS_HOME  install path (default: ~/.determinagents)
+  DETERMINAGENTS_HOME  library path (default: ~/.determinagents)
   DETERMINAGENTS_BIN   shim install path (default: ~/.local/bin)
 
 docs:

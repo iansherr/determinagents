@@ -32,8 +32,10 @@ Use these behavior tokens for direct routing on the same command:
 | `docs-drift` | `DOCS_DRIFT` |
 | `ux` | `UX_DESIGN_AUDIT` |
 | `resource-capacity` | `RESOURCE_CAPACITY` |
+| `structural-entropy` | `STRUCTURAL_ENTROPY` |
 | `p0` | Cross-audit P0 sweep |
 | `resolve` | `RESOLVE_FROM_REPORT` |
+| `structural-refactor` | `STRUCTURAL_REFACTOR` |
 | `security-hunt` | `SECURITY_HUNT` |
 | `flow-verify` | `DATA_FLOW_VERIFY` |
 | `testing` | `TESTING_CREATOR` |
@@ -93,6 +95,7 @@ Substitute `<AUDIT>` with one of:
 | `DOCS_DRIFT` | Claims in README/docs that the code no longer matches |
 | `UX_DESIGN_AUDIT` | CSS that violates DESIGN.md tokens. For live phases (5–8) requires `--target=<dev-url>`. |
 | `RESOURCE_CAPACITY` | Runtime-agnostic capacity and resource-pressure risks across k8s, docker/compose, bare metal, or unraid-style deployments. |
+| `STRUCTURAL_ENTROPY` | God-files and god-modules: responsibility count, fan-in/out, change velocity. Outputs seam proposals, not refactors. |
 
 ### Cross-audit P0 sweep
 
@@ -127,6 +130,32 @@ Optional flags:
 Read docs/determinagents/AUDIT_CONTEXT.md first. Triage findings, show
 plan, work through with shorthand approval. One commit per fix. Append
 ## Resolution to the report when done.
+```
+
+---
+
+## STRUCTURAL_REFACTOR (mutating)
+
+Specialization of `RESOLVE_FROM_REPORT` for `STRUCTURAL_ENTROPY` reports. Per-seam loop, contract-before-code gate, dependency-graph artifacts.
+
+**Prerequisites**: a `STRUCTURAL_ENTROPY` report exists at `docs/reports/`; disposable workspace; tests cover the target file (run `TESTING_CREATOR` Tier 1 first if not).
+
+```
+Run audits/STRUCTURAL_REFACTOR.md from $DETERMINAGENTS_HOME.
+
+Optional flags:
+  --report=<path>    Specific structural-entropy report (default: most
+                     recent STRUCTURAL_ENTROPY_*.md, confirmed)
+  --scope=<value>    Limits which god-files to refactor:
+                       P0 | P1 | P2 | P3      — by severity
+                       file:<path>            — single file
+                       (default: highest-severity single file)
+
+Read docs/determinagents/AUDIT_CONTEXT.md first. Defer to RESOLVE Phase 0
+for workspace + report discovery. Then per-file: snapshot, per-seam loop
+(contract commit then move commit, lowest-coupling first), re-snapshot,
+test the integrated file, optionally re-run STRUCTURAL_ENTROPY against
+this file. Append ## Refactor log to the report.
 ```
 
 ---

@@ -208,21 +208,34 @@ Specific model names are intentionally not listed here — vendor lineups change
 
 Gemini CLI uses `~/.gemini/commands/` for global commands and `.gemini/commands/` for project-local. Commands must be in **TOML format** with a **`.toml`** extension.
 
-**Subdirectory namespacing** is supported: a file at `.gemini/commands/group/name.toml` is invoked as `/group:name`. Use this to namespace DeterminAgents commands if desired (e.g., `.gemini/commands/da/audit-stub.toml` → `/da:audit-stub`).
+**Discovery & Autocomplete**: Gemini CLI (v1) does not support autocomplete for arguments within a single command. To enable command discovery, you MUST use **subdirectory namespacing**. Files in a `determinagents/` folder are invoked as `/determinagents:name`.
 
-**Prompt body interpolation** (within the `prompt` value):
+**Structure**:
+```text
+~/.gemini/commands/
+├── determinagents.toml          <-- Hub (/determinagents)
+└── determinagents/              <-- Namespaced behaviors
+    ├── audit-stub.toml          <-- /determinagents:audit-stub
+    ├── audit-security.toml      <-- /determinagents:audit-security
+    └── ...
+```
+
+When a user types `/determinagents:`, the CLI automatically lists all behaviors.
+
+**Prompt body interpolation**:
 - `{{args}}` — injects arguments the user passes at invocation time
-- `!{command}` — executes a shell command and injects its output (user confirmation required)
-- `@{path}` — injects file or directory content (multimodal support)
+- `!{command}` — executes a shell command and injects its output
+- `@{path}` — injects file or directory content
 
-**File template (`~/.gemini/commands/audit-stub.toml`):**
+**File template (`~/.gemini/commands/determinagents/audit-stub.toml`):**
 
 ```toml
 description = "Run STUB_AND_COMPLETENESS audit"
 prompt = """
-Library at $DETERMINAGENTS_HOME. Read docs/determinagents/AUDIT_CONTEXT.md if present.
+Library at <ABSOLUTE_PATH_TO_LIBRARY>.
+Read docs/determinagents/AUDIT_CONTEXT.md if present.
 
-Read $DETERMINAGENTS_HOME/audits/STUB_AND_COMPLETENESS.md and run it
+Read <ABSOLUTE_PATH_TO_LIBRARY>/audits/STUB_AND_COMPLETENESS.md and run it
 against this repo. Additional flags: {{args}}
 
 Report to docs/reports/STUB_AUDIT_<YYYY-MM-DD>.md.
@@ -332,6 +345,13 @@ Re-running materialize is only required when:
 1. A new invocation is added to `INVOCATIONS.md` (new behavior).
 2. The shared conventions header changes.
 3. The host tool's frontmatter convention changes.
+4. You moved the library (path migration).
+
+**Safety Protocol**: When re-materializing, the agent MUST inspect existing files for the `generated-by` marker and the library path.
+
+- **Missing Marker or Path Mismatch**: Treat as a high-risk migration. The agent should explain the mismatch and obtain explicit approval before overwriting.
+- **Marker Present & Path Matches**: If the content is identical to the latest `INVOCATIONS.md`, the file can be reported as "unchanged." If it differs, the agent should report the change (or hand-edit) and prompt.
+- **New Files**: Always report and ask.
 
 Day-to-day audit improvements (Phase changes, new commands, severity rubric updates) flow through automatically because the slash command always reads the live audit doc.
 
