@@ -15,9 +15,9 @@ This is a meta-audit: it does not find issues in code. It triages the audit libr
 - Periodically (weekly / monthly), as a calibration check on which audits are being neglected.
 - After joining a new project, to see which audits would surface the most signal first.
 
-**Model tier**: `fast`
+**Model tier**: `default`
 
-Rationale: this is classification and ranking over a small inventory, not multi-step reasoning. Cheap models do this well.
+Rationale: the escalation logic (parsing resolution annotations, recognizing never-run-with-churn cases, weighing cadence overrides against raw score) is genuine multi-step reasoning. A fast model will rank by score and miss the escalations.
 
 ## Time estimate
 
@@ -82,33 +82,27 @@ Audits with `staleness_ratio < 0.5` are recent and ranked low regardless of surf
 
 ## Phase 2: Surface-change scan
 
-For each audit, find what's changed in its area-of-interest since its `last_run`. The mapping comes from each audit doc's Phase 0 (Discovery) patterns — read them, don't reinvent.
+For each audit, find what's changed in its area-of-interest since its `last_run`. **Read the patterns from each audit's source**, do not maintain a copy here.
 
-Approximate mapping (override per project via `CADENCE` extended entries):
+For each audit in the recommendation set, open `${DETERMINAGENTS_HOME}/audits/<AUDIT>.md` and read its **Phase 0 (Discovery)** section. Extract the grep/find patterns it uses to identify its area of interest. Those patterns *are* the audit's watch surface — by definition. The audit doc is the single source of truth; PICK_NEXT does not maintain a parallel mapping. (Earlier drafts of this audit kept a hardcoded table here. It drifted within two releases. The reading-from-source approach trades ~30s of runtime per scan for being structurally correct forever.)
 
-| Audit | Watches |
-|---|---|
-| `SECURITY_PENTEST` | auth, session, JWT, crypto, route handlers, middleware |
-| `STRUCTURAL_ENTROPY` | files crossing the project's p95 LOC line; high-churn files |
-| `STUB_AND_COMPLETENESS` | new route handlers, new endpoints, frontend `fetch`/`axios` callsites |
-| `ERROR_HANDLING` | `try/catch` additions, error UI, logging calls |
-| `DATA_FLOW_TRACE` | UI → API → DB pathways for features added since last run |
-| `TEST_GAPS` | new business logic without corresponding test files |
-| `DOCS_DRIFT` | README, docs/, claims about endpoints/flags/commands |
-| `UX_DESIGN_AUDIT` | CSS, design tokens, component styling |
-| `RESOURCE_CAPACITY` | k8s manifests, Dockerfiles, infra config, dependency capacity settings |
+Then run the scoped git log:
 
 ```bash
-# For each audit, run a scoped git log since its last_run date.
 AUDIT="SECURITY_PENTEST"
 SINCE="<last_run_date or 90 days ago>"
+
+# Patterns derived from $DETERMINAGENTS_HOME/audits/SECURITY_PENTEST.md Phase 0.
+# Agent reads the audit doc and constructs the grep extension dynamically.
 git log --since="$SINCE" --name-only --pretty=format: \
-  | grep -E '(auth|session|jwt|crypto|middleware|/routes/|/handlers/)' \
+  | grep -E '<patterns from the audit's Phase 0>' \
   | sort -u | wc -l
 ```
 
+For audits whose Phase 0 patterns are too broad to be useful as a watch filter (e.g., `STUB_AND_COMPLETENESS` scans the whole repo), fall back to counting *all* commits in the window — staleness alone drives the score in that case.
+
 Record per audit:
-- `changed_paths_in_watch`: count of distinct files matching the audit's watch patterns
+- `changed_paths_in_watch`: count of distinct files matching the audit's Phase 0 patterns
 - `commit_count_in_watch`: count of commits touching those files
 - One-line evidence string (e.g., `"12 commits touched services/auth/** since 2026-02-14"`)
 
@@ -130,6 +124,7 @@ Why the weights:
 Special-case escalations (override the score):
 
 - **Unresolved P0 findings exist**: if any audit report has unresolved P0s (no `## Resolution` annotation marking them done), `RESOLVE_FROM_REPORT` for that report is the top recommendation. Always.
+  - *Caveat*: resolution annotations are free-form markdown, so the detection may false-positive (recommend RESOLVE when the P0s are actually done). Treat the escalation as a *prompt to check the report*, not a verdict — surface the report path and the suspected unresolved findings so the user can confirm in one glance.
 - **Never-run + high surface-change**: an audit that has never run *and* its watch patterns saw significant changes ranks above ordinary stale audits. The first run on a high-churn surface is usually the highest-yield run.
 - **Cadence overdue by 2x+**: any audit ≥ 2.0 staleness-ratio with non-trivial surface-change is elevated regardless of score — the cadence preference is a stronger signal than raw arithmetic.
 

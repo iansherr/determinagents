@@ -333,6 +333,8 @@ _Example:_ `k8s (prod), docker-compose (local), bare-metal workers for batch`
 
 Per-audit recommended interval. The `PICK_NEXT` meta-audit reads this to decide which audits are overdue. Without this section every audit defaults to 90 days.
 
+*Exception to the catalog's "copy in only when filled" rule:* CADENCE is useful even partially filled — every audit benefits from a default, and one calibrated line is better than zero. Copy this section in as soon as you know the cadence for one audit.
+
 Format: one audit per line, mapping to either a number of days or a qualitative phrase. Qualitative phrases the meta-audit understands: `anytime` (no cadence; only recommend on surface change), `after-major-features` (recommend after release tags or large diffs), `quarterly` (90d), `monthly` (30d), `weekly` (7d).
 
 ```

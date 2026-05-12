@@ -4,6 +4,19 @@ All notable changes to determinagents are documented here. The format is loosely
 
 `determinagents update` shows the relevant entries when updating.
 
+## [0.5.6] — 2026-05-12
+
+Calibration pass on v0.5.5: tier correction, structural-correctness fix in PICK_NEXT, README trim. No new behaviors; no re-materialize required.
+
+### Changed
+- `audits/PICK_NEXT.md` model tier raised from `fast` to `default`. The escalation logic (parsing resolution annotations, recognizing never-run-with-churn, weighing cadence overrides) is multi-step reasoning, not classification. A fast model ranks by score and misses the escalations.
+- `audits/PICK_NEXT.md` Phase 2 no longer maintains a hardcoded "audit → watch patterns" mapping. The agent reads each audit's Phase 0 (Discovery) at runtime and uses those patterns directly. Trades ~30s of scan time for being structurally correct as the audit library evolves. Earlier table drifted within two releases of the v0.5.5 ship date.
+- `audits/PICK_NEXT.md` adds an explicit caveat to the unresolved-P0 escalation: detection works by grepping free-form `## Resolution` markdown and may false-positive. The escalation now surfaces as a *prompt to check the report*, not a verdict.
+- `specs/AUDIT_CONTEXT_SECTIONS.md` notes CADENCE as the exception to the catalog's "copy in only when filled" rule — one calibrated cadence line is better than zero.
+
+### Removed
+- `README.md` workflow Mermaid diagram. It showed a four-step linear chain (Repo → Audit → Report → Resolve → Digest) that no longer matches reality after STRUCTURAL_REFACTOR, SECURITY_HUNT → TESTING_CREATOR, and PICK_NEXT joined the surface. The behavior-chooser table above covers the navigation job; the diagram was decorative.
+
 ## [0.5.5] — 2026-05-12
 
 > **Action required after `determinagents update`**: re-run `determinagents materialize` to pick up the new `next` slash command.

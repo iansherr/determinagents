@@ -90,15 +90,6 @@ Reports are meant to be read by humans and reused by agents. A typical finding l
 - Next step: /determinagents resolve --report=docs/reports/ERROR_HANDLING_2026-05-11.md
 ```
 
-```mermaid
-flowchart LR
-  Repo --> Discovery
-  Discovery --> Audit
-  Audit --> Report
-  Report --> Resolve
-  Report --> Digest[System Digest]
-```
-
 ## Layout
 
 ```
