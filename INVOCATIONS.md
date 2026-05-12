@@ -33,6 +33,7 @@ Use these behavior tokens for direct routing on the same command:
 | `ux` | `UX_DESIGN_AUDIT` |
 | `resource-capacity` | `RESOURCE_CAPACITY` |
 | `structural-entropy` | `STRUCTURAL_ENTROPY` |
+| `next` | `PICK_NEXT` (recommends which audit to run based on staleness + git history) |
 | `p0` | Cross-audit P0 sweep |
 | `resolve` | `RESOLVE_FROM_REPORT` |
 | `structural-refactor` | `STRUCTURAL_REFACTOR` |
@@ -105,6 +106,27 @@ When you only have time to find showstoppers across the whole library:
 Run all read-only audits from $DETERMINAGENTS_HOME/audits/ against this
 repo with --p0-only. Surface a consolidated P0 list (audit, file:line,
 one-sentence impact). No reports.
+```
+
+---
+
+## PICK_NEXT (read-only meta-audit)
+
+Recommends which audit to run next based on report staleness, git-history surface change, and `AUDIT_CONTEXT.md` cadence preferences. Writes no report by default.
+
+```
+Run audits/PICK_NEXT.md from $DETERMINAGENTS_HOME against this repo.
+
+Optional flags:
+  --log              Write docs/reports/PICK_NEXT_<YYYY-MM-DD>.md for
+                     trend-tracking (default: conversational only)
+  --window=<days>    Override the analysis window (default: 90 days for
+                     never-run audits; per-audit last-run otherwise)
+
+Read docs/determinagents/AUDIT_CONTEXT.md first (CADENCE section if
+present). Inventory existing reports, scan git log per audit's watch
+patterns, rank, output top 3 with a paste-ready invocation for the
+top pick. Honor escalations: unresolved P0s outrank new audit runs.
 ```
 
 ---

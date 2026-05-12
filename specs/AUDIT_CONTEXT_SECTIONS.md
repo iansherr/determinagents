@@ -326,3 +326,35 @@ _Example:_ `k8s (prod), docker-compose (local), bare-metal workers for batch`
 
 ### Seam-ordering overrides
 > Cases where the report's "lowest coupling first" heuristic produces the wrong order for this project (e.g., a shared store that must be extracted before any consumer can move). Rare.
+
+---
+
+## CADENCE (used by PICK_NEXT)
+
+Per-audit recommended interval. The `PICK_NEXT` meta-audit reads this to decide which audits are overdue. Without this section every audit defaults to 90 days.
+
+Format: one audit per line, mapping to either a number of days or a qualitative phrase. Qualitative phrases the meta-audit understands: `anytime` (no cadence; only recommend on surface change), `after-major-features` (recommend after release tags or large diffs), `quarterly` (90d), `monthly` (30d), `weekly` (7d).
+
+```
+- SECURITY_PENTEST: 90d
+- STRUCTURAL_ENTROPY: after-major-features
+- STUB_AND_COMPLETENESS: 30d
+- DOCS_DRIFT: monthly
+- TEST_GAPS: 60d
+- ERROR_HANDLING: quarterly
+- UX_DESIGN_AUDIT: after-major-features
+- RESOURCE_CAPACITY: quarterly
+- DATA_FLOW_TRACE: anytime
+```
+
+Audits not listed default to 90 days. Audits the project explicitly does not want recommended (e.g., "we never run UX_DESIGN_AUDIT here, no DESIGN.md") should be listed with `skip` so `PICK_NEXT` excludes them:
+
+```
+- UX_DESIGN_AUDIT: skip
+```
+
+### Cadence override evidence
+> Optional. If a cadence differs from the universal default for a specific reason, note it so future maintainers know.
+
+- `SECURITY_PENTEST: 30d` — financial services product, compliance reason
+- `STRUCTURAL_ENTROPY: weekly` — actively decomposing god-files; track progress

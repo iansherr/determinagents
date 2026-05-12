@@ -76,6 +76,7 @@ Once that loop is comfortable, browse the audits table below for other audits to
 | Trace where a user action breaks | `/determinagents data-flow --target=<flow>` |
 | Review runtime capacity and resource pressure | `/determinagents resource-capacity` |
 | Find god-files and propose extraction seams | `/determinagents structural-entropy` |
+| **Don't know what to run** — let it pick | `/determinagents next` |
 | Create a weekly or post-change system digest | `/determinagents auto-report --mode=baseline` |
 | Work through report findings with approval gates | `/determinagents resolve --report=<path>` |
 
@@ -115,6 +116,7 @@ determinagents/
 │   ├── UX_DESIGN_AUDIT.md
 │   ├── RESOURCE_CAPACITY.md
 │   ├── STRUCTURAL_ENTROPY.md
+│   ├── PICK_NEXT.md            # meta: recommends what to run next
 │   ├── RESOLVE_FROM_REPORT.md  # mutating: works through report findings
 │   ├── STRUCTURAL_REFACTOR.md  # mutating: executes structural-entropy seams
 │   ├── SECURITY_HUNT.md        # mutating: agentic vulnerability hunting
@@ -144,6 +146,7 @@ determinagents/
 | [audits/UX_DESIGN_AUDIT.md](audits/UX_DESIGN_AUDIT.md) | CSS that violates DESIGN.md tokens — colors, spacing, radii, motion, typography |
 | [audits/RESOURCE_CAPACITY.md](audits/RESOURCE_CAPACITY.md) | Runtime-agnostic capacity and resource-pressure risks across k8s, docker/compose, bare metal, or unraid-style deployments |
 | [audits/STRUCTURAL_ENTROPY.md](audits/STRUCTURAL_ENTROPY.md) | God-files and god-modules. Severity is driven by responsibility count, fan-in/out, and change velocity — not LOC alone. Outputs seam proposals consumed by `STRUCTURAL_REFACTOR.md` |
+| [audits/PICK_NEXT.md](audits/PICK_NEXT.md) | Meta-audit. Recommends which audit to run next based on report staleness, recent git history, and `AUDIT_CONTEXT.md` cadence preferences. Writes no report by default |
 
 Most audits run in 30–180 minutes at default scope, scaling with codebase size. Each audit doc supports `--phases=N,M` and `--max-time=Xm` to scope tighter.
 

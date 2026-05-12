@@ -4,6 +4,19 @@ All notable changes to determinagents are documented here. The format is loosely
 
 `determinagents update` shows the relevant entries when updating.
 
+## [0.5.5] — 2026-05-12
+
+> **Action required after `determinagents update`**: re-run `determinagents materialize` to pick up the new `next` slash command.
+
+### Added
+- `audits/PICK_NEXT.md` — read-only meta-audit that recommends which audit to run next. Inventories `docs/reports/` for per-audit last-run dates, scans `git log` against each audit's watch patterns for surface change, applies optional `CADENCE` preferences from `AUDIT_CONTEXT.md`, and outputs a ranked top 3 with a paste-ready invocation. Special escalations: unresolved P0s outrank new audit runs; never-run audits on high-churn surfaces rank above ordinary staleness. Writes no report by default (`--log` for trend-tracking). `fast` model tier.
+- `specs/AUDIT_CONTEXT_SECTIONS.md` — new `CADENCE` section documenting per-audit interval preferences (numeric days, qualitative phrases like `quarterly` / `after-major-features`, or `skip` to exclude an audit from recommendations).
+- `INVOCATIONS.md` — `next` routing token; full invocation block for `PICK_NEXT`.
+- `README.md` — `PICK_NEXT` in audits table; "don't know what to run" entry in the behavior chooser; layout-tree update.
+
+### Design note
+The meta-audit reads existing artifacts (reports, git log) instead of maintaining its own state. No existing audit was modified — last-run inference comes free from the existing `docs/reports/<AUDIT>_<YYYY-MM-DD>.md` naming convention. The audit deliberately does not manufacture urgency: "nothing's overdue" is a valid output.
+
 ## [0.5.4] — 2026-05-12
 
 > **Action required after `determinagents update`**: re-run `determinagents materialize`. Two new slash commands ship in this release (`structural-entropy`, `structural-refactor`) and Gemini CLI materialization now uses a subdirectory-namespacing pattern (`/determinagents:<name>`) for discovery — existing Gemini installs need re-materialization to pick up the new convention.
