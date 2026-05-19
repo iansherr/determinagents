@@ -6,6 +6,15 @@ All notable changes to determinagents are documented here. The format is loosely
 
 ## [Unreleased]
 
+## [0.5.9] — 2026-05-19
+
+### Changed
+- `materialize` prompt in `bin/determinagents` and `INSTALL.md` updated to add support for the new AGY CLI (`.agy/subagents/`).
+- Clarified that `Claude Code` and `opencode` use argument-based routing (`/determinagents resolve`) instead of the legacy subdirectory namespacing used by Gemini CLI.
+- Fixed a shellcheck (SC2235) error in `bin/determinagents`.
+
+## [0.5.8] — 2026-05-19
+
 ### Added
 - `audits/DESIGN_HANDOFF_AUDIT.md` — new read-only determinagent designed for parsing design handoff bundles (Figma, Claude Design, Google Stitch). Enforces a structural inventory over relying on potentially misleading `README.md` files. Includes explicit anti-patterns and rules for discovering integration gaps and shell elements like nav bars.
 - `DESIGN_HANDOFF_AUDIT` support in `INVOCATIONS.md`, `README.md`, `specs/BOOTSTRAP.md`, `specs/AUDIT_CONTEXT_SECTIONS.md`, `specs/AUDIT_CONTEXT_TEMPLATE.md`, and `audits/RESOLVE_FROM_REPORT.md`.
