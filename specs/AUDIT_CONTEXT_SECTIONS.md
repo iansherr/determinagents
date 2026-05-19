@@ -223,6 +223,15 @@ _Example:_ 5xx responses on any internal API; 503 on Stripe; 30s delay on Redis.
 
 ---
 
+## DESIGN_HANDOFF_AUDIT
+
+### Known Handoff Quirks
+> Rules for how to handle specific file patterns in handoff bundles.
+
+- `site/legacy/*` — ignore legacy files in handoff bundles
+
+---
+
 ## TESTING_CREATOR (TEST_VERIFICATION)
 
 - Preferred simulation stack (e.g., Python + Docker Compose)
@@ -345,6 +354,7 @@ Format: one audit per line, mapping to either a number of days or a qualitative 
 - TEST_GAPS: 60d
 - ERROR_HANDLING: quarterly
 - UX_DESIGN_AUDIT: after-major-features
+- DESIGN_HANDOFF_AUDIT: after-design-handoff
 - RESOURCE_CAPACITY: quarterly
 - DATA_FLOW_TRACE: anytime
 ```

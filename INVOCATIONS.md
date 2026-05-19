@@ -31,6 +31,7 @@ Use these behavior tokens for direct routing on the same command:
 | `test-gaps` | `TEST_GAPS` |
 | `docs-drift` | `DOCS_DRIFT` |
 | `ux` | `UX_DESIGN_AUDIT` |
+| `design-handoff` | `DESIGN_HANDOFF_AUDIT` |
 | `resource-capacity` | `RESOURCE_CAPACITY` |
 | `structural-entropy` | `STRUCTURAL_ENTROPY` |
 | `next` | `PICK_NEXT` (recommends which audit to run based on staleness + git history) |
@@ -95,6 +96,7 @@ Substitute `<AUDIT>` with one of:
 | `TEST_GAPS` | Scenarios the test suite would miss |
 | `DOCS_DRIFT` | Claims in README/docs that the code no longer matches |
 | `UX_DESIGN_AUDIT` | CSS that violates DESIGN.md tokens. For live phases (5–8) requires `--target=<dev-url>`. |
+| `DESIGN_HANDOFF_AUDIT` | Audit design handoff bundles against target code, bypassing misleading READMEs. |
 | `RESOURCE_CAPACITY` | Runtime-agnostic capacity and resource-pressure risks across k8s, docker/compose, bare metal, or unraid-style deployments. |
 | `STRUCTURAL_ENTROPY` | God-files and god-modules: responsibility count, fan-in/out, change velocity. Outputs seam proposals, not refactors. |
 

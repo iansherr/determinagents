@@ -4,6 +4,12 @@ All notable changes to determinagents are documented here. The format is loosely
 
 `determinagents update` shows the relevant entries when updating.
 
+## [Unreleased]
+
+### Added
+- `audits/DESIGN_HANDOFF_AUDIT.md` — new read-only determinagent designed for parsing design handoff bundles (Figma, Claude Design, Google Stitch). Enforces a structural inventory over relying on potentially misleading `README.md` files. Includes explicit anti-patterns and rules for discovering integration gaps and shell elements like nav bars.
+- `DESIGN_HANDOFF_AUDIT` support in `INVOCATIONS.md`, `README.md`, `specs/BOOTSTRAP.md`, `specs/AUDIT_CONTEXT_SECTIONS.md`, `specs/AUDIT_CONTEXT_TEMPLATE.md`, and `audits/RESOLVE_FROM_REPORT.md`.
+
 ## [0.5.7] — 2026-05-12
 
 > **Action required after `determinagents update`**: re-run `determinagents materialize`. This release fixes a critical path-resolution issue where the shim would "forget" its installation path if run from inside the repository. It also overhauled Gemini CLI materialization to use namespacing for better discovery and autocomplete.

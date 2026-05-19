@@ -329,7 +329,7 @@ Every finding in the actionable set must end in one of these outcomes. No silent
 
 ## Composition with other docs
 
-- **Source**: any report from `audits/STUB_AND_COMPLETENESS.md`, `audits/SECURITY_PENTEST.md`, `audits/DATA_FLOW_TRACE.md`, `audits/ERROR_HANDLING.md`, `audits/TEST_GAPS.md`, `audits/DOCS_DRIFT.md`, `audits/UX_DESIGN_AUDIT.md`.
+- **Source**: any report from `audits/STUB_AND_COMPLETENESS.md`, `audits/SECURITY_PENTEST.md`, `audits/DATA_FLOW_TRACE.md`, `audits/ERROR_HANDLING.md`, `audits/TEST_GAPS.md`, `audits/DOCS_DRIFT.md`, `audits/UX_DESIGN_AUDIT.md`, `audits/DESIGN_HANDOFF_AUDIT.md`.
 - **Follow-up for security fixes**: pass to `audits/TESTING_CREATOR.md` Tier 1 (Adversarial) to add executable coverage proving the fix can't regress.
 - **Follow-up for chaos-related fixes**: pass to `audits/TESTING_CREATOR.md` Tier 2 (Chaos) to verify survival mode.
 - **Re-audit**: re-run the source audit after resolution to confirm clean state.

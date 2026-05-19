@@ -21,5 +21,5 @@
 - `STUB_AND_COMPLETENESS.md` — are any docs cross-referenced but missing?
 
 **Audits that don't apply**:
-- `SECURITY_PENTEST.md`, `DATA_FLOW_TRACE.md`, `ERROR_HANDLING.md`, `UX_DESIGN_AUDIT.md` — no attack surface, no data flow, no UI.
+- `SECURITY_PENTEST.md`, `DATA_FLOW_TRACE.md`, `ERROR_HANDLING.md`, `UX_DESIGN_AUDIT.md`, `DESIGN_HANDOFF_AUDIT.md` — no attack surface, no data flow, no UI.
 - `TEST_GAPS.md` — the only tests are a CI shellcheck pass and an install smoke-test in Docker; no unit/integration suite exists by design.
