@@ -41,17 +41,22 @@ Open-ended; depends on how many gaps exist, the surface area of the service, and
 
 ---
 
-## The four tiers
+## The five tiers
 
 Each tier answers a different question. A service is "verified" only when it has live coverage at every tier where the question is non-trivial for it. 
 
 | Tier | Question | Common artifacts |
 |------|----------|------------------|
-| **0. Survival Smoke** | Does the **built artifact** actually run? | Binary execution tests, native binding smokes, startup-sequence logs |
-| **1. Adversarial** | Can it be bypassed or coerced? | RBAC matrix tests, attestation challenges, fuzz harnesses |
-| **2. Chaos** | Does it survive failure? | Provider-down simulations, circuit-breaker tests, survival mode |
+| **0. Survival Smoke** | Does the **built artifact** actually run? | Binary execution tests, native binding smokes, memory-leak detection (heap-delta assertions), startup-sequence logs |
+| **1. Adversarial** | Can it be bypassed or coerced? | RBAC matrix, attestation challenges, **Parser Fuzzing** (pathological markdown, unicode, 10KB strings), View-render integrity (jsdom) |
+| **2. Chaos** | Does it survive failure? | **API Fault Injection** (timeouts, 5xx, rate-limits), **DB Faults** (corrupted SQLite, lock contention, migration failures) |
 | **3. Simulation** | Does it work in a cluster? | Multi-node Docker harness, leader-election + thundering-herd tests |
-| **4. Forensics** | Is tampering detectable? | Integrity / fracture tests, honeytoken alarms |
+| **4. Forensics** | Is tampering detectable? | Integrity / fracture tests, honeytoken alarms, **Golden Fixtures** (E2E source-to-DB golden snapshots) |
+
+### The Saturation Rule
+Do **NOT** add more unit tests if the codebase already has "substantial coverage" (e.g. >100 tests). Instead, focus exclusively on the **missing defect classes** above. 
+
+A tier is considered **UNCOVERED** if it lacks the bolded artifacts (Fuzzing, Fault Injection, DB Faults, Golden Fixtures), regardless of total test count. Focus on depth, not volume.
 
 **Note on Tier 0**: This tier prevents the "Dev-Mode Trap." It **MUST** run against the distributed bundle (e.g. `dist/`, `target/release/`, or a Docker image) rather than the source code. It validates that native bindings (`sqlite3`, `canvas`) match the target architecture.
 

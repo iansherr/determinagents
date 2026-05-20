@@ -102,6 +102,32 @@ Attempt to run the generated harness (if the environment allows).
 
 ---
 
+## Strategy Blueprints (High-Value Gaps)
+
+When the audit report identifies a high-value gap, use these blueprints as the **Starting Point**:
+
+### B1. DB Fault Scenario (SQLite/PG)
+- **Harness**: A script that manually corrupts the DB or locks it before running the app.
+- **Logic**: `sqlite3 db.sqlite "PRAGMA journal_mode=DELETE; ..."`, then attempt an app operation.
+- **Assertion**: App must return a graceful error/retry, **not** crash or show raw SQL errors.
+
+### B2. API Fault Injection (Adapters)
+- **Harness**: A proxy or mock-server (e.g. `nock`, `msw`, or a Python `httpretty` script).
+- **Logic**: Simulate `HTTP 429` (Rate Limit) or a 30s timeout for a third-party service (Asana, CalDAV).
+- **Assertion**: App must trigger the "Offline/Degraded" UI and retry with exponential backoff.
+
+### B3. Pathological Fuzzing (Parser)
+- **Harness**: A loop that feeds a "Junk Drawer" of pathological strings into the parser.
+- **Logic**: `['\u0000', 'A' * 10240, '{"unclosed": "brace"', 'invalid-date-2026-99-99']`.
+- **Assertion**: Parser must return an "Invalid" result object, **not** throw an unhandled exception or hang the event loop.
+
+### B4. Memory Leak Detection
+- **Harness**: A long-running loop (100+ iterations) of a core sync function.
+- **Logic**: Record `process.memoryUsage().heapUsed` before and after the loop.
+- **Assertion**: Heap growth after GC should be `< 5%` of the total throughput.
+
+---
+
 ## Severity rubric (for the harness itself)
 
 | Severity | Criteria |

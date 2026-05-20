@@ -6,6 +6,13 @@ All notable changes to determinagents are documented here. The format is loosely
 
 ## [Unreleased]
 
+## [0.6.7] — 2026-05-19
+
+### Added
+- **Saturation Rule**: Updated `TESTING_CREATOR.md` to prevent "test bloat." If a codebase already has substantial coverage, the agent is mandated to focus exclusively on **missing defect classes** (Fuzzing, Fault Injection, DB Corruption) rather than adding more generic unit tests.
+- **High-Value Gap Definitions**: Expanded the testing tiers to explicitly include: **DB Faults** (SQLite corruption/locks), **API Fault Injection** (timeouts/rate-limits), **Memory Leak Detection**, and **Pathological Fuzzing**.
+- **Strategy Blueprints**: Added a "how-to" section to `HARNESS_CREATOR.md` providing deterministic starting points for these complex test types.
+
 ## [0.6.6] — 2026-05-19
 
 ### Added
