@@ -50,7 +50,7 @@ _Example:_ Admin-panel gaps are P1, not P0 — admins report breakage out-of-ban
 
 ## (audit-specific sections — copy from `specs/AUDIT_CONTEXT_SECTIONS.md` as needed)
 
-Section catalog: `STUB_AND_COMPLETENESS`, `SECURITY_PENTEST`, `DATA_FLOW_TRACE`, `ERROR_HANDLING`, `TEST_GAPS`, `DOCS_DRIFT`, `UX_DESIGN_AUDIT`, `DESIGN_HANDOFF_AUDIT`, `SECURITY_HUNT`, `DATA_FLOW_VERIFY`, `STUB_AND_COMPLETENESS (Phase 6)`, `ERROR_HANDLING (Phase 6)`, `TESTING_CREATOR`.
+Section catalog: `STUB_AND_COMPLETENESS`, `SECURITY_PENTEST`, `DATA_FLOW_TRACE`, `ERROR_HANDLING`, `TEST_GAPS`, `DOCS_DRIFT`, `UX_DESIGN_AUDIT`, `DESIGN_HANDOFF_AUDIT`, `SECURITY_HUNT`, `DATA_FLOW_VERIFY`, `STUB_AND_COMPLETENESS (Phase 6)`, `ERROR_HANDLING (Phase 6)`, `TESTING_CREATOR`, `HARNESS_CREATOR`.
 
 Don't add sections preemptively. An empty `## STUB_AND_COMPLETENESS` section is noise — and a section that grew during a real audit run is signal.
 

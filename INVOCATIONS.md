@@ -47,6 +47,7 @@ Use these behavior tokens for direct routing on the same command:
 | `context` | `AUDIT_CONTEXT.md` bootstrap |
 | `refresh-context` | Refresh AUDIT_CONTEXT |
 | `auto-report` | `AUTOMATED_REPORTING` orchestrator |
+| `harness` | `HARNESS_CREATOR` |
 
 Example direct runs:
 

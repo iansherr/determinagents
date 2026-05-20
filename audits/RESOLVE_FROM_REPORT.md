@@ -335,3 +335,5 @@ Every finding in the actionable set must end in one of these outcomes. No silent
 - **Re-audit**: re-run the source audit after resolution to confirm clean state.
 
 The chain: **audit → report → resolve → re-audit → testing_creator** is the full safety pattern. Each step is its own session.
+
+For complex behavioral findings, the chain is: **audit → report → harness → resolve → testing_creator**. Use `/determinagents harness` to generate the verification engine before starting the resolution.

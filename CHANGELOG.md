@@ -6,6 +6,10 @@ All notable changes to determinagents are documented here. The format is loosely
 
 ## [Unreleased]
 
+### Added
+- `audits/HARNESS_CREATOR.md` — new mutating determinagent for generating verification harnesses (Playwright, Docker, Fuzzing) from static audit reports. Acts as a unified "harness factory" to provide executable starting points for agents.
+- `HARNESS_CREATOR` support in `INVOCATIONS.md`, `README.md`, `specs/FORMAT.md`, `specs/AUDIT_CONTEXT_SECTIONS.md`, and `audits/RESOLVE_FROM_REPORT.md`.
+
 ## [0.5.9] — 2026-05-19
 
 ### Changed

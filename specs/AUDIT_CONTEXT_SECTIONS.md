@@ -60,6 +60,25 @@ For the warm-overlay workflow that adds sections after an audit run, see `specs/
 
 ---
 
+## HARNESS_CREATOR
+
+Defines project-specific test locations and preferred runner configurations.
+
+### Target directories
+> 1-2 sentence rules for where generated harnesses should be placed.
+
+```
+- All Playwright harnesses go to tests/e2e/harnesses/
+- All Docker runners go to simulation/runners/
+```
+
+### Runner Config
+> Preferred CLI flags or environment variables for the generated runners.
+
+```
+- Set CI=true for all Playwright runs.
+```
+
 ## SECURITY_HUNT
 
 ### Build / test commands

@@ -112,7 +112,8 @@ determinagents/
 │   ├── STRUCTURAL_REFACTOR.md  # mutating: executes structural-entropy seams
 │   ├── SECURITY_HUNT.md        # mutating: agentic vulnerability hunting
 │   ├── DATA_FLOW_VERIFY.md     # mutating: observed-vs-theorized data flow
-│   └── TESTING_CREATOR.md      # mutating: writes new tests
+│   ├── TESTING_CREATOR.md      # mutating: writes new tests
+│   └── HARNESS_CREATOR.md      # mutating: generates verification harnesses
 └── specs/               # conventions and per-project artifact specs
     ├── FORMAT.md                  # how to author a new audit; harness conventions
     ├── BOOTSTRAP.md               # how to generate AUDIT_CONTEXT.md (cold + warm)
@@ -153,6 +154,7 @@ Most audits run in 30–180 minutes at default scope, scaling with codebase size
 | [audits/SECURITY_HUNT.md](audits/SECURITY_HUNT.md) | Agentic vulnerability hunting — agent gets execution capability to verify or refute bug hypotheses against one target file/function. Inspired by Mozilla's Firefox-hardening pipeline | Project builds locally; sanitizers configured; disposable workspace; AUDIT_CONTEXT.md `SECURITY_HUNT` section configured |
 | [audits/DATA_FLOW_VERIFY.md](audits/DATA_FLOW_VERIFY.md) | Drives a real user flow end-to-end and observes wire traffic + DB state. The "observed" counterpart to `DATA_FLOW_TRACE.md`'s "inferred" — catches silent layer drift static analysis misses | Disposable workspace; app runs locally; AUDIT_CONTEXT.md `DATA_FLOW_VERIFY` section configured |
 | [audits/TESTING_CREATOR.md](audits/TESTING_CREATOR.md) | Implements tests across four tiers — Adversarial, Chaos, Simulation, Forensics — beyond what `TEST_GAPS.md` covers | Run `TEST_GAPS.md` and `SECURITY_PENTEST.md` first |
+| [audits/HARNESS_CREATOR.md](audits/HARNESS_CREATOR.md) | Deterministically generates verification harnesses (Playwright, Docker, Fuzzing) to prove/refute audit findings | An audit report exists; disposable workspace |
 
 Two read-only audits — `ERROR_HANDLING.md` and `STUB_AND_COMPLETENESS.md` — include an **optional mutating Phase 6** (fault injection and endpoint verification respectively) that follows the harness conventions in `specs/FORMAT.md`. Use scope `+harness` to enable.
 
@@ -173,8 +175,7 @@ Supporting docs: [specs/FORMAT.md](specs/FORMAT.md) (audit authoring spec), [spe
 ## Conventions
 
 Every audit:
-
-- Is **read-only** by default. Two mutating docs (`RESOLVE_FROM_REPORT.md` and `TESTING_CREATOR.md`) declare this prominently in their purpose sections.
+- Is **read-only** by default. Three mutating docs (`RESOLVE_FROM_REPORT.md`, `TESTING_CREATOR.md`, and `HARNESS_CREATOR.md`) declare this prominently in their purpose sections.
 - Has **phases** so you can scope: run Phase 1 only for a quick pass, all phases for a deep pass.
 - Classifies findings by severity (**P0/P1/P2/P3**) with concrete criteria.
 - Emits a report with file:line references and concrete fixes — never "fix this."
