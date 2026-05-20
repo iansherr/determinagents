@@ -54,15 +54,16 @@ Read the report. For each finding to be harnessed, classify the verification str
 
 For the identified strategy, generate the **minimal reproducible skeleton**.
 
-### 1.1 Harness Intelligence (Resilience Rules)
+### 1.1 Ground Truth Protocol (Hard Enforcement)
+To ensure the harness provides genuine verification and doesn't just "spot-check" what the agent already saw, the generated code **MUST** follow these structural rules:
+
+1.  **Iterative Loop Requirement**: Assertions **MUST NOT** be hardcoded for specific variables (e.g. `expect(brand).toBe('#hex')`). Instead, the harness **MUST** load the Canonical Manifest (from DESIGN.md or the audit report) and loop through every item, asserting its state programmatically.
+2.  **The Negative Grep Phase**: The agent **MUST** run a discovery command (e.g. `grep -rE '--[a-z0-9-]+'`) to find all variables in the codebase and compare them against the manifest. Any variable in the code but **not** in the manifest MUST be included in the harness report as an "Orphan/Ghost" finding.
+3.  **Prohibited Shortcuts**: Do **NOT** generate a harness that only tests a subset of tokens you "spotted" during discovery. The harness is a validator for the *entire* manifest.
+
+### 1.2 Harness Intelligence (Resilience Rules)
 To ensure reliability and minimize noise, the generated harness **MUST** include:
-- **Manifest-First Mapping**: Do not search for variables where they "should" be. Instead, take the full list of primitives/tokens from the manifest (e.g., `DESIGN.md` or handoff report) and verify each one's existence and value in the codebase.
-- **Bi-directional Verification**:
-    1. **Coverage**: Are all manifest items represented in the code?
-    2. **Orphans/Ghosts**: Are there variables in the code that *look* like primitives (e.g., matching a naming pattern) but are missing from the manifest?
-- **Keyword Guardrails**: An explicit skip-list for common language keywords (`if`, `alert`, `console`, `eval`, `window`, `prompt`, `confirm`).
-- **Pattern Support**: Robust parsing for Object Methods, Async Arrow Functions, and anonymous handlers.
-- **Token Mapping**: (UX only) Use the project's design system (e.g., `paper`, `clay`, `surface`) to map tokens contextually, catching category mismatches rather than just numerical drift.
+...
 
 - **Config**: Add necessary dependencies to `package.json`, `requirements.txt`, etc. (but do not run install unless in a container).
 - **Boilerplate**: Generate the test harness entry point (e.g., `tests/harness/ux_drift_verify.spec.ts`).
@@ -139,6 +140,7 @@ npm run test:harness
 
 ## Anti-patterns
 
+- **Spot-Checking**: Generating a harness that only tests 3-4 "obvious" variables you saw in the code. This is a false verification. The harness MUST loop through the manifest.
 - **The Test God-File**: Creating a single massive harness script to verify 20 unrelated findings. This makes the harness fragile and hard to debug. Generate targeted harnesses or cohesive suites.
 - **Silent Setup Failures**: Assuming the environment is ready (e.g., Docker running) without a Phase 0.1 check.
 - **Baking Content**: Inlining findinds into the harness instead of referencing the report artifacts.

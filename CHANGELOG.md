@@ -6,6 +6,13 @@ All notable changes to determinagents are documented here. The format is loosely
 
 ## [Unreleased]
 
+## [0.6.5] — 2026-05-19
+
+### Added
+- **Hard Enforcement Protocol**: Updated `HARNESS_CREATOR.md` with explicit structural requirements for generated code. Harnesses are now **required** to use iterative loops over the manifest rather than hardcoded assertions.
+- **Negative Grep Mandate**: Generated harnesses must now include a "Negative Grep" phase to identify "Orphan/Ghost" variables in the codebase that are missing from the design manifest.
+- **Spot-Checking Anti-Pattern**: Explicitly forbade the "shortcut" behavior of testing only a subset of observed variables.
+
 ## [0.6.4] — 2026-05-19
 
 ### Added
