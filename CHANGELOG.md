@@ -6,6 +6,12 @@ All notable changes to determinagents are documented here. The format is loosely
 
 ## [Unreleased]
 
+## [0.6.8] — 2026-05-19
+
+### Added
+- **Negative Mocking Patterns**: Added Blueprint `B5` to `HARNESS_CREATOR.md` for deterministic testing of "known fails." Includes patterns for malformed JSON, partial payloads, and type chaos.
+- **Synthetic DB Generation**: Added Blueprint `B6` for generating large-scale synthetic states (100k+ rows) to test UI performance and query optimization under pressure.
+
 ## [0.6.7] — 2026-05-19
 
 ### Added

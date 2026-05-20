@@ -126,6 +126,19 @@ When the audit report identifies a high-value gap, use these blueprints as the *
 - **Logic**: Record `process.memoryUsage().heapUsed` before and after the loop.
 - **Assertion**: Heap growth after GC should be `< 5%` of the total throughput.
 
+### B5. Negative Mocking (Known Fails)
+- **Harness**: Intercept API calls using `nock`, `msw`, or `pytest-mock`.
+- **Logic**: Return "Known Fail" payloads:
+    - **Malformed JSON**: `"{ "valid": true, "broken": " }"` (unclosed quote).
+    - **Partial Payload**: Return only the first 10% of a required array.
+    - **Type Chaos**: Return a `string` where an `int` is expected.
+- **Assertion**: App must fail fast with a clear error, not crash the worker or corrupt the DB.
+
+### B6. Synthetic DB Generation (Large-Scale)
+- **Harness**: A script that generates a "heavy" but valid SQLite/PG state.
+- **Logic**: Insert 100,000 "standard" rows + 10 "pathological" rows (Unicode, 10KB text).
+- **Assertion**: UI list-rendering must remain fluid (`< 16ms` main-thread block) and DB queries must hit indexes.
+
 ---
 
 ## Severity rubric (for the harness itself)
