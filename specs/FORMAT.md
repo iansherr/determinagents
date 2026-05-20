@@ -171,6 +171,11 @@ Only confirmed findings reach the report's main severity tables. Speculation doe
 
 Every confirmed finding includes a permanent artifact (testcase, repro script, network capture, screenshot, computed-style diff) under `docs/reports/<audit>-artifacts/<report-name>/<finding-N>/`. The disposable workspace will be torn down; the artifact persists so the finding stays reproducible.
 
+**Artifact Sanitization Mandate**: The agent **MUST** sanitize/redact all artifacts before capture. 
+- **Redact Secrets**: Replace API keys, JWTs, and passwords with `[REDACTED]`.
+- **Redact PII**: Replace user emails, names, and phone numbers with `[PII-REDACTED]`.
+- **Environment Safety**: Remove local file paths that reveal the user's machine name or sensitive directories.
+
 ### 6. "Attempted but blocked" report section
 
 When the agent's experiment confirms a defense thwarts a hypothesized bug, that's *positive signal about hardening* — log it under "Attempted but blocked" in the report. Validating that defenses work is part of the audit's value, not a non-finding.

@@ -116,6 +116,7 @@ determinagents/
 │   └── HARNESS_CREATOR.md      # mutating: generates verification harnesses
 └── specs/               # conventions and per-project artifact specs
     ├── FORMAT.md                  # how to author a new audit; harness conventions
+    ├── HARNESS_STUBS.md           # boilerplate for common harnesses
     ├── BOOTSTRAP.md               # how to generate AUDIT_CONTEXT.md (cold + warm)
     ├── FEATURE_REGISTRY.md        # spec for the per-project feature registry
     ├── AUTOMATED_REPORTING.md     # project-facing system digest orchestrator

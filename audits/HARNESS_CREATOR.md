@@ -52,7 +52,9 @@ Read the report. For each finding to be harnessed, classify the verification str
 
 ## Phase 1: Skeleton Generation
 
-For the identified strategy, generate the **minimal reproducible skeleton**.
+For the identified strategy, generate the **minimal reproducible skeleton**. 
+
+**Reference Library**: Use the boilerplate provided in `specs/HARNESS_STUBS.md` as your code foundation.
 
 ### 1.1 Ground Truth Protocol (Hard Enforcement)
 To ensure the harness provides genuine verification and doesn't just "spot-check" what the agent already saw, the generated code **MUST** follow these structural rules:

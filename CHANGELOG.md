@@ -6,6 +6,14 @@ All notable changes to determinagents are documented here. The format is loosely
 
 ## [Unreleased]
 
+## [0.6.9] — 2026-05-19
+
+### Added
+- **LLM Prompt Injection Audit**: Added Phase 3.5 to `SECURITY_PENTEST.md` to detect unsafe concatenation of user input into LLM prompts without boundaries.
+- **Security Sanitization (Code-Level)**: Expanded the library's security mandate to include checking for prompt injection, script injection, and unsafe template rendering.
+- **Harness Stubs Library**: Created `specs/HARNESS_STUBS.md` providing copy-pasteable boilerplate for Playwright (UX), Python (Integrity), and MSW (Fault Injection).
+- **Hard Enforcement of Resilience**: `HARNESS_CREATOR.md` now references the Stubs library to ensure agents use deterministic, redacted, and loop-based verification by default.
+
 ## [0.6.8] — 2026-05-19
 
 ### Added
