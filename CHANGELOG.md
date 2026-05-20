@@ -6,6 +6,15 @@ All notable changes to determinagents are documented here. The format is loosely
 
 ## [Unreleased]
 
+## [0.6.2] — 2026-05-19
+
+### Added
+- **Harness Intelligence**: Codified "resilience rules" in `STUB_AND_COMPLETENESS.md` and `HARNESS_CREATOR.md` to eliminate "Ghost Function" false positives. Includes explicit skip-lists for common JS keywords (`if`, `console`, etc.) and support for Object Methods and Async Arrow Functions.
+- **Contextual Token Mapping**: `HARNESS_CREATOR.md` now supports mapping tokens to project-specific systems (e.g., `paper`, `clay`, `surface`) to catch category mismatches in UX audits.
+
+### Changed
+- `specs/BOOTSTRAP.md`: Baseline harness generation via `HARNESS_CREATOR --mode=baseline` is now a **default action** during project initialization (`init`).
+
 ## [0.6.1] — 2026-05-19
 
 ### Changed

@@ -186,15 +186,17 @@ For every file flagged by 2.1 or 2.2:
 ---
 
 ## Phase 3: Route ↔ Handler Integrity
-
 ### 3.1 Defined-but-unregistered handlers
 
 Handlers that exist as functions but have no route pointing to them.
 
+**Harness Intelligence**: To avoid "Ghost Function" false positives, the detection logic **MUST** skip common language keywords (e.g., `if`, `alert`, `console`, `eval`, `window`) and correctly parse modern JS patterns like Object Methods and Async Arrow Functions.
+
 ```bash
 # Generic: list handler-shaped functions, list functions referenced in route registrations,
 # diff the two. Adapt the regex per language.
-
+# ...
+```
 # Go example
 grep -rEhn --include='*.go' '^func \([a-zA-Z]+ \*?[A-Z][a-zA-Z]+\) (handle|Handle)' . \
   | sed -E 's/.*\) (handle[A-Za-z0-9_]+|Handle[A-Za-z0-9_]+).*/\1/' | sort -u > /tmp/defined.txt

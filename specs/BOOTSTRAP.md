@@ -31,8 +31,8 @@ For paste-ready prompts, see `INVOCATIONS.md` (AUDIT_CONTEXT section). The two m
 **Cold bootstrap** — first run for a new project. Agent surveys the codebase (auth model, deployment surface, languages, archived dirs), asks up to 5 questions about institutional knowledge that's not visible from code, and writes an initial `AUDIT_CONTEXT.md` from the minimal template at `specs/AUDIT_CONTEXT_TEMPLATE.md`. 
 
 **Post-Bootstrap Actions (Autonomous)**:
-1. **Baseline Harness**: If a supported testing stack is detected, the agent offers to run `HARNESS_CREATOR --mode=baseline` to set up the verification infrastructure (Playwright, Docker, etc.) immediately.
-2. **Next Steps**: The agent finishes by running `PICK_NEXT` to provide a ranked recommendation for the first audit run.
+1. **Baseline Harness (Default)**: If a supported testing stack is detected, the agent **MUST** recommend or automatically trigger `HARNESS_CREATOR --mode=baseline` to set up the verification infrastructure (Playwright, Docker, etc.). Setting up the safety net is part of a complete initialization.
+2. **Next Steps**: The agent finishes by running `PICK_NEXT` to provide a ranked roadmap for the first audit run.
 
 Sections beyond Global come from the catalog at `specs/AUDIT_CONTEXT_SECTIONS.md` — copied in only when there's something to put in them.
 

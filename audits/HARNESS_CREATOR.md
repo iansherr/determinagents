@@ -54,6 +54,12 @@ Read the report. For each finding to be harnessed, classify the verification str
 
 For the identified strategy, generate the **minimal reproducible skeleton**.
 
+### 1.1 Harness Intelligence (Resilience Rules)
+To ensure reliability and minimize noise, the generated harness **MUST** include:
+- **Keyword Guardrails**: An explicit skip-list for common language keywords (`if`, `alert`, `console`, `eval`, `window`, `prompt`, `confirm`).
+- **Pattern Support**: Robust parsing for Object Methods, Async Arrow Functions, and anonymous handlers.
+- **Token Mapping**: (UX only) Use the project's design system (e.g., `paper`, `clay`, `surface`) to map tokens contextually, catching category mismatches rather than just numerical drift.
+
 - **Config**: Add necessary dependencies to `package.json`, `requirements.txt`, etc. (but do not run install unless in a container).
 - **Boilerplate**: Generate the test harness entry point (e.g., `tests/harness/ux_drift_verify.spec.ts`).
 - **Targeting**: Hardcode the specific endpoints, files, or states identified in the report findings.
