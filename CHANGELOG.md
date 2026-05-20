@@ -6,11 +6,14 @@ All notable changes to determinagents are documented here. The format is loosely
 
 ## [Unreleased]
 
-### Added
-- `audits/HARNESS_CREATOR.md` — new mutating determinagent for generating verification harnesses (Playwright, Docker, Fuzzing) from static audit reports. Acts as a unified "harness factory" to provide executable starting points for agents.
-- `HARNESS_CREATOR` support in `INVOCATIONS.md`, `README.md`, `specs/FORMAT.md`, `specs/AUDIT_CONTEXT_SECTIONS.md`, and `audits/RESOLVE_FROM_REPORT.md`.
+## [0.6.1] — 2026-05-19
 
-## [0.5.9] — 2026-05-19
+### Changed
+- `RESOLVE_FROM_REPORT.md`: now automatically detects and executes harnesses created by `HARNESS_CREATOR.md`. Verification of a fix now prioritizes the behavioral proof from a harness over static unit tests.
+- `specs/BOOTSTRAP.md`: initialization flow now includes autonomous hooks to offer `HARNESS_CREATOR --mode=baseline` and recommend the first audit via `PICK_NEXT`.
+- `HARNESS_CREATOR.md`: added `--mode=baseline` flag for initializing project testing infrastructure independently of an audit report.
+
+## [0.6.0] — 2026-05-19
 
 ### Changed
 - `materialize` prompt in `bin/determinagents` and `INSTALL.md` updated to add support for the new AGY CLI (`.agy/subagents/`).

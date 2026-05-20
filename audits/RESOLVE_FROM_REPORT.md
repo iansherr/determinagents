@@ -228,7 +228,9 @@ If the user types prose instead of a letter, treat it as `e` and incorporate the
 
 ### Verification rules
 
-If tests fail because of the fix → revert, re-plan, re-present. If tests were already broken pre-existing → flag and ask whether to proceed anyway. If no tests cover the area → surface that and recommend a `TESTING_CREATOR` Tier 1 follow-up to add coverage.
+**Harness-First Verification**: If a harness exists for the finding (e.g., in `tests/harness/`, `docs/reports/artifacts/`, or as specified in the report), the resolver **MUST** run that harness first after applying the fix. This behavioral proof outranks static unit tests for resolution finality.
+
+If tests fail because of the fix → revert, re-plan, re-present. If tests were already broken pre-existing → flag and ask whether to proceed anyway. If no tests cover the area → surface that and recommend a `HARNESS_CREATOR` or `TESTING_CREATOR` Tier 1 follow-up to add coverage.
 
 ### Commit format
 

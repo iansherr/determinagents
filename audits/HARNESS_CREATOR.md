@@ -13,10 +13,16 @@ This agent **mutates** the codebase by creating new test files, configuration, a
 ## When to run
 
 - After a static audit (UX, Security, Docs Drift, etc.) produces findings that require behavioral verification.
+- During project initialization (`--mode=baseline`) to set up generic testing infrastructure.
 - When an agent is "stuck" in a static reasoning loop and needs a physics engine (harness) to test hypotheses.
 - To install permanent regression coverage for complex behaviors (concurrency, data integrity).
 
 **Model tier**: `reasoning` — needs to understand the project's build system and the specific defect class to generate a valid testcase.
+
+## Flags
+
+- `--report=<path>`: The audit report containing findings to be harnessed.
+- `--mode=baseline`: (Optional) Initialize the project's harness infrastructure (config, boilerplate, smoke tests) without a report.
 
 ## Output
 

@@ -28,7 +28,13 @@ What does **not** belong:
 
 For paste-ready prompts, see `INVOCATIONS.md` (AUDIT_CONTEXT section). The two modes are:
 
-**Cold bootstrap** — first run for a new project. Agent surveys the codebase (auth model, deployment surface, languages, archived dirs), asks up to 5 questions about institutional knowledge that's not visible from code, and writes an initial `AUDIT_CONTEXT.md` from the minimal template at `specs/AUDIT_CONTEXT_TEMPLATE.md`. Sections beyond Global come from the catalog at `specs/AUDIT_CONTEXT_SECTIONS.md` — copied in only when there's something to put in them.
+**Cold bootstrap** — first run for a new project. Agent surveys the codebase (auth model, deployment surface, languages, archived dirs), asks up to 5 questions about institutional knowledge that's not visible from code, and writes an initial `AUDIT_CONTEXT.md` from the minimal template at `specs/AUDIT_CONTEXT_TEMPLATE.md`. 
+
+**Post-Bootstrap Actions (Autonomous)**:
+1. **Baseline Harness**: If a supported testing stack is detected, the agent offers to run `HARNESS_CREATOR --mode=baseline` to set up the verification infrastructure (Playwright, Docker, etc.) immediately.
+2. **Next Steps**: The agent finishes by running `PICK_NEXT` to provide a ranked recommendation for the first audit run.
+
+Sections beyond Global come from the catalog at `specs/AUDIT_CONTEXT_SECTIONS.md` — copied in only when there's something to put in them.
 
 **Warm overlay** — after any audit run. Agent proposes additions based on what was learned, but only entries that are (a) project-specific institutional knowledge not findable by discovery and (b) would change how a future audit runs. Findings themselves live in the report, never the overlay. Diff is shown; nothing commits without approval per entry.
 
