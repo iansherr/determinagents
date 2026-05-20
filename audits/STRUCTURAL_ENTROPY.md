@@ -74,20 +74,12 @@ A file has high responsibility count when it mixes signals from multiple of the 
 | Data shaping | parsing, serialization, schema validation, normalization |
 | Routing / dispatch | route maps, action dispatch, command tables |
 | Persistence | DB queries, cache reads/writes, migrations |
-| Domain logic | business rules without I/O |
+| Domain logic | Business rules without I/O |
+| Fix Aggregation | "Utils" or "Helpers" that accumulate unrelated fixes to bypass reports |
 
 ```bash
-# For each file flagged in Phase 0 as outlier-large, sample for category signals.
-# Run per-file; the agent reads results and tallies categories present.
-FILE="<path from phase 0>"
-echo "=== $FILE ==="
-grep -cE '(return\s*\(?\s*<|jsx|className=|<[A-Z][A-Za-z]*\s|<[a-z]+\s[^>]*>)' "$FILE"       # UI
-grep -cE '(useState|useReducer|createContext|createStore|atom\(|signal\()' "$FILE"             # State
-grep -cE '(fetch\(|axios\.|http\.|localStorage|sessionStorage|fs\.|readFile|writeFile)' "$FILE" # I/O
-grep -cE '(EventSource|WebSocket|ReadableStream|async\s*\*|for await|emit\(|on\()' "$FILE"     # Streaming
-grep -cE '(JSON\.parse|JSON\.stringify|schema|z\.|yup\.|joi\.|zod\.|parse\(|serialize)' "$FILE" # Shaping
-grep -cE '(router\.|route\(|switch\s*\([^)]*action|dispatch\()' "$FILE"                        # Routing
-grep -cE '(db\.|prisma\.|knex\.|sequelize\.|SELECT |INSERT |UPDATE |DELETE )' "$FILE"          # Persistence
+# ... (rest of Phase 1 grep commands)
+grep -cE '(util|helper|common|misc|fix|resolve|patch|harness|test_utils)' "$FILE"             # Fix Aggregation
 ```
 
 Record per file:
@@ -97,6 +89,8 @@ Record per file:
 - Severity (see rubric — three or more categories = P1 floor)
 
 A file mixing **UI + State + I/O + Streaming** is the canonical "agent-workspace.tsx" god-file. Three categories = warning, four+ = god-file confirmed.
+
+**Junk Drawer Signal**: A file with high responsibility count but **low fan-in** (only 1-2 files import it) is a "Junk Drawer." It was likely created as a path of least resistance to dump unrelated logic. These are P1 findings even if LOC is low.
 
 ---
 

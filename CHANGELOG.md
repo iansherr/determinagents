@@ -6,6 +6,13 @@ All notable changes to determinagents are documented here. The format is loosely
 
 ## [Unreleased]
 
+## [0.6.3] — 2026-05-19
+
+### Added
+- **Tech Debt Prevention**: Added explicit guardrails and anti-patterns across the library to prevent agents from creating "junk drawer" files or aggregating unrelated fixes.
+- **Junk Drawer Detection**: `STRUCTURAL_ENTROPY.md` now detects files with high responsibility count but low fan-in (fix aggregators).
+- **Cohesion Guardrails**: `STRUCTURAL_REFACTOR.md`, `RESOLVE_FROM_REPORT.md`, and `HARNESS_CREATOR.md` now include anti-patterns against "Debt Redirection" and "Fix Aggregation."
+
 ## [0.6.2] — 2026-05-19
 
 ### Added

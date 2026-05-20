@@ -131,6 +131,14 @@ npm run test:harness
 2. Focused task: [Specific instructions for the next loop].
 3. Success criteria: [Expected outcome].
 
+---
+
+## Anti-patterns
+
+- **The Test God-File**: Creating a single massive harness script to verify 20 unrelated findings. This makes the harness fragile and hard to debug. Generate targeted harnesses or cohesive suites.
+- **Silent Setup Failures**: Assuming the environment is ready (e.g., Docker running) without a Phase 0.1 check.
+- **Baking Content**: Inlining findinds into the harness instead of referencing the report artifacts.
+
 ## Recommendations
 1. ...
 ```

@@ -272,6 +272,7 @@ Same as `RESOLVE_FROM_REPORT.md` (Resolved / Already resolved / Invalid / Needs 
 - **Lowest-coupling seam first.** The order in the report is the order to execute. Reordering produces cascading conflicts.
 - **The god-file can stop being a god-file mid-session.** If after seam 2 the file is no longer P1, the remaining seams may be P2 or P3 — surface that and ask whether to continue or close out.
 - **Never extract into existing files without re-evaluating.** If the destination already exists, the contract becomes a merge problem and the seam is no longer a clean move. Treat as a new finding.
+- **Cohesion Guardrail**: Do **NOT** extract into "junk drawer" files (e.g., `utils.ts`, `helpers.ts`, `common.ts`) if the logic is not strictly generic. Extraction must go into a cohesive, named destination (e.g., `useWorkspacePersistence.ts`).
 - **Do not rewrite the consumer sites in the same session.** The audit refactors the god-file's internals. Rewiring consumers to use the new modules directly (instead of going through the god-file) is a separate concern.
 
 ---
@@ -281,6 +282,7 @@ Same as `RESOLVE_FROM_REPORT.md` (Resolved / Already resolved / Invalid / Needs 
 - **Bundling contract + move into one commit.** Loses the ability to revert the move without losing the interface.
 - **Reordering seams to "do the impressive one first."** High-coupling seams have hidden dependencies on lower-coupling extractions. The report's order exists for a reason.
 - **Extracting into a file that already does something else.** That's just moving the god-file problem one level down.
+- **Debt Redirection**: Creating a new "fix aggregation" file to handle multiple findings. This just creates a new god-file in a different folder. Each extraction must be cohesive.
 - **"This seam is small, I'll skip the contract step."** The contract step is what separates this audit from copy-paste refactoring. Skip it and you've reinvented the failure mode.
 - **Continuing when tests don't cover the moved code.** The whole point of this audit is to avoid the regression vector. Adding tests is a prerequisite, not a follow-up.
 

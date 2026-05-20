@@ -322,6 +322,7 @@ Every finding in the actionable set must end in one of these outcomes. No silent
 ## Anti-patterns
 
 - **"While I'm in here..." scope creep.** Adjacent issues become new findings, not silent commits. The resolver is a precision tool, not a refactor session.
+- **Fix Aggregation**: Creating a single file to handle a bunch of issues raised by the harness. This is trading one problem for another. Every fix must be cohesive and committed separately.
 - **Fixing without verifying the issue still exists.** Reports go stale. Always re-run the discovery command first.
 - **Trusting the report's suggested fix.** It's a starting point, not a recipe. Read the code, write a fresh plan.
 - **Bundling fixes "to save commits."** Separate commits make review and revert tractable. The audit trail depends on this.
