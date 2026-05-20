@@ -106,6 +106,7 @@ determinagents/
 │   ├── DOCS_DRIFT.md
 │   ├── UX_DESIGN_AUDIT.md
 │   ├── RESOURCE_CAPACITY.md
+│   ├── SCENARIO_CHAINER.md     # meta: chains findings into simulations
 │   ├── STRUCTURAL_ENTROPY.md
 │   ├── PICK_NEXT.md            # meta: recommends what to run next
 │   ├── RESOLVE_FROM_REPORT.md  # mutating: works through report findings

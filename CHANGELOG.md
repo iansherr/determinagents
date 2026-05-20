@@ -6,6 +6,13 @@ All notable changes to determinagents are documented here. The format is loosely
 
 ## [Unreleased]
 
+## [0.7.0] — 2026-05-19
+
+### Added
+- **Scenario Chaining (Level 2)**: Introduced `audits/SCENARIO_CHAINER.md`, a new meta-audit for linking findings from disparate reports into stateful "stories" or "failure journeys" (inspired by Mythos/Mozilla).
+- **Simulation Blueprint**: Added `Blueprint B7: Stateful Chain` to `HARNESS_CREATOR.md` to provide the technical boilerplate for multi-step simulations.
+- **Smart Recommendations**: `PICK_NEXT.md` now recommends `SCENARIO_CHAINER` when high signal density is detected across multiple audit categories.
+
 ## [0.6.9] — 2026-05-19
 
 ### Added

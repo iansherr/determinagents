@@ -31,7 +31,8 @@ Use these behavior tokens for direct routing on the same command:
 | `test-gaps` | `TEST_GAPS` |
 | `docs-drift` | `DOCS_DRIFT` |
 | `ux` | `UX_DESIGN_AUDIT` |
-| `design-handoff` | `DESIGN_HANDOFF_AUDIT` |
+| `handoff` | `DESIGN_HANDOFF_AUDIT` |
+| `chainer` | `SCENARIO_CHAINER` |
 | `resource-capacity` | `RESOURCE_CAPACITY` |
 | `structural-entropy` | `STRUCTURAL_ENTROPY` |
 | `next` | `PICK_NEXT` (recommends which audit to run based on staleness + git history) |

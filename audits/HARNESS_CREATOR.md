@@ -141,6 +141,14 @@ When the audit report identifies a high-value gap, use these blueprints as the *
 - **Logic**: Insert 100,000 "standard" rows + 10 "pathological" rows (Unicode, 10KB text).
 - **Assertion**: UI list-rendering must remain fluid (`< 16ms` main-thread block) and DB queries must hit indexes.
 
+### B7. Stateful Chain (Simulation)
+- **Harness**: A multi-step `async` script (Playwright or Python) that carries state between steps.
+- **Logic**:
+    1. **Step 1**: Perform UI action to trigger Finding A.
+    2. **Intermediate**: Capture token/state from console/localStorage/network.
+    3. **Step 2**: Use captured state to perform API call for Finding B.
+- **Assertion**: Final outcome matches the "Catastrophic" hypothesis from the Chain Report.
+
 ---
 
 ## Severity rubric (for the harness itself)

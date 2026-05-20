@@ -126,6 +126,7 @@ Special-case escalations (override the score):
 - **Unresolved P0 findings exist**: if any audit report has unresolved P0s (no `## Resolution` annotation marking them done), `RESOLVE_FROM_REPORT` for that report is the top recommendation. Always.
   - *Caveat*: resolution annotations are free-form markdown, so the detection may false-positive (recommend RESOLVE when the P0s are actually done). Treat the escalation as a *prompt to check the report*, not a verdict — surface the report path and the suspected unresolved findings so the user can confirm in one glance.
 - **Never-run + high surface-change**: an audit that has never run *and* its watch patterns saw significant changes ranks above ordinary stale audits. The first run on a high-churn surface is usually the highest-yield run.
+- **Signal Density (Chaining)**: If 3 or more audit reports exist from different categories (e.g. UX, Security, Data Flow) and none are older than 30 days, elevate `SCENARIO_CHAINER` to a top recommendation. The goal shifts from finding new bugs to linking existing ones into cascades.
 - **Cadence overdue by 2x+**: any audit ≥ 2.0 staleness-ratio with non-trivial surface-change is elevated regardless of score — the cadence preference is a stronger signal than raw arithmetic.
 
 ---
