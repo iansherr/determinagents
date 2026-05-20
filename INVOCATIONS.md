@@ -261,9 +261,33 @@ Report to docs/reports/TEST_VERIFICATION_<service>_<YYYY-MM-DD>.md.
 
 ---
 
+## HARNESS_CREATOR (mutating)
+
+Deterministically generate verification harnesses (Playwright scripts, Docker runners, fuzzing suites, or fault-injection skeletons) to prove or refute findings from static audit reports.
+
+**Prerequisites**: audit report exists at `docs/reports/`; disposable workspace.
+
+```
+Run audits/HARNESS_CREATOR.md from $DETERMINAGENTS_HOME.
+
+Required:
+  --report=<path>    The audit report containing findings to be harnessed.
+
+Optional:
+  --mode=baseline    Initialize the project's harness infrastructure
+                     (config, boilerplate, smoke tests) without a report.
+
+Read audits/HARNESS_CREATOR.md from $DETERMINAGENTS_HOME. Identify defect
+classes in the report. Generate minimal reproducible skeletons with
+keyword guardrails and pattern support. Verify the harness runs (pass
+or fail) before handing over. One commit per artifact.
+```
+
+---
+
 ## Project Initialization (First Run)
 
-The recommended "cold start" for a new repository. Calibrates all future audits.
+The recommended "cold start" for a new repository. Calibrates all future audits and installs the testing safety net.
 
 ```
 Run PROJECT_INIT from $DETERMINAGENTS_HOME.
@@ -277,8 +301,14 @@ Phase 1: Propose a plan to bootstrap the missing artifacts in order:
   2. FEATURE_REGISTRY.md (User-visible route discovery)
   3. AUDIT_CONTEXT.md (Project calibration & institutional knowledge)
 
-Get approval for the plan, then work through each bootstrap following
-the per-artifact instructions in INVOCATIONS.md.
+Phase 2: Bootstrap artifacts. For AUDIT_CONTEXT, ask up to 5 questions.
+
+Phase 3: Install Safety Net. Recommend or automatically trigger:
+  /determinagents harness --mode=baseline
+
+Phase 4: Roadmap. Run /determinagents next to recommend the first audit.
+
+Get approval for the plan before starting Phase 2.
 ```
 
 ---

@@ -1,0 +1,9 @@
+{
+  "name": "testing-creator",
+  "description": "TESTING_CREATOR (implement adversarial, chaos, and simulation tests)",
+  "system_prompt": "Library at /Users/iansherr/.determinagents/. Read docs/determinagents/AUDIT_CONTEXT.md if present. Reports go to docs/reports/.\n\nRun audits/TESTING_CREATOR.md from /Users/iansherr/.determinagents/. Requires --tier=<N> and --service=<name>. Implement and verify test infrastructure. Additional flags: {{args}}",
+  "metadata": {
+    "generated-by": "/Users/iansherr/.determinagents/INSTALL.md",
+    "library-path": "/Users/iansherr/.determinagents/"
+  }
+}

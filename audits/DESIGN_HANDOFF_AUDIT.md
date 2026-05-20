@@ -54,10 +54,10 @@ Classify each file by what it contains, not by what the README says it is. For e
 
 ## Phase 3: Extract a component manifest
 
-For each component-source file, search for class names, exported components, and CSS selectors. Build a flat list. Example:
+For each component-source file, search for class names, exported components, and CSS selectors. Build a **Canonical Manifest** (a flat list or JSON-compatible table). Example:
 `web-extras.jsx` → `.site-header`, `.site-footer`, `.auth-modal`
 
-This manifest is the spec — the README is just commentary on it.
+This manifest is the spec — the README is just commentary on it. The manifest **MUST** be structured so `HARNESS_CREATOR.md` can iterate through it to verify every item's existence in the target codebase.
 
 ---
 

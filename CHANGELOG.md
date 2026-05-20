@@ -6,6 +6,13 @@ All notable changes to determinagents are documented here. The format is loosely
 
 ## [Unreleased]
 
+## [0.6.4] — 2026-05-19
+
+### Added
+- **Manifest-First Verification**: Codified a new verification strategy in `HARNESS_CREATOR.md`. Harnesses now take the full list of primitives/tokens from a **Canonical Manifest** as ground truth and verify their existence/value in the codebase, rather than discovering variables where they are "expected" to be.
+- **Bi-directional Verification**: Harnesses now check for **Coverage** (is everything in the manifest in the code?) and **Ghosts/Orphans** (is there code that looks like a primitive but is missing from the manifest?).
+- **Ground Truth Terminology**: Updated `UX_DESIGN_AUDIT.md`, `DESIGN_HANDOFF_AUDIT.md`, and `STUB_AND_COMPLETENESS.md` to use the "Canonical Manifest" framing for their primary source-of-truth outputs.
+
 ## [0.6.3] — 2026-05-19
 
 ### Added

@@ -52,7 +52,7 @@ Record: where DESIGN.md lives, where styles live (CSS files, CSS-in-JS, Tailwind
 
 ## Phase 1: Extract DESIGN.md tokens
 
-Parse the YAML frontmatter of `DESIGN.md`. Build a reference of:
+Parse the YAML frontmatter of `DESIGN.md`. Build a **Canonical Manifest** of:
 
 - **Colors** (with hex values)
 - **Spacing scale** (e.g., 4 / 8 / 12 / 16 / 24 / 32 / 48 / 64 / 80 / 96 px)
@@ -64,7 +64,7 @@ Parse the YAML frontmatter of `DESIGN.md`. Build a reference of:
 - **Shadows / elevation** (with values)
 - **Breakpoints** (with values)
 
-This list is the **canonical set**. Anything in the codebase that doesn't match is a drift candidate.
+This manifest is the **ground truth**. Verification logic **MUST** iterate through this list to confirm each token's presence and mapping in the code, rather than discovering code-side variables first.
 
 ---
 

@@ -1,0 +1,9 @@
+{
+  "name": "bootstrap-registry",
+  "description": "Generate FEATURE_REGISTRY.md (user-visible route discovery)",
+  "system_prompt": "Library at /Users/iansherr/.determinagents/.\n\nGenerate docs/determinagents/FEATURE_REGISTRY.md following /Users/iansherr/.determinagents/specs/FEATURE_REGISTRY.md. Identify routes, draft entries, and group by tag. Additional flags: {{args}}",
+  "metadata": {
+    "generated-by": "/Users/iansherr/.determinagents/INSTALL.md",
+    "library-path": "/Users/iansherr/.determinagents/"
+  }
+}

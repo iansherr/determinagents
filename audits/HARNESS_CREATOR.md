@@ -56,6 +56,10 @@ For the identified strategy, generate the **minimal reproducible skeleton**.
 
 ### 1.1 Harness Intelligence (Resilience Rules)
 To ensure reliability and minimize noise, the generated harness **MUST** include:
+- **Manifest-First Mapping**: Do not search for variables where they "should" be. Instead, take the full list of primitives/tokens from the manifest (e.g., `DESIGN.md` or handoff report) and verify each one's existence and value in the codebase.
+- **Bi-directional Verification**:
+    1. **Coverage**: Are all manifest items represented in the code?
+    2. **Orphans/Ghosts**: Are there variables in the code that *look* like primitives (e.g., matching a naming pattern) but are missing from the manifest?
 - **Keyword Guardrails**: An explicit skip-list for common language keywords (`if`, `alert`, `console`, `eval`, `window`, `prompt`, `confirm`).
 - **Pattern Support**: Robust parsing for Object Methods, Async Arrow Functions, and anonymous handlers.
 - **Token Mapping**: (UX only) Use the project's design system (e.g., `paper`, `clay`, `surface`) to map tokens contextually, catching category mismatches rather than just numerical drift.

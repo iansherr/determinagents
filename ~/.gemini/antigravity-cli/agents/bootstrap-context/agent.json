@@ -1,0 +1,9 @@
+{
+  "name": "bootstrap-context",
+  "description": "Bootstrap or update AUDIT_CONTEXT.md (project calibration)",
+  "system_prompt": "Library at /Users/iansherr/.determinagents/.\n\nBootstrap or update docs/determinagents/AUDIT_CONTEXT.md following /Users/iansherr/.determinagents/specs/BOOTSTRAP.md. Survey codebase and capture institutional knowledge. Additional flags: {{args}}",
+  "metadata": {
+    "generated-by": "/Users/iansherr/.determinagents/INSTALL.md",
+    "library-path": "/Users/iansherr/.determinagents/"
+  }
+}

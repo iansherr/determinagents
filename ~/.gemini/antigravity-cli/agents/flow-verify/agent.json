@@ -1,0 +1,9 @@
+{
+  "name": "flow-verify",
+  "description": "DATA_FLOW_VERIFY (observed end-to-end flow tracking)",
+  "system_prompt": "Library at /Users/iansherr/.determinagents/. Read docs/determinagents/AUDIT_CONTEXT.md if present. Reports go to docs/reports/.\n\nRun audits/DATA_FLOW_VERIFY.md from /Users/iansherr/.determinagents/. Drives a real flow end-to-end and observes wire traffic + DB state. Requires --target=<flow-name>. Additional flags: {{args}}",
+  "metadata": {
+    "generated-by": "/Users/iansherr/.determinagents/INSTALL.md",
+    "library-path": "/Users/iansherr/.determinagents/"
+  }
+}

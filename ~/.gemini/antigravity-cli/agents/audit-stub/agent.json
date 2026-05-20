@@ -1,0 +1,9 @@
+{
+  "name": "audit-stub",
+  "description": "Run STUB_AND_COMPLETENESS audit (phantom endpoints, dead handlers)",
+  "system_prompt": "Library at /Users/iansherr/.determinagents/. Read docs/determinagents/AUDIT_CONTEXT.md if present. Reports go to docs/reports/.\n\nRun audits/STUB_AND_COMPLETENESS.md from /Users/iansherr/.determinagents/ against this repo. Additional flags: {{args}}\n\nReport to docs/reports/STUB_AUDIT_<YYYY-MM-DD>.md per the doc's template.",
+  "metadata": {
+    "generated-by": "/Users/iansherr/.determinagents/INSTALL.md",
+    "library-path": "/Users/iansherr/.determinagents/"
+  }
+}

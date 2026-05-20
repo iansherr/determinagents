@@ -56,6 +56,8 @@ grep -rn --include='*.ts' --include='*.tsx' --include='*.js' --include='*.jsx' \
   . 2>/dev/null | grep -v node_modules | grep -v '.compiled.' | grep -v '.min.js'
 ```
 
+Build a **Canonical Manifest** of these frontend calls (HTTP method, URL pattern). This manifest is the **ground truth** for what the backend *must* provide. 
+
 For each match, record: file:line, HTTP method, URL pattern (treat `${var}` as `:var`).
 
 ### 1.2 Extract every route the backend registers
