@@ -60,6 +60,9 @@ To ensure the harness provides genuine verification and doesn't just "spot-check
 1.  **Iterative Loop Requirement**: Assertions **MUST NOT** be hardcoded for specific variables (e.g. `expect(brand).toBe('#hex')`). Instead, the harness **MUST** load the Canonical Manifest (from DESIGN.md or the audit report) and loop through every item, asserting its state programmatically.
 2.  **The Negative Grep Phase**: The agent **MUST** run a discovery command (e.g. `grep -rE '--[a-z0-9-]+'`) to find all variables in the codebase and compare them against the manifest. Any variable in the code but **not** in the manifest MUST be included in the harness report as an "Orphan/Ghost" finding.
 3.  **Prohibited Shortcuts**: Do **NOT** generate a harness that only tests a subset of tokens you "spotted" during discovery. The harness is a validator for the *entire* manifest.
+4.  **Visibility Assertion (UI only)**: Any UI harness **MUST** assert that elements are **visible** to the user (`.toBeVisible()`), not just present in the DOM. This prevents "Ghost UI" false-positives where an app creates a window but fails to show it.
+5.  **Boot-Sequence Watcher**: Any harness that launches an app/service **MUST** capture and check console/stderr for the first 10 seconds of startup. Errors during the boot sequence outrank subsequent test failures.
+6.  **Artifact-First Testing**: Any harness verifying a distribution (Electron, Docker, Binaries) **MUST** execute the actual artifact (e.g. the `.app` or `.exe`) rather than the source code.
 
 ### 1.2 Harness Intelligence (Resilience Rules)
 To ensure reliability and minimize noise, the generated harness **MUST** include:

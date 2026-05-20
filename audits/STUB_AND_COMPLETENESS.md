@@ -47,18 +47,21 @@ Record: language(s), frontend dir(s), backend service dir(s), router file(s), ng
 
 ## Phase 1: Frontend → Backend Contract
 
-### 1.1 Extract every URL the frontend calls
+### 1.1 Extract every URL and Configuration Key the frontend calls
 
 ```bash
-# JS/TS clients
+# JS/TS clients (URLs)
 grep -rn --include='*.ts' --include='*.tsx' --include='*.js' --include='*.jsx' \
   -E "fetch\(|axios\.|XMLHttpRequest|\$\.ajax|api\.(get|post|put|delete|patch)" \
   . 2>/dev/null | grep -v node_modules | grep -v '.compiled.' | grep -v '.min.js'
+
+# Configuration / Env Var usage
+grep -rnE 'process\.env\.[A-Z0-9_]+|os\.environ\.get\(|env\("[A-Z0-9_]+"' . | grep -v node_modules
 ```
 
-Build a **Canonical Manifest** of these frontend calls (HTTP method, URL pattern). This manifest is the **ground truth** for what the backend *must* provide. 
+Build a **Canonical Manifest** of these frontend calls and **Configuration Requirements** (Env Var keys). This manifest is the **ground truth** for what the environment and backend *must* provide. 
 
-For each match, record: file:line, HTTP method, URL pattern (treat `${var}` as `:var`).
+**Configuration Integrity Check**: Compare the Env Var keys found in the app (e.g. `OT_VAULT_PATH`) against those used in the test suite (e.g. `OBSIDIAN_VAULT_PATH`). Any discrepancy is a P1 finding.
 
 ### 1.2 Extract every route the backend registers
 

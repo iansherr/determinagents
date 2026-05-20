@@ -6,6 +6,13 @@ All notable changes to determinagents are documented here. The format is loosely
 
 ## [Unreleased]
 
+## [0.6.6] — 2026-05-19
+
+### Added
+- **Tier 0: Survival Smoke**: Added a new tier to `TESTING_CREATOR.md` focused on verifying that built artifacts (binaries, packages) actually run. Specifically targets native binding architecture mismatches and startup-sequence logs.
+- **Configuration Integrity**: `STUB_AND_COMPLETENESS.md` now extracts environment variable requirements and verifies that the app and the test suite are using identical configuration keys (preventing `OT_VAULT_PATH` vs `OBSIDIAN_VAULT_PATH` drift).
+- **Visibility & Boot Guardrails**: `HARNESS_CREATOR.md` now mandates that UI harnesses assert **Visibility** (not just existence) and include a **Boot-Sequence Watcher** to catch errors during initial app startup.
+
 ## [0.6.5] — 2026-05-19
 
 ### Added

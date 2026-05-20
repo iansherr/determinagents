@@ -43,14 +43,17 @@ Open-ended; depends on how many gaps exist, the surface area of the service, and
 
 ## The four tiers
 
-Each tier answers a different question. A service is "verified" only when it has live coverage at every tier where the question is non-trivial for it. Correctness — "is the math right?" — is covered by `TEST_GAPS.md` and is not duplicated here.
+Each tier answers a different question. A service is "verified" only when it has live coverage at every tier where the question is non-trivial for it. 
 
 | Tier | Question | Common artifacts |
 |------|----------|------------------|
+| **0. Survival Smoke** | Does the **built artifact** actually run? | Binary execution tests, native binding smokes, startup-sequence logs |
 | **1. Adversarial** | Can it be bypassed or coerced? | RBAC matrix tests, attestation challenges, fuzz harnesses |
 | **2. Chaos** | Does it survive failure? | Provider-down simulations, circuit-breaker tests, survival mode |
 | **3. Simulation** | Does it work in a cluster? | Multi-node Docker harness, leader-election + thundering-herd tests |
 | **4. Forensics** | Is tampering detectable? | Integrity / fracture tests, honeytoken alarms |
+
+**Note on Tier 0**: This tier prevents the "Dev-Mode Trap." It **MUST** run against the distributed bundle (e.g. `dist/`, `target/release/`, or a Docker image) rather than the source code. It validates that native bindings (`sqlite3`, `canvas`) match the target architecture.
 
 Not every service needs all four. A pure-CRUD service may legitimately stop at Tier 1. A service handling payments, secrets, or distributed state needs all four.
 
