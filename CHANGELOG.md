@@ -6,6 +6,14 @@ All notable changes to determinagents are documented here. The format is loosely
 
 ## [Unreleased]
 
+## [0.7.1] — 2026-05-22
+
+### Added
+- **Configuration & State Chaos**: Added testing blueprints (`B8`) and implementation mandates (`Tier 2.4`) for validating resilience against malformed configurations and missing intermediate states.
+- **IPC / Boundary Contract Drift**: Added blueprints (`B9`) and implementation mandates (`Tier 2.6`) to hunt for crashes caused by missing arguments or invalid payloads over internal boundaries.
+- **Concurrency & Race Conditions**: Expanded Tier 3 and added blueprints (`B10`) for testing rapid, conflicting user interactions on rich clients overlapping with background tasks.
+- **Persistence & OS-Level Failures**: Added blueprints (`B11`) and implementation mandates (`Tier 2.5`) simulating read-only mounts, disk-full events, and lock contention to ensure safe aborts without data corruption.
+
 ## [0.7.0] — 2026-05-19
 
 ### Added

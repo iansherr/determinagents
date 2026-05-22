@@ -149,6 +149,26 @@ When the audit report identifies a high-value gap, use these blueprints as the *
     3. **Step 2**: Use captured state to perform API call for Finding B.
 - **Assertion**: Final outcome matches the "Catastrophic" hypothesis from the Chain Report.
 
+### B8. Configuration & State Chaos
+- **Harness**: Initialize the app or component with `null`, missing, or structurally invalid config/state objects.
+- **Logic**: Provide `{ enabledIntegrations: 'invalid' }`, `vaults: []`, or simulate multi-step UI flows missing intermediary state (e.g. going back/forward).
+- **Assertion**: App must degrade gracefully, skip invalid modules silently, or show an empty state—never crash or throw undefined errors.
+
+### B9. IPC / Boundary Contract Drift
+- **Harness**: Verify that internal boundaries (e.g. Electron IPC, frontend/backend endpoints) have matching contracts and handle invalid payloads.
+- **Logic**: Scan/invoke IPC routes sending missing args, arrays instead of objects, or invoke non-existent channels.
+- **Assertion**: Boundary gracefully rejects malformed payloads; missing handlers fail cleanly instead of hanging the renderer/client.
+
+### B10. Concurrency & Race Conditions
+- **Harness**: A script that triggers multiple conflicting async operations simultaneously.
+- **Logic**: Fire `Promise.all([syncData(), reorderItems(), deactivateIntegration()])` where operations overlap in state access.
+- **Assertion**: Operations are idempotent, state remains consistent (no duplicate IDs/lost writes), and the UI/app does not lock up.
+
+### B11. Persistence & OS-Level Failures
+- **Harness**: Simulate read-only filesystems, disk-full events, or locked files during write operations.
+- **Logic**: Mock `fs.writeFile` to throw EACCES or ENOSPC, or set target directories to read-only (`chmod 400`).
+- **Assertion**: App reverts to previous state, queues operations for retry, or alerts the user—preventing partial writes and silent data loss.
+
 ---
 
 ## Severity rubric (for the harness itself)

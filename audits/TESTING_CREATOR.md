@@ -234,11 +234,36 @@ grep -rEn -B2 -A5 --include='*.go' --include='*.py' --include='*.ts' --include='
 
 Each outbound call without a timeout is a Tier-2 finding. Add a timeout, then add a test that verifies it triggers correctly.
 
+### 2.4 Configuration & State Resilience
+
+Systems must not crash or behave unpredictably when handed malformed configuration or missing expected state.
+
+**Implementation mandate:**
+- Pass `null`, `{}` or structurally invalid types (e.g. string instead of array) to initialization functions.
+- For multi-step UI flows, assert graceful fallback or reset if intermediate state is missing (e.g. user goes back/forward).
+- Assert the system falls back to defaults, shows empty states, or returns clean validation errors.
+
+### 2.5 Persistence & OS-Level Failures
+
+Local state persistence must survive read-only mounts, disk-full events, and lock contentions.
+
+**Implementation mandate:**
+- Mock or configure filesystem boundaries to throw EACCES, ENOSPC, or EROFS during critical write paths.
+- Assert the system alerts the user and cleanly aborts without corrupting existing files or database rows.
+
+### 2.6 IPC / Boundary Contract Drift
+
+Internal API boundaries (e.g., Electron IPC, micro-frontends, separate processes) often lack the validation of external APIs.
+
+**Implementation mandate:**
+- Send missing arguments, malformed arrays, or invoke unknown channels across the boundary.
+- Assert the receiving handler sanitizes the input or rejects it cleanly instead of crashing the main process or hanging the client.
+
 ---
 
 ## Phase 3: Multi-Node Simulation (Tier 3)
 
-The "physics" tier — bugs that only appear when multiple instances of the system interact.
+The "physics" tier — bugs that only appear when multiple instances of the system interact, or when concurrent actions race against each other.
 
 Skip this tier entirely if the service is genuinely single-instance and will remain so. Most production services are not.
 
@@ -262,6 +287,14 @@ For services running >1 instance:
 ### 3.3 Machine-to-machine handshakes
 
 For OIDC / mTLS / service-to-service auth flows: implement a test that completes the handshake **without human interaction** in a clean cluster start. If a flow needs a human in the loop on first boot, it's a Tier-3 finding.
+
+### 3.4 Client-Side Concurrency & Racing
+
+For rich clients (Electron, SPA), simulate rapid, conflicting user interactions happening concurrently with background tasks.
+
+**Implementation mandate:**
+- Fire parallel actions: e.g. `Promise.all([dragAndDropItem(), syncBackground(), deleteItem()])`.
+- Assert the UI remains responsive, lists stay ordered correctly, and no duplicate IDs or phantom records are persisted.
 
 ---
 
