@@ -99,3 +99,65 @@ export const handlers = [
 const server = setupServer(...handlers);
 server.listen();
 ```
+
+---
+
+## S4. Visual Regression & Accessibility (Playwright)
+
+Use this to catch unintended visual drift and a11y violations.
+
+```javascript
+// tests/harness/visual_a11y.spec.js
+const { test, expect } = require('@playwright/test');
+const AxeBuilder = require('@axe-core/playwright').default;
+
+test.describe('Visual & A11y Integrity', () => {
+  test('Dashboard should match visual baseline and pass a11y', async ({ page }) => {
+    await page.goto(process.env.TARGET_URL || 'http://localhost:3000/dashboard');
+    
+    // 1. Visual Regression (Snapshotting)
+    // First run creates baseline, subsequent runs diff against it.
+    await expect(page).toHaveScreenshot('dashboard-baseline.png', {
+      fullPage: true,
+      maxDiffPixels: 100 // Allow minor antialiasing noise
+    });
+
+    // 2. Automated Accessibility Gate
+    const accessibilityScanResults = await new AxeBuilder({ page }).analyze();
+    expect(accessibilityScanResults.violations).toEqual([]);
+  });
+});
+```
+
+---
+
+## S5. Environmental Determinism (Playwright)
+
+Use this to test time-based logic and network degradation.
+
+```javascript
+// tests/harness/environmental_determinism.spec.js
+const { test, expect } = require('@playwright/test');
+
+test.describe('Environmental Chaos & Time Travel', () => {
+  test('Time-based logic (Overdue tasks)', async ({ page }) => {
+    // Freeze time to a specific deterministic date
+    const mockNow = new Date('2026-05-11T12:00:00Z').valueOf();
+    await page.clock.install({ time: mockNow });
+    
+    await page.goto('/tasks');
+    // Assert logic that depends on "today" or "tomorrow"
+  });
+
+  test('Offline Mutation Queue', async ({ page, context }) => {
+    await page.goto('/app');
+    
+    // Simulate dropping the network connection
+    await context.setOffline(true);
+    
+    // Perform mutation, assert it enters offline queue gracefully
+    await page.click('#add-task');
+    await expect(page.locator('.offline-sync-indicator')).toBeVisible();
+  });
+});
+```

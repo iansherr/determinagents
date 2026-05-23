@@ -169,6 +169,16 @@ When the audit report identifies a high-value gap, use these blueprints as the *
 - **Logic**: Mock `fs.writeFile` to throw EACCES or ENOSPC, or set target directories to read-only (`chmod 400`).
 - **Assertion**: App reverts to previous state, queues operations for retry, or alerts the user—preventing partial writes and silent data loss.
 
+### B12. Visual Regression & a11y (Playwright)
+- **Harness**: Playwright script utilizing `toHaveScreenshot()` and `@axe-core/playwright`.
+- **Logic**: Navigate to key views, take full-page screenshot diffs, and scan the DOM for ARIA/contrast violations.
+- **Assertion**: Pixel diff must be within tolerance; axe-core violations array must be empty.
+
+### B13. Environmental Determinism (Time/Network Mocking)
+- **Harness**: Playwright script manipulating the browser context's environment.
+- **Logic**: Freeze the clock (`page.clock.install`) to a deterministic date, or simulate dropped network (`context.setOffline(true)`).
+- **Assertion**: Time-sensitive logic resolves consistently; offline mutations queue gracefully without crashing.
+
 ---
 
 ## Severity rubric (for the harness itself)

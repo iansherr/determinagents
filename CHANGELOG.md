@@ -6,6 +6,13 @@ All notable changes to determinagents are documented here. The format is loosely
 
 ## [Unreleased]
 
+## [0.7.2] — 2026-05-23
+
+### Added
+- **Environmental Determinism**: Added time and network mocking blueprints (`B13`), implementation mandates (`Tier 2.7`), and boilerplate (`Stub S5`) to handle offline states and time-travel testing deterministically.
+- **Visual Regression & a11y**: Added blueprint `B12` and boilerplate `Stub S4` covering Playwright assertions for DOM snapshots and accessibility violations using `@axe-core/playwright`.
+- **Cross-Platform Matrix Hardening**: Clarified `Tier 0: Survival Smoke` in `TESTING_CREATOR.md` to require checking native bindings and execution across multiple operating systems concurrently.
+
 ## [0.7.1] — 2026-05-22
 
 ### Added
@@ -318,7 +325,10 @@ Initial public-shaped release. The library and install flow are usable end-to-en
 - Reports go to `docs/reports/<NAME>_<YYYY-MM-DD>.md` in the target project.
 - `docs/determinagents/AUDIT_CONTEXT.md` (overlay) is read first if present, to apply project-specific calibrations.
 
-[Unreleased]: https://github.com/iansherr/determinagents/compare/v0.5.3...HEAD
+[Unreleased]: https://github.com/iansherr/determinagents/compare/v0.7.2...HEAD
+[0.7.2]: https://github.com/iansherr/determinagents/compare/v0.7.1...v0.7.2
+[0.7.1]: https://github.com/iansherr/determinagents/compare/v0.7.0...v0.7.1
+[0.7.0]: https://github.com/iansherr/determinagents/compare/v0.6.9...v0.7.0
 [0.5.3]: https://github.com/iansherr/determinagents/compare/v0.5.2...v0.5.3
 [0.5.2]: https://github.com/iansherr/determinagents/compare/v0.5.1...v0.5.2
 [0.5.1]: https://github.com/iansherr/determinagents/compare/v0.5.0...v0.5.1

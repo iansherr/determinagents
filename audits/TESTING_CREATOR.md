@@ -259,6 +259,14 @@ Internal API boundaries (e.g., Electron IPC, micro-frontends, separate processes
 - Send missing arguments, malformed arrays, or invoke unknown channels across the boundary.
 - Assert the receiving handler sanitizes the input or rejects it cleanly instead of crashing the main process or hanging the client.
 
+### 2.7 Environmental Determinism (Time & Network Chaos)
+
+Tests that rely on the current time or perfect network conditions are flaky and hide bugs.
+
+**Implementation mandate:**
+- **Time Travel:** For time-based logic (e.g. overdue tasks, expiring tokens), mock the system clock (e.g. `page.clock.setFixedTime` in Playwright or `freezegun` in Python). Assert that behavior is identical on every CI run.
+- **Network Throttling:** For clients with offline mutation queues, simulate dropped connections or slow 3G network conditions and assert the queue handles synchronization gracefully upon reconnection.
+
 ---
 
 ## Phase 3: Multi-Node Simulation (Tier 3)
