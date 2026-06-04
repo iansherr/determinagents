@@ -157,6 +157,7 @@ Most audits run in 30–180 minutes at default scope, scaling with codebase size
 | [audits/DATA_FLOW_VERIFY.md](audits/DATA_FLOW_VERIFY.md) | Drives a real user flow end-to-end and observes wire traffic + DB state. The "observed" counterpart to `DATA_FLOW_TRACE.md`'s "inferred" — catches silent layer drift static analysis misses | Disposable workspace; app runs locally; AUDIT_CONTEXT.md `DATA_FLOW_VERIFY` section configured |
 | [audits/TESTING_CREATOR.md](audits/TESTING_CREATOR.md) | Implements tests across four tiers — Adversarial, Chaos, Simulation, Forensics — beyond what `TEST_GAPS.md` covers | Run `TEST_GAPS.md` and `SECURITY_PENTEST.md` first |
 | [audits/HARNESS_CREATOR.md](audits/HARNESS_CREATOR.md) | Deterministically generates verification harnesses (Playwright, Docker, Fuzzing) to prove/refute audit findings | An audit report exists; disposable workspace |
+| [audits/RECURSIVE_IMPROVEMENT.md](audits/RECURSIVE_IMPROVEMENT.md) | Autonomously design, execute, and evaluate experiments to improve a specific metric or solve an open-ended problem. Generates hypotheses, mutates code, and verifies against a harness. | Measurable goal; deterministic harness exists; disposable workspace |
 
 Two read-only audits — `ERROR_HANDLING.md` and `STUB_AND_COMPLETENESS.md` — include an **optional mutating Phase 6** (fault injection and endpoint verification respectively) that follows the harness conventions in `specs/FORMAT.md`. Use scope `+harness` to enable.
 

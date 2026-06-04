@@ -6,6 +6,12 @@ All notable changes to determinagents are documented here. The format is loosely
 
 ## [Unreleased]
 
+## [0.8.0] — 2026-06-04
+
+### Added
+- **Recursive Improvement**: Introduced `audits/RECURSIVE_IMPROVEMENT.md`, an autonomous agentic loop designed to incrementally optimize code or solve complex problems against a measurable goal or determinagent test harness. This implements the "Hypothesize -> Implement -> Measure -> Verify" loop.
+- Added `RECURSIVE_IMPROVEMENT` to the README's mutating creators table and `INVOCATIONS.md`.
+
 ## [0.7.2] — 2026-05-23
 
 ### Added

@@ -49,6 +49,7 @@ Use these behavior tokens for direct routing on the same command:
 | `refresh-context` | Refresh AUDIT_CONTEXT |
 | `auto-report` | `AUTOMATED_REPORTING` orchestrator |
 | `harness` | `HARNESS_CREATOR` |
+| `recursive` | `RECURSIVE_IMPROVEMENT` |
 
 Example direct runs:
 
@@ -421,6 +422,30 @@ Read $DETERMINAGENTS_HOME/specs/MAINTENANCE.md and run it in
 
 Reports go to docs/maintenance/<MODE>_<YYYY-MM-DD>[_<slug>].md (gitignored).
 Do not modify any library files; propose edits only.
+
+If you maintain an automated, read-only signal digest (for example
+capacity/reliability/cost/drift snapshots), feed it through
+`--mode=integrate --source=<digest-path>` rather than auto-editing library
+content.
+```
+
+This is **not** a user audit. End users running DeterminAgents on their projects don't invoke this — it's for the library steward.
+
+---
+
+## Authoring new invocations
+
+Add an entry to this file when the library grows a new behavior. Format:
+
+```markdown
+## <BEHAVIOR>
+**Prerequisites**: ...
+
+[paste-ready prompt with --flags]
+```
+
+If the same flag pattern shows up across multiple invocations, document it once in the audits-table prompt and reference it elsewhere. Resist enumerating variants of the same behavior — variants are flag combinations, not separate invocations.
+odify any library files; propose edits only.
 
 If you maintain an automated, read-only signal digest (for example
 capacity/reliability/cost/drift snapshots), feed it through
