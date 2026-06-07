@@ -28,9 +28,11 @@ Use these behavior tokens for direct routing on the same command:
 | `security` | `SECURITY_PENTEST` |
 | `data-flow` | `DATA_FLOW_TRACE` |
 | `error-handling` | `ERROR_HANDLING` |
+| `adversarial` | `ADVERSARIAL_HARDENER` |
 | `test-gaps` | `TEST_GAPS` |
 | `docs-drift` | `DOCS_DRIFT` |
 | `ux` | `UX_DESIGN_AUDIT` |
+| `token-refactor` | `UX_TOKEN_REFACTOR` |
 | `handoff` | `DESIGN_HANDOFF_AUDIT` |
 | `chainer` | `SCENARIO_CHAINER` |
 | `resource-capacity` | `RESOURCE_CAPACITY` |

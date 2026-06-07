@@ -6,6 +6,8 @@ Autonomously design, execute, and evaluate experiments to improve a specific met
 
 ## Mode: Mutating
 
+**Protocol**: This audit follows the [Recursive Self-Improvement Protocol](../specs/LOOP_PROTOCOL.md).
+
 This agent **mutates** the codebase. It requires a disposable workspace (git worktree, branch, or container) because it will iteratively modify, test, and potentially revert code.
 
 ## When to run
