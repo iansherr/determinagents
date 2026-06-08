@@ -105,9 +105,9 @@ AGY CLI is the successor to Gemini CLI. It uses a **plugin-based** architecture 
 
 **Naming Convention Nuance**:
 - **Gemini CLI**: Uses **subdirectory namespacing** with a colon (`/determinagents:audit-stub`).
-- **Antigravity CLI (agy)**: Uses the **`@` prefix** for direct agent invocation. 
-  - Direct: `@audit-stub`
-  - Namespaced: `@determinagents/audit-stub` (if the plugin is installed)
+- **Antigravity CLI (agy)**: Uses the **`@` prefix** for direct agent invocation.
+  - Namespaced (recommended): `@determinagents:audit-stub`
+  - Plugin grouping: setting the agent `name` to `namespace:behavior` ensures they are grouped and discoverable when typing `@determinagents:`.
 
 Users invoke these in `agy` by typing the `@` symbol followed by the agent name, or by managing them via `/agents`.
 
@@ -147,17 +147,27 @@ The user invokes with arguments: `/determinagents testing-creator --tier=2 --ser
 
 [opencode](https://opencode.ai) uses the same markdown-with-YAML-frontmatter convention as Claude Code's slash commands, and explicitly reads `~/.claude/skills/` as a fallback.
 
-**UX Preference**: While a single `/determinagents` hub is cleaner for the menu, many users prefer **individual command files** for better discoverability and "attached sub-commands" feel.
+**Discovery & Namespacing**: Like Gemini CLI, these tools support **subdirectory namespacing**. Files in a `determinagents/` folder are invoked as `/determinagents:name`.
 
-If the user asks for "attached sub-commands" or better discovery, generate individual markdown files in `~/.claude/commands/` for every behavior defined in `INVOCATIONS.md`.
+**Structure**:
+```text
+~/.claude/commands/
+├── determinagents.md            <-- Hub (/determinagents)
+└── determinagents/              <-- Namespaced behaviors
+    ├── audit-stub.md            <-- /determinagents:audit-stub
+    ├── audit-security.md        <-- /determinagents:audit-security
+    └── ...
+```
+
+This ensures every behavior appears in the `/` autocomplete menu with its own description, while keeping the top-level command list clean.
 
 | Command | File |
 |---------|------|
 | Hub | `determinagents.md` |
-| Audits | `audit-stub.md`, `audit-security.md`, etc. |
-| Tools | `resolve.md`, `testing.md`, etc. |
+| Audits | `determinagents/audit-stub.md`, etc. |
+| Tools | `determinagents/resolve.md`, etc. |
 
-This ensures every behavior appears in the `/` autocomplete menu with its own description.
+**UX Preference**: While namespacing is better for clean lists, some users prefer individual flat files. Default to namespaced subdirectories for this library.
 
 **Native path:** `.opencode/commands/` (project-local) or `~/.opencode/commands/` (global). Markdown files; the filename minus `.md` becomes the command name.
 ...
