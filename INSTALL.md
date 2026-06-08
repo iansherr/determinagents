@@ -103,7 +103,13 @@ AGY CLI is the successor to Gemini CLI. It uses a **plugin-based** architecture 
 }
 ```
 
-Users invoke these in `agy` using the `@` symbol (e.g. `@audit-stub "Run against this repo"`) or by managing them via `/agents`.
+**Naming Convention Nuance**:
+- **Gemini CLI**: Uses **subdirectory namespacing** with a colon (`/determinagents:audit-stub`).
+- **Antigravity CLI (agy)**: Uses the **`@` prefix** for direct agent invocation. 
+  - Direct: `@audit-stub`
+  - Namespaced: `@determinagents/audit-stub` (if the plugin is installed)
+
+Users invoke these in `agy` by typing the `@` symbol followed by the agent name, or by managing them via `/agents`.
 
 ### Claude Code
 
