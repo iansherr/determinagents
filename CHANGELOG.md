@@ -6,6 +6,18 @@ All notable changes to determinagents are documented here. The format is loosely
 
 ## [Unreleased]
 
+## [0.9.0] — 2026-06-07
+
+### Added
+- **Loop Orchestration**: Introduced `audits/LOOP_ORCHESTRATOR.md` to autonomously find, plan, and execute multiple recursive improvement loops.
+- **Guided Onboarding**: Added `audits/LOOP_BOOTSTRAP.md` (`init-loops`), an interactive wizard that scans the repo and helps users memorialize loops in `docs/determinagents/LOOPS.md`.
+- **Native Agent Loops**: Added boilerplate `S8` to `specs/HARNESS_STUBS.md` for native, markdown-driven improvement loops that work without external bash wrappers.
+- **Registry & Persistence**: Standardized loop storage in `docs/determinagents/LOOPS.md` to provide a persistent source of truth for self-improving codebases.
+
+### Changed
+- Improved discovery logic in `LOOP_ORCHESTRATOR` to exclude noisy dependency directories (`node_modules`, `vendor`).
+- Tightened loop-related prompt wording to prioritize harness structure over verbal detail.
+
 ## [0.8.0] — 2026-06-04
 
 ### Added

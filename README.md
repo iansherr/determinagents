@@ -77,6 +77,8 @@ Once that loop is comfortable, browse the audits table below for other audits to
 | Review runtime capacity and resource pressure | `/determinagents resource-capacity` |
 | Find god-files and propose extraction seams | `/determinagents structural-entropy` |
 | **Don't know what to run** — let it pick | `/determinagents next` |
+| Set up and discover recursive improvement loops | `/determinagents init-loops` |
+| Orchestrate recursive improvement loops automatically | `/determinagents loop-orchestrator` |
 | Create a weekly or post-change system digest | `/determinagents auto-report --mode=baseline` |
 | Work through report findings with approval gates | `/determinagents resolve --report=<path>` |
 

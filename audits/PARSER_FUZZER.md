@@ -1,10 +1,12 @@
-# Recursive Improvement Loop
+# Parser Round-trip Fuzzer
 
 ## Purpose
 
-Run a recursive improvement loop: hypothesize, modify, verify against a harness, and iterate until the goal is met or options are exhausted.
+Autonomously generate adversarial markdown strings and verify parser stability to improve a specific metric (performance, reliability, accuracy) or solve an open-ended problem. This agent implements the "recursive self-improvement" loop: generating hypotheses, modifying code, verifying the outcome against a baseline harness, and iterating until the goal is met or options are exhausted.
 
 ## Mode: Mutating
+
+**Protocol**: This audit follows the [Recursive Self-Improvement Protocol](../specs/LOOP_PROTOCOL.md).
 
 This agent **mutates** the codebase. It requires a disposable workspace (git worktree, branch, or container) because it will iteratively modify, test, and potentially revert code.
 
@@ -97,6 +99,54 @@ Compare the new results against the baseline and the goal:
 | **P2** | Experiment yields negligible improvement for high complexity. | Consider reverting to maintain simplicity. |
 | **P3** | Code style or readability degrades significantly during optimization. | Note for human review/refactoring. |
 
+---
+
+## Report template
+
+```markdown
+# Recursive Improvement Report — <DATE>
+
+## Summary
+- **Goal**: <Goal Description>
+- **Harness**: `<Harness Command>`
+- **Iterations Run**: X / Y max
+- **Outcome**: [Goal Met | Partial Improvement | Exhausted/Failed]
+- **Time spent**: ~Xh
+
+## Metrics Journey
+- **Baseline**: <Metric Value>
+- **Final**: <Metric Value>
+- **Net Change**: <Percentage/Absolute Improvement>
+
+## Iteration Log
+
+### Iteration 1
+- **Hypothesis**: <Description>
+- **Action**: <What was changed>
+- **Result**: [Success | Partial | Failed] — <Metric/Error>
+- **Disposition**: [Committed | Reverted]
+
+### Iteration 2
+...
+
+## Patterns & Discoveries
+1–3 paragraph synthesis of what worked, what didn't, and why. If the loop hit a ceiling, explain the apparent constraint (e.g., "I/O bound," "framework limitation").
+
 ## Next steps
-1. Run `/determinagents resolve --report=docs/reports/RECURSIVE_IMPROVEMENT_<DATE>.md`
-2. (Optional) Run `/determinagents testing --tier=1` to add permanent regression tests for the optimized path.
+
+**Review the successful changes:**
+```bash
+git diff origin/main..HEAD
+```
+
+**Run the harness manually to verify:**
+```bash
+<Harness Command>
+```
+```
+
+## Anti-patterns
+
+- **Optimizing without Correctness**: Making code faster by breaking its logic. The harness MUST test correctness.
+- **The "One Massive Commit"**: Trying 5 different optimizations at once. Hypotheses must be tested in isolation to know which one actually worked.
+- **Ignoring the Ceiling**: Continuing to run micro-optimizations when the bottleneck has clearly shifted elsewhere (e.g., optimizing CPU loops when the task is now network I/O bound).

@@ -33,6 +33,7 @@ Use these behavior tokens for direct routing on the same command:
 | `docs-drift` | `DOCS_DRIFT` |
 | `ux` | `UX_DESIGN_AUDIT` |
 | `token-refactor` | `UX_TOKEN_REFACTOR` |
+| `fuzzer` | `PARSER_FUZZER` |
 | `handoff` | `DESIGN_HANDOFF_AUDIT` |
 | `chainer` | `SCENARIO_CHAINER` |
 | `resource-capacity` | `RESOURCE_CAPACITY` |
@@ -45,6 +46,7 @@ Use these behavior tokens for direct routing on the same command:
 | `flow-verify` | `DATA_FLOW_VERIFY` |
 | `testing` | `TESTING_CREATOR` |
 | `init` | Initialize Project bootstrap |
+| `init-loops` | `LOOP_BOOTSTRAP` |
 | `design` | `DESIGN.md` bootstrap |
 | `registry` | `FEATURE_REGISTRY.md` bootstrap |
 | `context` | `AUDIT_CONTEXT.md` bootstrap |
@@ -52,6 +54,7 @@ Use these behavior tokens for direct routing on the same command:
 | `auto-report` | `AUTOMATED_REPORTING` orchestrator |
 | `harness` | `HARNESS_CREATOR` |
 | `recursive` | `RECURSIVE_IMPROVEMENT` |
+| `loop-orchestrator` | `LOOP_ORCHESTRATOR` |
 
 Example direct runs:
 

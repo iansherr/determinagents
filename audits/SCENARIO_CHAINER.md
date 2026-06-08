@@ -20,7 +20,7 @@ This agent parses existing reports and generates a **Chain Specification**. It d
 
 ## Output
 
-`docs/reports/SCENARIO_CHAIN_<YYYY-MM-DD>.md`. This report contains the "Chained Hypotheses" and the technical requirements for the subsequent harness.
+`docs/reports/SCENARIO_CHAINER_<YYYY-MM-DD>.md`. This report contains the "Chained Hypotheses" and the technical requirements for the subsequent harness.
 
 ---
 
@@ -70,7 +70,7 @@ For the top 1-2 Chains, define the **Stateful Requirements**:
 Generate the exact command to build the physics engine for this chain:
 
 ```bash
-/determinagents harness --chain --report=docs/reports/SCENARIO_CHAIN_<DATE>.md
+/determinagents harness --chain --report=docs/reports/SCENARIO_CHAINER_<DATE>.md
 ```
 
 ---
@@ -83,33 +83,6 @@ Generate the exact command to build the physics engine for this chain:
 | **P1** | The chain leads to unauthorized access to single-user data or significant UI state corruption. |
 | **P2** | The chain is theoretically possible but requires unlikely environmental conditions. |
 
----
-
-## Report template
-
-```markdown
-# Scenario Chain Report — <DATE>
-
-## Summary
-- Source Reports: [List of paths]
-- Target Flow: <e.g. User Onboarding / Auth>
-- Chains Identified: X
-
-## Chained Hypothesis: <Title>
-### The Story
-[1-2 paragraphs describing the failure journey]
-
-### The Path
-1. **Trigger**: [Finding ID] - [Action]
-2. **Pivot**: [Finding ID] - [Capture]
-3. **Impact**: [Finding ID] - [Outcome]
-
-### Technical Specs for HARNESS_CREATOR
-- **Runtime**: <Playwright | Python | Docker>
-- **State Requirement**: <DB setup, Auth keys>
-- **Assertions**: <What defines a successful chain execution>
-
 ## Next steps
 1. Run `/determinagents harness --chain --report=<THIS_PATH>`
 2. Review generated `tests/harness/chain_*.spec.js`
-```
