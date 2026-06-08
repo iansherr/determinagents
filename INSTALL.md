@@ -34,72 +34,22 @@ Recommended pairing: keep one canonical command surface. Use `/determinagents` a
 **Template for Gemini CLI (`~/.gemini/commands/determinagents.toml`):**
 
 ```toml
+# generated-by: <ABSOLUTE_PATH_TO_LIBRARY>/INSTALL.md
 description = "Library Hub — interactive list of all DeterminAgents audits and tools"
 prompt = \"\"\"
 You are the **DeterminAgents Library Hub**.
-
-IMMEDIATE ACTION: Display the menu below to the user verbatim. Do NOT perform any shell commands, file searches, or research until the user has selected an item from the menu.
-
-Execution surface rule: do not use shell `determinagents` commands to run audits.
-The shell CLI is install/update/materialize/doctor only. Audit execution
-must stay in this slash-command flow.
-
-If wrong-surface detected (example: `determinagents --help` used during an
-audit run), recover immediately with one line and continue in-band:
-"That CLI is installer-only. Continue here with `/determinagents <behavior> [flags]` or a menu choice."
-
-ONE EXCEPTION — adapt the "First Run" section based on which core
-project artifacts already exist. Check for these three files in the
-current project root:
-
-  - DESIGN.md
-  - docs/determinagents/FEATURE_REGISTRY.md
-  - docs/determinagents/AUDIT_CONTEXT.md
-
-Then render the First Run section conditionally:
-
-  - If ALL THREE exist: omit the entire "🚀 First Run" section.
-  - If SOME exist: replace the section with one line under "Bootstraps":
-      "**Re-init**: bootstrap any missing core artifacts (lists which are missing)."
-  - If NONE exist: render the section as written below.
-
-This check is a quick filesystem stat — no shell commands or
-listings should be shown to the user. Then display the menu.
-
----
-**DeterminAgents Library** (Path: <ABSOLUTE_PATH_TO_LIBRARY>)
-Read docs/determinagents/AUDIT_CONTEXT.md if present. Reports go to docs/reports/.
-
-Tip: for direct routing, use `/determinagents <behavior> [flags]`.
-Example: `/determinagents ux --target=<dev-url>`.
-Example: `/determinagents p0 --p0-only`.
-
-### 🚀 First Run (Recommended)
-- **Initialize Project**: Survey codebase and bootstrap missing core artifacts (DESIGN, FEATURE_REGISTRY, AUDIT_CONTEXT) to calibrate future audits.
-
-### Available Audits (Read-Only)
-... [Menu Content from INVOCATIONS.md] ...
-
-**Which behavior would you like to run?**
----
-\"\"\"
+...
 ```
 
-When invoked, the hub should:
-1. List the available categories (Audits, Mutating Tools, Bootstraps).
-2. Briefly describe what each does.
-3. Provide the full prompt for the user's chosen behavior (or just start it if the tool supports interactive selection).
+**Marker syntax mandate**: Use the host tool's native comment syntax for the `generated-by` marker.
+- **Markdown (.md)**: `<!-- generated-by: ... -->` at the top.
+- **TOML (.toml)**: `# generated-by: ...` at the top.
+- **JSON (.json)**: `"metadata": { "generated-by": "..." }` or a top-level key.
+- **YAML (.yaml)**: `# generated-by: ...` at the top.
 
-### Direct Routing on the Same Command
+Failure to follow native syntax (e.g. putting an HTML comment in a TOML file) will cause CLI errors.
 
-Use `/determinagents` as a single command family:
-
-| Mode | Behavior |
-|------|----------|
-| `/determinagents` | Opens interactive hub/menu |
-| `/determinagents <behavior> [flags]` | Runs behavior directly |
-
-Behavior tokens: `stub`, `security`, `data-flow`, `error-handling`, `test-gaps`, `docs-drift`, `ux`, `p0`, plus mutating tools (`resolve`, `security-hunt`, `flow-verify`, `testing`) and bootstraps (`init`, `design`, `registry`, `context`, `refresh-context`).
+Behavior tokens: `stub`, `security`, `data-flow`, `error-handling`, `test-gaps`, `docs-drift`, `ux`, `p0`, plus mutating tools (`resolve`, `security-hunt`, `flow-verify`, `testing`) and bootstraps (`init`, `init-loops`, `design`, `registry`, `context`, `refresh-context`).
 
 | Source (in `INVOCATIONS.md`) | Generated artifact |
 |------------------------------|-------------------|
@@ -110,25 +60,50 @@ Behavior tokens: `stub`, `security`, `data-flow`, `error-handling`, `test-gaps`,
 | SECURITY_HUNT | `/security-hunt` |
 | DATA_FLOW_VERIFY | `/data-flow-verify` |
 | TESTING_CREATOR | `/testing-creator` |
+| LOOP_ORCHESTRATOR | `/loop-orchestrator` |
 | Per-project bootstraps (DESIGN, FEATURE_REGISTRY, AUDIT_CONTEXT) | `/bootstrap-design`, etc. |
 | Maintenance | `/refresh-audit-context` |
+| LOOP_BOOTSTRAP | `/init-loops` |
 
 The shared conventions block at the top of `INVOCATIONS.md` should become a **header included in every generated artifact**, so each command is self-contained.
 
 ## Host-tool targets
 
-### AGY CLI
+### AGY CLI (Antigravity)
 
-AGY CLI uses custom subagents configured in `~/.agy/subagents/` (global) or `.agy/subagents/` (project-local). Configuration files are JSON or YAML.
+AGY CLI is the successor to Gemini CLI. It uses a **plugin-based** architecture for custom agents.
+
+**Global Path**: `~/.gemini/antigravity-cli/plugins/determinagents/agents/`
+**Project Path**: `.agents/`
 
 **Structure**:
 ```text
-~/.agy/subagents/
-├── determinagents.json          <-- Hub
-├── audit-stub.json
-└── resolve.json
+~/.gemini/antigravity-cli/plugins/determinagents/
+├── plugin.json                  <-- Plugin manifest
+└── agents/                      <-- Individual agent definitions
+    ├── audit-stub.json          <-- Individual agent
+    └── resolve.json
 ```
-For AGY, create individual subagent definitions that wrap the invocations. Users invoke them using AGY's native subagent or run commands.
+
+**Plugin Manifest (`plugin.json`):**
+```json
+{
+  "name": "determinagents",
+  "description": "Universal audit harnesses for coding agents",
+  "version": "0.9.0"
+}
+```
+
+**Agent Definition (`agents/audit-stub.json`):**
+```json
+{
+  "name": "audit-stub",
+  "description": "Audit for phantom endpoints and dead handlers",
+  "system_prompt": "Read <ABSOLUTE_PATH_TO_LIBRARY>/audits/STUB_AND_COMPLETENESS.md and run it..."
+}
+```
+
+Users invoke these in `agy` using the `@` symbol (e.g. `@audit-stub "Run against this repo"`) or by managing them via `/agents`.
 
 ### Claude Code
 
@@ -164,16 +139,22 @@ The user invokes with arguments: `/determinagents testing-creator --tier=2 --ser
 
 ### opencode
 
-[opencode](https://opencode.ai) uses the same markdown-with-YAML-frontmatter convention as Claude Code's slash commands, and explicitly reads `~/.claude/skills/` as a fallback. This means **a single install serves both tools** — you do not need a separate materialization pass for opencode.
+[opencode](https://opencode.ai) uses the same markdown-with-YAML-frontmatter convention as Claude Code's slash commands, and explicitly reads `~/.claude/skills/` as a fallback.
+
+**UX Preference**: While a single `/determinagents` hub is cleaner for the menu, many users prefer **individual command files** for better discoverability and "attached sub-commands" feel.
+
+If the user asks for "attached sub-commands" or better discovery, generate individual markdown files in `~/.claude/commands/` for every behavior defined in `INVOCATIONS.md`.
+
+| Command | File |
+|---------|------|
+| Hub | `determinagents.md` |
+| Audits | `audit-stub.md`, `audit-security.md`, etc. |
+| Tools | `resolve.md`, `testing.md`, etc. |
+
+This ensures every behavior appears in the `/` autocomplete menu with its own description.
 
 **Native path:** `.opencode/commands/` (project-local) or `~/.opencode/commands/` (global). Markdown files; the filename minus `.md` becomes the command name.
-
-**Shared path (recommended):** Install at `~/.claude/commands/` or `~/.claude/skills/`. opencode picks these up automatically. Users of both tools get one source of truth.
-
-**Frontmatter:** Same fields as Claude Code slash commands (`description`, `model`, `argument-hint`, `allowed-tools`). Model names map to Claude (Anthropic) model IDs since opencode defaults to Claude as its model provider.
-
-**When to use the native path instead:** Only if you want opencode-only commands that Claude Code should never see, or if the user isn't running Claude Code at all.
-
+...
 **Docs:** [opencode.ai/docs/rules](https://opencode.ai/docs/rules/)
 
 ### Honoring `Model tier` hints
