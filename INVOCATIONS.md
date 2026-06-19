@@ -38,6 +38,7 @@ Use these behavior tokens for direct routing on the same command:
 | `chainer` | `SCENARIO_CHAINER` |
 | `resource-capacity` | `RESOURCE_CAPACITY` |
 | `structural-entropy` | `STRUCTURAL_ENTROPY` |
+| `regression-surface` | `REGRESSION_SURFACE` |
 | `next` | `PICK_NEXT` (recommends which audit to run based on staleness + git history) |
 | `p0` | Cross-audit P0 sweep |
 | `resolve` | `RESOLVE_FROM_REPORT` |
@@ -107,6 +108,7 @@ Substitute `<AUDIT>` with one of:
 | `DESIGN_HANDOFF_AUDIT` | Audit design handoff bundles against target code, bypassing misleading READMEs. |
 | `RESOURCE_CAPACITY` | Runtime-agnostic capacity and resource-pressure risks across k8s, docker/compose, bare metal, or unraid-style deployments. |
 | `STRUCTURAL_ENTROPY` | God-files and god-modules: responsibility count, fan-in/out, change velocity. Outputs seam proposals, not refactors. |
+| `REGRESSION_SURFACE` | Regression-prone complexity hotspots: overlapping responsibilities, fragile error handlers, fallback ladders. |
 
 ### Cross-audit P0 sweep
 
@@ -427,30 +429,6 @@ Read $DETERMINAGENTS_HOME/specs/MAINTENANCE.md and run it in
 
 Reports go to docs/maintenance/<MODE>_<YYYY-MM-DD>[_<slug>].md (gitignored).
 Do not modify any library files; propose edits only.
-
-If you maintain an automated, read-only signal digest (for example
-capacity/reliability/cost/drift snapshots), feed it through
-`--mode=integrate --source=<digest-path>` rather than auto-editing library
-content.
-```
-
-This is **not** a user audit. End users running DeterminAgents on their projects don't invoke this — it's for the library steward.
-
----
-
-## Authoring new invocations
-
-Add an entry to this file when the library grows a new behavior. Format:
-
-```markdown
-## <BEHAVIOR>
-**Prerequisites**: ...
-
-[paste-ready prompt with --flags]
-```
-
-If the same flag pattern shows up across multiple invocations, document it once in the audits-table prompt and reference it elsewhere. Resist enumerating variants of the same behavior — variants are flag combinations, not separate invocations.
-odify any library files; propose edits only.
 
 If you maintain an automated, read-only signal digest (for example
 capacity/reliability/cost/drift snapshots), feed it through

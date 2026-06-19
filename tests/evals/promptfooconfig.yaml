@@ -1,0 +1,59 @@
+# Promptfoo evaluation config for DeterminAgents
+# Run with: npx promptfoo eval -c tests/evals/promptfooconfig.yaml
+
+prompts:
+  - 'file://audits/REGRESSION_SURFACE.md'
+  - 'file://audits/STRUCTURAL_ENTROPY.md'
+
+providers:
+  - id: 'openai:chat:gpt-4o'
+    config:
+      temperature: 0.1
+  - id: 'anthropic:messages:claude-3-5-sonnet-20241022'
+    config:
+      temperature: 0.1
+
+tests:
+  # Test Case 1: Regression Surface Audit against auth_regression.js
+  - description: 'Validate REGRESSION_SURFACE audit against auth_regression.js fixture'
+    vars:
+      file_path: 'tests/fixtures/auth_regression.js'
+    assert:
+      - type: icontains
+        value: 'auth_regression.js'
+      - type: icontains
+        value: 'fleetcrewSessionId'
+      - type: javascript
+        value: |
+          // Assert that it found the fallback ladder or broad catch block
+          const output = output.toLowerCase();
+          const hasLadder = output.includes('||') || output.includes('fallback');
+          const hasCatch = output.includes('catch') || output.includes('logout') || output.includes('erasure');
+          return hasLadder && hasCatch;
+      - type: llm-rubric
+        value: 'The suggested fix recommends standard browser features or native libraries rather than introducing new dependencies.'
+
+  # Test Case 2: Structural Entropy Audit against god_file.js
+  - description: 'Validate STRUCTURAL_ENTROPY audit against god_file.js fixture'
+    vars:
+      file_path: 'tests/fixtures/god_file.js'
+    assert:
+      - type: icontains
+        value: 'god_file.js'
+      - type: javascript
+        value: |
+          // Assert that the audit identifies multiple responsibilities
+          const output = output.toLowerCase();
+          const categories = ['ui', 'state', 'i/o', 'shaping', 'normalize', 'persistence'];
+          const matched = categories.filter(cat => output.includes(cat));
+          return matched.length >= 3;
+      - type: llm-rubric
+        value: 'The suggested refactor proposal recommends clean seams (such as custom hook extraction or state service split) without rewriting the entire file from scratch.'
+
+  # Test Case 3: Do-Nothing / Idle Check (Already Correct Code)
+  - description: 'Validate that the audit behaves correctly on a simple, correct, single-responsibility file'
+    vars:
+      file_path: 'services/fleetyard/internal/screenshot/adapter.go'
+    assert:
+      - type: llm-rubric
+        value: 'The model correctly identifies that the file is well-scoped, has a single responsibility, and does not require complex refactoring or regression actions.'

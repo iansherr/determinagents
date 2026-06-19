@@ -105,6 +105,16 @@ The report's seam proposal is a starting point, not a recipe. Re-read the actual
 
 If any of these have drifted, re-plan the seam fresh and surface the divergence to the user before proceeding.
 
+### 2.2.1 Simplicity review (The Simplicity Ladder)
+
+When planning the seam's contract and extraction target, verify against the Simplicity Ladder:
+1. **YAGNI**: Can we simplify the seam or avoid extracting it entirely by deleting redundant/speculative code?
+2. **Standard Library / Platform Native**: Can the extracted logic call directly into standard libraries or native APIs rather than carrying custom utilities?
+3. **Minimize boundaries**: Keep the contract (input parameters and output objects) as minimal and small as possible. Avoid creating complex state wrapper classes when a simple hook, function, or basic type is sufficient.
+4. **Shrink**: Write the minimum code needed to satisfy the seam contract. Do not add speculative handling, extra wrappers, or unused flexibility.
+
+Do not sacrifice essential security, error boundaries, or input validation.
+
 ### 2.3 Contract gate — write the interface first
 
 **No code moves until the contract is approved.**

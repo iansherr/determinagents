@@ -189,6 +189,17 @@ User can adjust scope before any code changes.
 
 For each finding in the actionable set, in severity order (P0 → P3), the agent runs one continuous loop: verify the issue still exists (reports go stale; re-run the discovery command from the source audit), plan the fix fresh by reading the surrounding code (don't trust the report's suggested-fix verbatim), present the plan using the shorthand format below, implement scoped to the finding (no scope creep — adjacent issues become new findings, not silent commits), run relevant tests, commit per the message format below, and append a row to the report's `## Resolution` section. Loop until the actionable queue is empty, the user types `q`, or a fix verification fails irrecoverably.
 
+### 2.0 Simplicity review (The Simplicity Ladder)
+
+Before implementing the plan or writing code, verify the change against the Simplicity Ladder to prevent over-engineering:
+1. **YAGNI**: Does this new logic need to exist? Can the problem be resolved by removing dead code, changing configurations, or simplifying the logic?
+2. **Standard Library**: Does the language standard library already solve this? (e.g. use built-in functions over custom utilities).
+3. **Native Platform/Browser**: Does the browser, OS, or container platform provide a native capability? (e.g. native HTML `<input type="date">`, standard headers, or native cookie handling).
+4. **Existing Dependencies**: Can we leverage an already-installed dependency/package rather than adding a new one or building custom wrappers?
+5. **Shrink**: Can the fix be implemented in a single line or a highly condensed form?
+
+Lazy is not negligent: do not simplify away essential security boundary checks, input validation, data-loss protection, or accessibility attributes. Write only the minimal necessary code that satisfies the requirements and passes the test harness.
+
 ### Per-finding presentation format
 
 Single-letter responses keep the loop conversational. Resist verbose alternatives.
@@ -227,6 +238,12 @@ Finding P0 #1: 10 unregistered Stripe webhook handlers
 If the user types prose instead of a letter, treat it as `e` and incorporate their guidance.
 
 ### Verification rules
+
+**Pre-Flight Health Check (Baseline Check)**: Before making any modifications to the codebase for an actionable finding, the resolver **MUST** run the target test command/harness on the unmodified code.
+- If the test command fails *before* any edits are made, halt and notify the user: *"Baseline test suite is failing pre-fix. Please resolve pre-existing compilation or environment errors first."*
+- This prevents false blame and ensures a clean baseline for the fix.
+
+**Empty-Patch Guard (Do-Nothing Check)**: If the finding states a test or condition is broken, but the pre-flight verification run *succeeds* on the clean codebase, the bug is either already resolved or not reproducible. The resolver **MUST** mark the finding "Already resolved" and make no edits to the files (avoiding unnecessary code/patch creation).
 
 **Harness-First Verification**: If a harness exists for the finding (e.g., in `tests/harness/`, `docs/reports/artifacts/`, or as specified in the report), the resolver **MUST** run that harness first after applying the fix. This behavioral proof outranks static unit tests for resolution finality.
 

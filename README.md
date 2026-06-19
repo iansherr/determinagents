@@ -76,6 +76,7 @@ Once that loop is comfortable, browse the audits table below for other audits to
 | Trace where a user action breaks | `/determinagents data-flow --target=<flow>` |
 | Review runtime capacity and resource pressure | `/determinagents resource-capacity` |
 | Find god-files and propose extraction seams | `/determinagents structural-entropy` |
+| Find regression-prone complexity hotspots | `/determinagents regression-surface` |
 | **Don't know what to run** — let it pick | `/determinagents next` |
 | Set up and discover recursive improvement loops | `/determinagents init-loops` |
 | Orchestrate recursive improvement loops automatically | `/determinagents loop-orchestrator` |
@@ -143,6 +144,7 @@ determinagents/
 | [audits/DESIGN_HANDOFF_AUDIT.md](audits/DESIGN_HANDOFF_AUDIT.md) | Audit design handoff bundles against target code, bypassing misleading READMEs |
 | [audits/RESOURCE_CAPACITY.md](audits/RESOURCE_CAPACITY.md) | Runtime-agnostic capacity and resource-pressure risks across k8s, docker/compose, bare metal, or unraid-style deployments |
 | [audits/STRUCTURAL_ENTROPY.md](audits/STRUCTURAL_ENTROPY.md) | God-files and god-modules. Severity is driven by responsibility count, fan-in/out, and change velocity — not LOC alone. Outputs seam proposals consumed by `STRUCTURAL_REFACTOR.md` |
+| [audits/REGRESSION_SURFACE.md](audits/REGRESSION_SURFACE.md) | Regression-prone complexity hotspots: overlapping responsibilities, fragile error handlers, fallback ladders |
 | [audits/PICK_NEXT.md](audits/PICK_NEXT.md) | Meta-audit. Recommends which audit to run next based on report staleness, recent git history, and `AUDIT_CONTEXT.md` cadence preferences. Writes no report by default |
 
 Most audits run in 30–180 minutes at default scope, scaling with codebase size. Each audit doc supports `--phases=N,M` and `--max-time=Xm` to scope tighter.
