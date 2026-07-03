@@ -6,6 +6,14 @@ All notable changes to determinagents are documented here. The format is loosely
 
 ## [Unreleased]
 
+## [0.11.0] — 2026-07-03
+
+No re-materialization required.
+
+### Added
+- **`audits/LAUNCH_READINESS.md`** — MVP go-live gate across seven lenses (visual, backend, security, UX, demand, biz-ops, operations). Builds a persistent `docs/determinagents/LAUNCH_MANIFEST.md`, drives every required element documented → stubbed → verified, emits `readiness` signals, and loops toward a GO verdict. Routing token `launch-readiness` (alias `launch`); `readiness` added to `SIGNAL_SCHEMA.md` categories.
+- Recovered from installed-copy drift: this audit was authored directly in `~/.determinagents` rather than the source repo. Ported here (with the 0.10.0 `## Mode:` line and report frontmatter added) so the library remains the single source of truth.
+
 ## [0.10.0] — 2026-07-03
 
 No re-materialization required — all changes are audit/spec content and installer-side, which flow through automatically.

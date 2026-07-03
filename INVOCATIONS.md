@@ -56,6 +56,7 @@ Use these behavior tokens for direct routing on the same command:
 | `harness` | `HARNESS_CREATOR` |
 | `recursive` | `RECURSIVE_IMPROVEMENT` |
 | `loop-orchestrator` | `LOOP_ORCHESTRATOR` |
+| `launch-readiness` (alias `launch`) | `LAUNCH_READINESS` (MVP go-live gate; manifest + self-reinforcing loop) |
 
 Example direct runs:
 
@@ -379,6 +380,53 @@ Warm mode: read the named report; propose entries that are project-
 specific and would change how a future audit runs (no findings; that's
 the report's job). Show diff; do not commit until I approve each entry.
 ```
+
+---
+
+## LAUNCH_READINESS (gate + self-reinforcing loop)
+
+MVP go-live gate across seven lenses (visual, backend, security, UX, demand, biz-ops, operations/launch-ops). Builds a persistent `LAUNCH_MANIFEST.md`, drives every required element through documented → stubbed → verified, runs a per-lens coverage check so nothing is silently skipped, emits readiness signals, and loops until the verdict is GO. Phases 1–7 and 9 are read-only; Phase 8 (stub generation) and the resolve step are mutating and approval-gated.
+
+**Prerequisites**: a target repo. For auth/tiered products, a verification-credentials source (`docs/operations/TEST_ACCOUNTS.md` or `.env.test`); the audit scaffolds one from a template if absent.
+
+Cold run (build the manifest + go/no-go report):
+
+```
+Run audits/LAUNCH_READINESS.md from $DETERMINAGENTS_HOME against this repo.
+Read docs/determinagents/AUDIT_CONTEXT.md if present.
+
+Phase 0 first: state what the service is, what "launch" means, and which
+lenses are mandatory vs N/A — then stop for confirmation.
+
+Build docs/determinagents/LAUNCH_MANIFEST.md across all seven lenses; every
+catalog item gets a state (Verified/Stubbed/Documented/Missing/Deferred)
+with evidence. Never mark Verified without an observed check; flag every
+silently-Missing required element as B0. Finish with the completeness critic:
+verify every catalog item has a manifest row and report per-lens coverage.
+
+Write docs/reports/LAUNCH_READINESS_<YYYY-MM-DD>.md and the signals JSON
+docs/reports/signals/LAUNCH_READINESS_<YYYY-MM-DD>.json (category "readiness",
+per specs/SIGNAL_SCHEMA.md). Do NOT run Phase 7 — propose stubs and wait.
+
+Optional flags:
+  --phases=N,M     Run only listed phases
+  --lens=<name>    visual|backend|security|ux|demand|bizops|operations
+  --max-time=Xm    Soft time budget
+```
+
+Loop iteration (re-verify after resolving blockers — the self-reinforcing step):
+
+```
+Run audits/LAUNCH_READINESS.md re-verify against docs/determinagents/
+LAUNCH_MANIFEST.md. Re-run Phase 8 on touched items only, recompute the
+scorecard (B0_open, B1_open, verified_ratio), emit new signals with delta
+vs the prior signals file, and report the verdict. Stop at GO, max-iterations,
+or diminishing returns per specs/LOOP_PROTOCOL.md.
+```
+
+Resolve blockers between iterations (mutating, gated): `/determinagents resolve --report=docs/reports/LAUNCH_READINESS_<date>.md scope=B0`.
+
+Trend the trajectory across runs: `/determinagents auto-report --mode=trend` (reads the readiness signals).
 
 ---
 

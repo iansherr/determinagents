@@ -81,6 +81,7 @@ Once that loop is comfortable, browse the audits table below for other audits to
 | Set up and discover recursive improvement loops | `/determinagents init-loops` |
 | Orchestrate recursive improvement loops automatically | `/determinagents loop-orchestrator` |
 | Create a weekly or post-change system digest | `/determinagents auto-report --mode=baseline` |
+| Gate an MVP launch and loop toward GO | `/determinagents launch-readiness` |
 | Work through report findings with approval gates | `/determinagents resolve --report=<path>` |
 
 Reports are meant to be read by humans and reused by agents. A typical finding looks like:
@@ -117,7 +118,8 @@ determinagents/
 │   ├── SECURITY_HUNT.md        # mutating: agentic vulnerability hunting
 │   ├── DATA_FLOW_VERIFY.md     # mutating: observed-vs-theorized data flow
 │   ├── TESTING_CREATOR.md      # mutating: writes new tests
-│   └── HARNESS_CREATOR.md      # mutating: generates verification harnesses
+│   ├── HARNESS_CREATOR.md      # mutating: generates verification harnesses
+│   └── LAUNCH_READINESS.md     # gate + loop: MVP go-live manifest across seven lenses
 └── specs/               # conventions and per-project artifact specs
     ├── FORMAT.md                  # how to author a new audit; harness conventions
     ├── HARNESS_STUBS.md           # boilerplate for common harnesses
@@ -162,6 +164,7 @@ Most audits run in 30–180 minutes at default scope, scaling with codebase size
 | [audits/TESTING_CREATOR.md](audits/TESTING_CREATOR.md) | Implements tests across four tiers — Adversarial, Chaos, Simulation, Forensics — beyond what `TEST_GAPS.md` covers | Run `TEST_GAPS.md` and `SECURITY_PENTEST.md` first |
 | [audits/HARNESS_CREATOR.md](audits/HARNESS_CREATOR.md) | Deterministically generates verification harnesses (Playwright, Docker, Fuzzing) to prove/refute audit findings | An audit report exists; disposable workspace |
 | [audits/RECURSIVE_IMPROVEMENT.md](audits/RECURSIVE_IMPROVEMENT.md) | Autonomously design, execute, and evaluate experiments to improve a specific metric or solve an open-ended problem. Generates hypotheses, mutates code, and verifies against a harness. | Measurable goal; deterministic harness exists; disposable workspace |
+| [audits/LAUNCH_READINESS.md](audits/LAUNCH_READINESS.md) | MVP go-live gate across seven lenses (visual, backend, security, UX, demand, biz-ops, operations/launch-ops). Builds a persistent `LAUNCH_MANIFEST.md`, drives each element documented → stubbed → verified with a per-lens coverage check so nothing is silently skipped, emits readiness signals, and loops toward a GO verdict. Read-only except Phase 8 stub-gen + the resolve step (both gated). | Target repo; verification-credentials source for auth/tiered products (scaffolds one if absent) |
 
 Two read-only audits — `ERROR_HANDLING.md` and `STUB_AND_COMPLETENESS.md` — include an **optional mutating Phase 6** (fault injection and endpoint verification respectively) that follows the harness conventions in `specs/FORMAT.md`. Use scope `+harness` to enable.
 

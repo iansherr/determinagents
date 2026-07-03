@@ -62,7 +62,7 @@ Each entry in `signals[]` must follow:
 ### Required fields
 
 - `signal_id` (string, unique per report)
-- `category` (`reliability|capacity|dependency|security|cost|drift`)
+- `category` (`reliability|capacity|dependency|security|cost|drift|readiness`)
 - `metric` (string)
 - `current_value` (number or string if non-numeric)
 - `threshold` (string)
