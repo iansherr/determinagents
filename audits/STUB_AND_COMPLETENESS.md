@@ -4,6 +4,8 @@
 
 Find code that was written aspirationally — frontends calling backends that don't exist, handlers returning hardcoded data, routes that point to missing functions, and UI for features that were never built. The dominant failure mode: a frontend's `.catch(() => fallback)` silently swallows 404s, so phantom endpoints are invisible during manual testing and only surface when someone tries to use the feature.
 
+## Mode: Read-Only (optional mutating verification phase via `+harness`)
+
 ## When to run
 
 Anytime. Read-only. Especially valuable after a sprint where features were shipped without integration tests, or when an admin/internal panel "looks empty for some reason."
@@ -200,8 +202,7 @@ Handlers that exist as functions but have no route pointing to them.
 ```bash
 # Generic: list handler-shaped functions, list functions referenced in route registrations,
 # diff the two. Adapt the regex per language.
-# ...
-```
+
 # Go example
 grep -rEhn --include='*.go' '^func \([a-zA-Z]+ \*?[A-Z][a-zA-Z]+\) (handle|Handle)' . \
   | sed -E 's/.*\) (handle[A-Za-z0-9_]+|Handle[A-Za-z0-9_]+).*/\1/' | sort -u > /tmp/defined.txt

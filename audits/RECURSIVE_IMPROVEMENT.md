@@ -6,6 +6,8 @@ Run a recursive improvement loop: hypothesize, modify, verify against a harness,
 
 ## Mode: Mutating
 
+**Protocol**: This audit follows the [Recursive Self-Improvement Protocol](../specs/LOOP_PROTOCOL.md) — correctness-first verification, the Rule of Three, Evidence of Improvement, anti-drift focus, and termination criteria all come from that spec.
+
 This agent **mutates** the codebase. It requires a disposable workspace (git worktree, branch, or container) because it will iteratively modify, test, and potentially revert code.
 
 ## When to run
@@ -76,7 +78,7 @@ Compare the new results against the baseline and the goal:
     - Revert the changes (e.g., `git reset --hard HEAD` and `git clean -fd`).
     - Mark the hypothesis as refuted. Return to Phase 1 and select the next hypothesis.
 
-*Loop ends when the goal is met, `--max-iterations` is reached, or all viable hypotheses are exhausted.*
+*Loop ends per `specs/LOOP_PROTOCOL.md` § Termination Criteria: goal met, `--max-iterations` reached, diminishing returns (improvement < 1% over two iterations), or a hard ceiling identified. Exhausting all viable hypotheses counts as a hard ceiling — record it as such in the report.*
 
 ---
 

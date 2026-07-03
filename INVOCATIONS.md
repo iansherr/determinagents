@@ -10,7 +10,7 @@ This file is the canonical source. Individual audit/spec docs may show one examp
 
 1. **Library**: `${DETERMINAGENTS_HOME:-$HOME/.determinagents}/`
 2. **Project context**: if `docs/determinagents/AUDIT_CONTEXT.md` exists, read it first and apply its calibrations
-3. **Reports** go to `docs/reports/<NAME>_<YYYY-MM-DD>.md` in the target repo
+3. **Reports** go to `docs/reports/<NAME>_<YYYY-MM-DD>.md` in the target repo, starting with `audit:`/`date:` YAML frontmatter (per `specs/FORMAT.md`) so meta-tooling can find them regardless of filename
 4. **Findings** classified P0–P3 per each audit's rubric
 5. **Read-only by default.** Mutating docs (RESOLVE_FROM_REPORT, SECURITY_HUNT, DATA_FLOW_VERIFY, TESTING_CREATOR) require a disposable workspace and per-action approval. Two read-only audits (STUB_AND_COMPLETENESS, ERROR_HANDLING) have an opt-in mutating Phase 6 enabled with `+harness`.
 6. **Each finding** includes file:line and a concrete suggested fix
@@ -136,9 +136,11 @@ Optional flags:
                      never-run audits; per-audit last-run otherwise)
 
 Read docs/determinagents/AUDIT_CONTEXT.md first (CADENCE section if
-present). Inventory existing reports, scan git log per audit's watch
-patterns, rank, output top 3 with a paste-ready invocation for the
-top pick. Honor escalations: unresolved P0s outrank new audit runs.
+present). Run bin/pick-next-scan from $DETERMINAGENTS_HOME for the
+deterministic inventory/staleness/churn table, refine top candidates
+against each audit's watch patterns, rank, output top 3 with a
+paste-ready invocation for the top pick. Honor escalations:
+unresolved P0s outrank new audit runs.
 ```
 
 ---

@@ -4,13 +4,17 @@
 
 Take an audit report produced by any read-only audit in this library and work through its findings — one at a time, with explicit per-finding approval, separate commits per fix, and verification that each issue is actually resolved before moving on.
 
-This doc is **mutating** — it writes code, runs tests, and creates commits. The only other mutating doc in the library is `TESTING_CREATOR.md`. Both follow the same discipline: stop and confirm before each action; commit each change separately; never bundle.
+This doc is **mutating** — it writes code, runs tests, and creates commits. All mutating docs in the library (find them with `grep -lE '^## Mode: Mutating' audits/*.md`) follow the same discipline: stop and confirm before each action; commit each change separately; never bundle.
 
 ## Prerequisites
 
 - An audit report at `docs/reports/<NAME>_<YYYY-MM-DD>.md` produced by one of the read-only audits. The report must follow the format specified in `specs/FORMAT.md` (severity rubric, file:line per finding, suggested fix per finding).
 - A clean working tree on a branch you can commit to. The resolver does not stash or shelve uncommitted work — it stops if `git status` is dirty.
 - Tests that run locally (or a documented "tests don't run, skip verification" decision in `AUDIT_CONTEXT.md`).
+
+## Mode: Mutating
+
+Requires a clean working tree on a branch you can commit to (see Prerequisites — the resolver stops if `git status` is dirty).
 
 ## When to run
 

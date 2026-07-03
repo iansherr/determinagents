@@ -8,16 +8,17 @@ A self-directed agent doc MUST contain, in order:
 
 1. **Title** — one line, action-oriented (e.g., "Stub & Completeness Audit").
 2. **Purpose** — 2–4 sentences. What this audit finds and why it matters. Name the failure mode it prevents.
-3. **When to run** — anytime / quarterly / before release / after incident X. Include risk level (read-only vs. mutating).
-4. **Time estimate** — quick / standard / deep, with rough minutes.
-5. **Output** — where the report goes and what it's named.
-6. **Discovery phase** — the FIRST phase. Universal docs have no hardcoded paths; the agent learns the layout here. Project-specific adaptations replace this with known paths.
-7. **Audit phases** — numbered, each scoped enough to run independently. Each phase has:
+3. **Mode** — a heading of the exact form `## Mode: Read-Only` or `## Mode: Mutating` (qualifiers may follow in parentheses, e.g. `## Mode: Read-Only (optional mutating verification phase via `+harness`)`). This line is a **machine contract**: meta-docs and tooling derive the mutating set with `grep -E '^## Mode: Mutating' audits/*.md` instead of maintaining hand-copied lists that drift. Mutating docs state the disposable-workspace requirement here.
+4. **When to run** — anytime / quarterly / before release / after incident X.
+5. **Time estimate** — quick / standard / deep, with rough minutes.
+6. **Output** — where the report goes and what it's named.
+7. **Discovery phase** — the FIRST phase. Universal docs have no hardcoded paths; the agent learns the layout here. Project-specific adaptations replace this with known paths.
+8. **Audit phases** — numbered, each scoped enough to run independently. Each phase has:
    - A goal (what this phase finds)
    - Concrete commands (grep, find, build, test invocations)
    - What to record (file:line, severity, suggested fix)
-8. **Severity rubric** — explicit P0/P1/P2/P3 (or Critical/High/Medium/Low) criteria. Without this, severities drift between runs.
-9. **Report template** — the markdown skeleton for the final report. Tables preferred over prose for findings.
+9. **Severity rubric** — explicit P0/P1/P2/P3 (or Critical/High/Medium/Low) criteria. Without this, severities drift between runs.
+10. **Report template** — the markdown skeleton for the final report. Tables preferred over prose for findings.
 
 ## Rules
 
@@ -60,7 +61,14 @@ Use this default unless the audit needs a domain-specific scale:
 
 Every audit produces a report following this structure. Reports are self-contained — a reader 3 weeks later should not have to look up the rubric or guess what to do next.
 
+Every report starts with two lines of YAML frontmatter identifying which audit produced it and when. This is a **machine contract**: `PICK_NEXT` and other meta-tooling determine each audit's last-run date by grepping this frontmatter (`grep -l '^audit: <NAME>' docs/reports/*.md`), not by parsing filenames — filenames drift (observed in the wild: `SECURITY_AUDIT_20260422.md`, reports with no date at all) and frontmatter survives renames. `audit:` is the audit doc's basename without `.md`; `date:` is ISO `YYYY-MM-DD`.
+
 ```markdown
+---
+audit: [AUDIT_DOC_BASENAME]
+date: [YYYY-MM-DD]
+---
+
 # [Audit Name] Report — [DATE]
 
 ## Severity rubric (this audit)
@@ -240,6 +248,8 @@ Host-tool installation (`INSTALL.md`) maps tier to the host's mechanism: `model:
 
 Before committing a new audit doc:
 
+- [ ] Doc declares `## Mode: Read-Only` or `## Mode: Mutating` (exact prefix — tooling greps for it).
+- [ ] Report template begins with `audit:`/`date:` YAML frontmatter.
 - [ ] Discovery phase exists and is universal (or the doc is explicitly project-specific).
 - [ ] Every phase is independently runnable.
 - [ ] Every phase has at least one concrete command.

@@ -6,6 +6,8 @@ Audit design handoff bundles (from Claude Design, Google Stitch, Figma, etc.) to
 
 `DESIGN_HANDOFF_AUDIT.md` ensures a structurally complete view of the provided design components.
 
+## Mode: Read-Only
+
 ## When to run
 
 When receiving a new design handoff bundle, before starting implementation, or when components seem to be missing from the handoff overview.

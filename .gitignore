@@ -16,3 +16,6 @@ docs/maintenance/
 .sisyphus/
 PROGRESS.md
 TODO.md
+
+# Runtime artifact written by `determinagents update`
+.last_pull

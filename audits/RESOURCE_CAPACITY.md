@@ -8,6 +8,8 @@ This is a **runtime-agnostic** audit. It first detects the deployment model (Kub
 
 Read-only by default. This audit does not generate load or mutate infrastructure.
 
+## Mode: Read-Only
+
 ## When to run
 
 Before traffic ramps, after capacity-related incidents, before major feature launches, and quarterly for preventive maintenance.

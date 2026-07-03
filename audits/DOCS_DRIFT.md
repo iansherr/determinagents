@@ -6,6 +6,8 @@ Find claims in the project's documentation that the code no longer matches. READ
 
 Drifted docs are worse than missing docs: they lie confidently to new contributors and outside users.
 
+## Mode: Read-Only
+
 ## When to run
 
 Quarterly. Before publishing externally. After a major refactor or service merge/split. Read-only.

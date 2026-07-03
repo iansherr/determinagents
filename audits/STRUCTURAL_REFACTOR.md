@@ -10,6 +10,10 @@ This doc is a **specialization of `RESOLVE_FROM_REPORT.md`** for structural-entr
 2. A **per-seam (not per-finding) loop**: one god-file = one finding = many seams = many commits.
 3. **Dependency-graph artifacts**: before/after snapshots per file, so the reduction in coupling is observable, not asserted.
 
+## Mode: Mutating
+
+Requires a disposable workspace (git worktree, branch, or container).
+
 ## When to run
 
 After a `STRUCTURAL_ENTROPY` report exists in `docs/reports/` and the seam proposals have been reviewed. Not appropriate for ad-hoc "clean this up" requests — without the report, the seams haven't been planned and this loop has nothing to consume.

@@ -8,6 +8,8 @@ Find **scenarios** the test suite would miss — not lines uncovered. Line cover
 - Which integration boundaries (frontend↔backend, service↔service, app↔DB) are tested only in isolation?
 - Which "happy path" tests would still pass if the feature was broken in a realistic way?
 
+## Mode: Read-Only
+
 ## When to run
 
 Before a release that touches a critical path; after an incident, to find sibling bugs the test suite also wouldn't catch; quarterly as a forcing function.

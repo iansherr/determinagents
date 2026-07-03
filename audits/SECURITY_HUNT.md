@@ -39,6 +39,10 @@ All execution happens in a workspace the user has explicitly designated as dispo
 
 If any prerequisite is missing, stop and surface that. Do not proceed without infrastructure; speculation without verification is exactly the failure mode this doc is designed to escape.
 
+## Mode: Mutating
+
+Requires a disposable workspace (git worktree, branch, or container).
+
 ## When to run
 
 - After `SECURITY_PENTEST.md` has identified high-risk surface area

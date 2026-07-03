@@ -6,6 +6,27 @@ All notable changes to determinagents are documented here. The format is loosely
 
 ## [Unreleased]
 
+## [0.10.0] — 2026-07-03
+
+No re-materialization required — all changes are audit/spec content and installer-side, which flow through automatically.
+
+### Added
+- **Machine contracts** (the release theme: prose conventions between docs kept drifting — three verified breaks in the wild — so the contracts are now greppable and checked):
+  - Every audit doc must declare a `## Mode: Read-Only|Mutating|Orchestrator|Interactive` heading (`specs/FORMAT.md` required section 3). All 25 audits now carry exactly one. Tooling derives the mutating set with `grep -lE '^## Mode: Mutating' audits/*.md` instead of hand-copied lists.
+  - Reports must start with `audit:`/`date:` YAML frontmatter (`specs/FORMAT.md` report template) so meta-tooling finds last-run dates regardless of filename. Observed in the wild: `SECURITY_AUDIT_20260422.md`, undated reports — filename parsing misclassified most audits as never-run.
+  - `determinagents doctor` gained a `contracts:` section: every audit has a Mode line (fail), project overlay `AUDIT_CONTEXT.md` ALL_CAPS section names match real audit docs (warn), report frontmatter coverage (warn).
+- **`bin/pick-next-scan`** — stdlib-only Python script doing `PICK_NEXT`'s deterministic Phases 0–2 (read-only inventory from Mode lines, frontmatter-first report attribution with longest-known-prefix filename fallback, CADENCE overlay, git churn per window). Emits ranked JSON; the agent's job starts at watch-pattern refinement and scoring. Arithmetic belongs in a script, not a language model.
+
+### Changed
+- `PICK_NEXT.md`: derives its recommendation surface and exclusions from Mode lines (the previous hardcoded five-name mutating list had already drifted — four newer mutating docs were missing); inventories reports by frontmatter with filename parsing demoted to legacy fallback; Phases 0–2 now run via `bin/pick-next-scan` with the manual path kept as fallback.
+- `RECURSIVE_IMPROVEMENT.md`: now explicitly follows `specs/LOOP_PROTOCOL.md` (as `ADVERSARIAL_HARDENER` already did) and defers loop termination to the protocol's criteria instead of stating a divergent set. One loop protocol, referenced everywhere.
+- `LOOP_ORCHESTRATOR.md`: registry-first discovery — reads `docs/determinagents/LOOPS.md` and verifies its harness commands still run; the broad filesystem scan is now the fallback, and scan discoveries are routed to `init-loops` for memorialization.
+- `DATA_FLOW_VERIFY.md`: nonstandard `## Mutating: yes` heading normalized to `## Mode: Mutating`.
+
+### Fixed
+- `STUB_AND_COMPLETENESS.md` Phase 3.1: a stray closing fence left the Go example outside its code block and inverted the fencing of every subsequent code block in the doc.
+- `RESOLVE_FROM_REPORT.md`: stale claim that `TESTING_CREATOR` was "the only other mutating doc" (there are ten); now points at the Mode-line grep instead of enumerating.
+
 ## [0.9.0] — 2026-06-07
 
 ### Added

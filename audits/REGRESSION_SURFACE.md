@@ -6,6 +6,8 @@ Find regression-prone complexity hotspots before they break: files and modules c
 
 Read-only by default.
 
+## Mode: Read-Only
+
 ## When to run
 
 - After complex refactors, auth updates, integration of overlapping subsystems, or when regressions occur.

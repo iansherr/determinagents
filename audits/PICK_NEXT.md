@@ -8,6 +8,8 @@ Read-only. Writes no report unless `--log` is passed. The recommendation is rend
 
 This is a meta-audit: it does not find issues in code. It triages the audit library against the project's recent history.
 
+## Mode: Read-Only
+
 ## When to run
 
 - "I have an hour, what should I look at?"
@@ -33,23 +35,45 @@ If `--log` is passed, also write `docs/reports/PICK_NEXT_<YYYY-MM-DD>.md` for tr
 
 ## Phase 0: Discovery
 
+**Scripted path (preferred).** Phases 0–2 are deterministic arithmetic — inventory, staleness ratios, git churn. A helper script does all of it in one shot; run it from the project root and skip straight to Phase 2's watch-pattern refinement for the top candidates:
+
+```bash
+python3 "${DETERMINAGENTS_HOME:-$HOME/.determinagents}/bin/pick-next-scan"
+```
+
+The JSON output is sorted never-run-first, then by staleness ratio, and includes whole-repo churn per window plus a list of reports it couldn't attribute (surface that list to the user — those reports predate the `audit:`/`date:` frontmatter convention). The model's job starts where the script stops: narrowing churn to each audit's watch patterns (Phase 2), scoring (Phase 3), escalations and recommendation (Phase 4).
+
+Fall back to the manual phases below only if `python3` or the script is unavailable.
+
 ### 0.1 Inventory the audit library
 
 ```bash
-ls "${DETERMINAGENTS_HOME:-$HOME/.determinagents}/audits/" | grep -E '^[A-Z_]+\.md$'
+AUDITS_DIR="${DETERMINAGENTS_HOME:-$HOME/.determinagents}/audits"
+
+# Recommendation surface: read-only audits only. Derive the set from each
+# doc's ## Mode: line (required per specs/FORMAT.md) — do not maintain a
+# hand-copied list here; an earlier hardcoded exclusion list drifted as
+# mutating docs were added.
+grep -lE '^## Mode: Read-Only' "$AUDITS_DIR"/*.md
 ```
 
-The set of read-only audits is the recommendation surface. The mutating audits (`RESOLVE_FROM_REPORT`, `STRUCTURAL_REFACTOR`, `SECURITY_HUNT`, `DATA_FLOW_VERIFY`, `TESTING_CREATOR`) are excluded from default ranking — they require a specific report or target as input, not a "run this next" recommendation.
+Everything else (`## Mode: Mutating`, `Orchestrator`, `Interactive`) is excluded from default ranking — those docs require a specific report or target as input, not a "run this next" recommendation.
 
 Exception: if a recent read-only audit produced a P0/P1-heavy report and `RESOLVE_FROM_REPORT` hasn't run against it, surface that as a candidate (see Phase 4).
 
 ### 0.2 Inventory existing reports
 
+Reports carry `audit:`/`date:` YAML frontmatter (per `specs/FORMAT.md`). Prefer it — filenames drift (`SECURITY_AUDIT_20260422.md`, undated reports) and frontmatter survives renames:
+
 ```bash
-ls -t docs/reports/*.md 2>/dev/null | head -50
+# Primary: last-run date per audit from frontmatter
+grep -H '^audit: ' docs/reports/*.md 2>/dev/null   # which audit produced each report
+grep -H '^date: '  docs/reports/*.md 2>/dev/null   # when
 ```
 
-Parse filenames. Reports follow `<AUDIT_NAME>_<YYYY-MM-DD>.md` (or `_<slug>_<YYYY-MM-DD>.md` for target-scoped audits). Group by audit name; take the most recent date per audit. Audits with no report ever = "never run" (highest staleness category).
+Group by audit name; take the most recent date per audit. Audits with no report ever = "never run" (highest staleness category).
+
+**Fallback for legacy reports without frontmatter**: parse filenames of the form `<AUDIT_NAME>_<YYYY-MM-DD>.md` (or `_<slug>_<YYYY-MM-DD>.md` for target-scoped audits). A legacy report whose filename matches neither pattern still counts as *some* run — flag it as "unparseable date; consider adding frontmatter" rather than silently treating the audit as never-run.
 
 ### 0.3 Read AUDIT_CONTEXT cadence preferences
 

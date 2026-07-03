@@ -6,6 +6,8 @@ Pick a user-visible action (e.g., "save bookmark", "submit application", "update
 
 This audit is a microscope, not a survey. One flow per run. Run it on multiple flows to build coverage.
 
+## Mode: Read-Only
+
 ## When to run
 
 After a feature ships, after a "works in dev but not prod" report, before extracting a service, or whenever the stack feels like a black box.

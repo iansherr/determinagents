@@ -18,7 +18,7 @@ The dominant failure mode this catches: **silent layer drift.** A field renamed 
 
 Run `DATA_FLOW_TRACE.md` first to map the flow's shape. Run this doc to verify the bits actually move that way.
 
-## Mutating: yes (in disposable workspace)
+## Mode: Mutating (in disposable workspace)
 
 This doc:
 - Drives the UI (real clicks via Playwright/Puppeteer, or simulated)

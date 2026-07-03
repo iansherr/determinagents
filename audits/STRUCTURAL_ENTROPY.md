@@ -8,6 +8,8 @@ The audit deliberately separates **what's true** (the file mixes five concerns a
 
 Read-only by default.
 
+## Mode: Read-Only
+
 ## When to run
 
 - After a feature push that touched a small number of files heavily.

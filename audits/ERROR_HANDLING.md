@@ -10,6 +10,8 @@ Find errors that happen but nobody notices. Three failure modes:
 
 The user-visible symptom is "the feature just doesn't work" with no error to grep for. This is the highest-leverage audit because almost every codebase has rich findings here.
 
+## Mode: Read-Only (optional mutating verification phase via `+harness`)
+
 ## When to run
 
 Anytime. Read-only. Especially after a "works in dev, mysteriously broken in prod" report, or when support tickets read "I clicked X and nothing happened."

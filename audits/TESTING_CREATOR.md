@@ -19,6 +19,10 @@ This doc consumes the findings from two read-only audits. Don't duplicate their 
 
 If `TEST_GAPS.md` and `SECURITY_PENTEST.md` haven't been run, stop and run them. The reports they produce are the gap inventory this doc draws from.
 
+## Mode: Mutating
+
+Requires a disposable workspace (git worktree, branch, or container).
+
 ## When to run
 
 - Before shipping a feature with concurrency, money movement, or auth-sensitive paths.

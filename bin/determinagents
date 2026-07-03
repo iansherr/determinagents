@@ -283,6 +283,53 @@ UNINSTALL_MSG
     esac
 
     echo ""
+    echo "contracts:"
+
+    # 8. Every audit declares a machine-greppable Mode line (specs/FORMAT.md).
+    #    Meta-docs (PICK_NEXT) derive the mutating set from these lines.
+    MISSING_MODE=""
+    for f in "$DETERMINAGENTS_HOME"/audits/*.md; do
+      [ -f "$f" ] || continue
+      grep -qE '^## Mode: (Read-Only|Mutating|Orchestrator|Interactive)' "$f" \
+        || MISSING_MODE="$MISSING_MODE $(basename "$f")"
+    done
+    if [ -z "$MISSING_MODE" ]; then
+      ok "every audit declares '## Mode:'"
+    else
+      fail "audits missing '## Mode:' line:$MISSING_MODE"
+    fi
+
+    # 9. Project overlay section names (only when run inside a project).
+    #    ALL_CAPS overlay sections must name a real audit doc, or the audit
+    #    that looks for its section will never find it.
+    if [ -f "docs/determinagents/AUDIT_CONTEXT.md" ]; then
+      BAD_SECTIONS=""
+      for name in $(grep -oE '^## [A-Z][A-Z_]+$' docs/determinagents/AUDIT_CONTEXT.md | sed 's/^## //'); do
+        [ -f "$DETERMINAGENTS_HOME/audits/$name.md" ] || BAD_SECTIONS="$BAD_SECTIONS $name"
+      done
+      if [ -z "$BAD_SECTIONS" ]; then
+        ok "AUDIT_CONTEXT.md section names match audit docs"
+      else
+        warn "AUDIT_CONTEXT.md sections with no matching audit doc:$BAD_SECTIONS"
+      fi
+    fi
+
+    # 10. Report frontmatter coverage (only when run inside a project).
+    #     PICK_NEXT reads audit:/date: frontmatter for staleness; legacy
+    #     reports without it fall back to filename parsing.
+    if [ -d "docs/reports" ]; then
+      TOTAL=$(ls docs/reports/*.md 2>/dev/null | wc -l | tr -d ' ')
+      if [ "$TOTAL" -gt 0 ]; then
+        WITH=$(grep -l '^audit: ' docs/reports/*.md 2>/dev/null | wc -l | tr -d ' ')
+        if [ "$WITH" -eq "$TOTAL" ]; then
+          ok "all $TOTAL reports carry audit:/date: frontmatter"
+        else
+          warn "$((TOTAL - WITH)) of $TOTAL reports lack 'audit:' frontmatter (legacy; PICK_NEXT falls back to filename parsing)"
+        fi
+      fi
+    fi
+
+    echo ""
     if [ "$FAIL" -eq 0 ]; then
       echo "all checks passed"
       exit 0

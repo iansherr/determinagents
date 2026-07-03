@@ -25,25 +25,30 @@ This agent does not mutate application code directly. It orchestrates sub-agents
 
 ## Phase 0: Discovery (Finding the Loops)
 
-### 0.1 Scan for Harnesses and Benchmarks
+### 0.1 Read the loop registry first
+
+The registry is the source of truth. If `LOOP_BOOTSTRAP` has run, the project's loops are already memorialized — trust them and skip the broad scan (0.2).
+
+```bash
+cat docs/determinagents/LOOPS.md 2>/dev/null
+```
+
+If the registry exists, verify each listed harness command still runs before scheduling it (commands drift; the registry may be stale). Report any dead entries so the user can prune them. Fall through to 0.2 only if the registry is missing, or the user explicitly asked to discover *new* loops beyond it.
+
+### 0.2 Scan for Harnesses and Benchmarks (fallback)
 
 Find deterministic executables that measure correctness, performance, or security, taking care to **exclude dependency directories** like `node_modules` or `vendor` which are full of irrelevant upstream benchmarks.
 
 ```bash
 # Safely look for standard benchmark directories and scripts, avoiding noise
 find . -not -path "*/node_modules/*" -not -path "*/vendor/*" -not -path "*/\.git/*" -type f \( -name "*bench*.sh" -o -name "*bench*.js" -o -name "*bench*.ts" -o -name "*perf*.py" \)
-```
 
-Inspect `package.json`, `Makefile`, or `Cargo.toml` for scripts like `bench`, `perf`, `fuzz`. Verify these scripts actually exist and run without errors locally before scheduling them.
-
-### 0.2 Scan for Explicit Loop Configurations & Harness Templates
-
-Look for existing loop harness metadata, primarily checking the project's loop registry (`docs/determinagents/LOOPS.md`). Also check for other recognized patterns (`PLAN.md`, `CLAUDE.md`, `.ralph/ralph-loop.sh`, or `.loop-prompt.md`) which indicate the project already employs autonomous improvement loops:
-```bash
-cat docs/determinagents/LOOPS.md 2>/dev/null || true
-cat docs/determinagents/AUDIT_CONTEXT.md | grep -i 'loop'
+# Other loop-config patterns that indicate existing autonomous improvement loops
+grep -i 'loop' docs/determinagents/AUDIT_CONTEXT.md 2>/dev/null
 find . -not -path "*/node_modules/*" -not -path "*/\.git/*" -type f \( -name "PLAN.md" -o -name "AGENTS.md" -o -name "loop.sh" -o -name "CLAUDE.md" \)
 ```
+
+Inspect `package.json`, `Makefile`, or `Cargo.toml` for scripts like `bench`, `perf`, `fuzz`. Verify these scripts actually exist and run without errors locally before scheduling them. If this scan finds loops worth keeping, recommend `/determinagents init-loops` afterwards so they get memorialized in the registry instead of being re-discovered every run.
 
 ### 0.3 Identify Regression Targets
 

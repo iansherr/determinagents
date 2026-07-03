@@ -10,6 +10,8 @@ Audit the rendered UI and the CSS/component code against the project's `DESIGN.m
 
 This audit requires `DESIGN.md` at the project root (see [google-labs-code/design.md spec](https://github.com/google-labs-code/design.md)). If absent, generate it first — see the bootstrap prompt in this directory's README.
 
+## Mode: Read-Only
+
 ## When to run
 
 Before any release that ships visual changes, after a theme/token update, quarterly otherwise. Read-only on the codebase. Phases 5–8 use a running app or screenshots.

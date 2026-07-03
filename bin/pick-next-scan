@@ -1,0 +1,184 @@
+#!/usr/bin/env python3
+"""Deterministic front half of audits/PICK_NEXT.md (Phases 0-2).
+
+Emits JSON: per-audit staleness, cadence, git churn since last run, and the
+naive combined score. The agent running PICK_NEXT does the judgment half on
+top of this output (watch-pattern refinement for top candidates, escalations,
+tie-breaking, honest "nothing's urgent") — arithmetic belongs here, not in a
+language model.
+
+Stdlib only. Run from the target project root:
+
+    python3 "$DETERMINAGENTS_HOME/bin/pick-next-scan" [--reports-dir docs/reports]
+
+Exit codes: 0 on success, 1 if the audit library can't be found.
+"""
+
+import argparse
+import json
+import math
+import os
+import re
+import subprocess
+import sys
+from datetime import date, datetime
+
+DEFAULT_CADENCE_DAYS = 90
+NEVER_RUN_WINDOW_DAYS = 90
+# Never recommend the dispatcher to itself.
+EXCLUDED = {"PICK_NEXT"}
+
+FRONTMATTER_AUDIT = re.compile(r"^audit:\s*(\S+)\s*$", re.M)
+FRONTMATTER_DATE = re.compile(r"^date:\s*(\d{4}-\d{2}-\d{2})\s*$", re.M)
+ISO_DATE = re.compile(r"(\d{4}-\d{2}-\d{2})")
+MODE_READONLY = re.compile(r"^## Mode: Read-Only", re.M)
+CADENCE_LINE = re.compile(r"([A-Z][A-Z_]+)\s*:\s*(\d+)")
+
+
+def find_audits_dir(cli_value):
+    candidates = [cli_value, os.environ.get("DETERMINAGENTS_HOME"),
+                  os.path.expanduser("~/.determinagents"),
+                  os.path.dirname(os.path.dirname(os.path.abspath(__file__)))]
+    for base in candidates:
+        if base and os.path.isdir(os.path.join(base, "audits")):
+            return os.path.join(base, "audits")
+    return None
+
+
+def read_only_audits(audits_dir):
+    names = []
+    for f in sorted(os.listdir(audits_dir)):
+        if not f.endswith(".md"):
+            continue
+        if f[:-3] in EXCLUDED:
+            continue
+        with open(os.path.join(audits_dir, f), encoding="utf-8", errors="replace") as fh:
+            if MODE_READONLY.search(fh.read()):
+                names.append(f[:-3])
+    return names
+
+
+def inventory_reports(reports_dir, known_audits):
+    """Return (last_run_by_audit, legacy_count, unparseable).
+
+    Frontmatter (audit:/date:) is authoritative. The legacy fallback matches
+    filenames against *known* audit names (longest prefix wins) rather than
+    guessing with a shape regex — legacy names in the wild are too varied.
+    """
+    by_prefix = sorted(known_audits, key=len, reverse=True)
+    last_run, legacy, unparseable = {}, 0, []
+    if not os.path.isdir(reports_dir):
+        return last_run, legacy, unparseable
+    for f in sorted(os.listdir(reports_dir)):
+        if not f.endswith(".md"):
+            continue
+        path = os.path.join(reports_dir, f)
+        try:
+            with open(path, encoding="utf-8", errors="replace") as fh:
+                head = fh.read(2048)
+        except OSError:
+            continue
+        m_audit, m_date = FRONTMATTER_AUDIT.search(head), FRONTMATTER_DATE.search(head)
+        if m_audit and m_date:
+            audit, run = m_audit.group(1), m_date.group(1)
+        else:
+            legacy += 1
+            audit = next((a for a in by_prefix if f.startswith(a + "_")), None)
+            m = ISO_DATE.search(f)
+            if not (audit and m):
+                unparseable.append(f)
+                continue
+            run = m.group(1)
+        if audit not in last_run or run > last_run[audit]:
+            last_run[audit] = run
+    return last_run, legacy, unparseable
+
+
+def cadence_prefs(context_path):
+    prefs = {}
+    if not os.path.isfile(context_path):
+        return prefs
+    with open(context_path, encoding="utf-8", errors="replace") as fh:
+        text = fh.read()
+    m = re.search(r"^#{2,3}\s+CADENCE\s*$(.*?)(?=^#{2,3}\s|\Z)", text, re.M | re.S)
+    if not m:
+        return prefs
+    for audit, days in CADENCE_LINE.findall(m.group(1)):
+        prefs[audit] = int(days)
+    return prefs
+
+
+def git_churn(since_iso):
+    def run(args):
+        try:
+            out = subprocess.run(["git"] + args, capture_output=True, text=True, timeout=60)
+            return out.stdout if out.returncode == 0 else None
+        except (OSError, subprocess.TimeoutExpired):
+            return None
+    log = run(["log", f"--since={since_iso}", "--oneline"])
+    files = run(["log", f"--since={since_iso}", "--name-only", "--pretty=format:"])
+    commits = len(log.splitlines()) if log is not None else None
+    changed = len({l for l in files.splitlines() if l.strip()}) if files is not None else None
+    return commits, changed
+
+
+def main():
+    ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    ap.add_argument("--audits-dir", help="override audit library location")
+    ap.add_argument("--reports-dir", default="docs/reports")
+    ap.add_argument("--context", default="docs/determinagents/AUDIT_CONTEXT.md")
+    args = ap.parse_args()
+
+    audits_dir = find_audits_dir(args.audits_dir)
+    if not audits_dir:
+        print("error: audit library not found (set $DETERMINAGENTS_HOME or --audits-dir)", file=sys.stderr)
+        return 1
+
+    today = date.today()
+    known = [f[:-3] for f in os.listdir(audits_dir) if f.endswith(".md")]
+    last_run, legacy, unparseable = inventory_reports(args.reports_dir, known)
+    prefs = cadence_prefs(args.context)
+
+    rows = []
+    for audit in read_only_audits(audits_dir):
+        run = last_run.get(audit)
+        if run:
+            days_since = (today - datetime.strptime(run, "%Y-%m-%d").date()).days
+            window_start = run
+        else:
+            days_since = None
+            window_start = (today.toordinal() - NEVER_RUN_WINDOW_DAYS)
+            window_start = date.fromordinal(window_start).isoformat()
+        cadence = prefs.get(audit, DEFAULT_CADENCE_DAYS)
+        staleness = (days_since / cadence) if days_since is not None else None
+        commits, changed = git_churn(window_start)
+        rows.append({
+            "audit": audit,
+            "last_run": run,                      # null = never run (escalation candidate)
+            "days_since": days_since,
+            "cadence_days": cadence,
+            "staleness_ratio": round(staleness, 2) if staleness is not None else None,
+            "window_start": window_start,
+            "commits_in_window": commits,          # whole-repo; refine with watch patterns
+            "files_changed_in_window": changed,
+        })
+
+    # Never-run first, then most-overdue. Churn is deliberately NOT scored
+    # here: these counts are whole-repo, and per PICK_NEXT Phase 2 staleness
+    # alone drives ranking until the agent narrows churn to each audit's
+    # watch patterns (score = staleness*1.0 + log1p(watch_paths)*1.5).
+    rows.sort(key=lambda r: (r["staleness_ratio"] is not None, -(r["staleness_ratio"] or 0)))
+    print(json.dumps({
+        "generated": today.isoformat(),
+        "default_cadence_days": DEFAULT_CADENCE_DAYS,
+        "cadence_overrides": prefs,
+        "ranking_note": "sorted never-run first, then staleness; commit/file counts are whole-repo — refine top candidates with each audit's Phase 0 watch patterns before final scoring",
+        "audits": rows,
+        "legacy_reports_without_frontmatter": legacy,
+        "unparseable_reports": unparseable,
+    }, indent=2))
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
