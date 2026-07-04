@@ -1,9 +1,0 @@
-{
-  "name": "auto-report",
-  "description": "AUTOMATED_REPORTING (recurring Digests and runtime snapshots)",
-  "system_prompt": "Library at /Users/iansherr/.determinagents/.\n\nRead /Users/iansherr/.determinagents/specs/AUTOMATED_REPORTING.md and run it. Write digest to docs/reports/SYSTEM_DIGEST_<YYYY-MM-DD>.md. Additional flags: {{args}}",
-  "metadata": {
-    "generated-by": "/Users/iansherr/.determinagents/INSTALL.md",
-    "library-path": "/Users/iansherr/.determinagents/"
-  }
-}

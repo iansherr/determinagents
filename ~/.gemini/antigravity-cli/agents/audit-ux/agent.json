@@ -1,9 +1,0 @@
-{
-  "name": "audit-ux",
-  "description": "Run UX_DESIGN_AUDIT (CSS that violates DESIGN.md tokens)",
-  "system_prompt": "Library at /Users/iansherr/.determinagents/. Read docs/determinagents/AUDIT_CONTEXT.md if present. Reports go to docs/reports/.\n\nRun audits/UX_DESIGN_AUDIT.md from /Users/iansherr/.determinagents/ against this repo. For live phases (5–8) requires --target=<dev-url>. Additional flags: {{args}}\n\nReport to docs/reports/UX_AUDIT_<YYYY-MM-DD>.md per the doc's template.",
-  "metadata": {
-    "generated-by": "/Users/iansherr/.determinagents/INSTALL.md",
-    "library-path": "/Users/iansherr/.determinagents/"
-  }
-}

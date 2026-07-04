@@ -12,7 +12,7 @@ This file is the canonical source. Individual audit/spec docs may show one examp
 2. **Project context**: if `docs/determinagents/AUDIT_CONTEXT.md` exists, read it first and apply its calibrations
 3. **Reports** go to `docs/reports/<NAME>_<YYYY-MM-DD>.md` in the target repo, starting with `audit:`/`date:` YAML frontmatter (per `specs/FORMAT.md`) so meta-tooling can find them regardless of filename
 4. **Findings** classified P0–P3 per each audit's rubric
-5. **Read-only by default.** Mutating docs (RESOLVE_FROM_REPORT, SECURITY_HUNT, DATA_FLOW_VERIFY, TESTING_CREATOR) require a disposable workspace and per-action approval. Two read-only audits (STUB_AND_COMPLETENESS, ERROR_HANDLING) have an opt-in mutating Phase 6 enabled with `+harness`.
+5. **Read-only by default.** Docs declaring `## Mode: Mutating` (list them with `grep -lE '^## Mode: Mutating' audits/*.md`) require a disposable workspace and per-action approval. Two read-only audits (STUB_AND_COMPLETENESS, ERROR_HANDLING) have an opt-in mutating Phase 6 enabled with `+harness`.
 6. **Each finding** includes file:line and a concrete suggested fix
 7. **Discovery first.** Phase 0 of every audit identifies project shape
 8. **Execution surface boundary.** Shell `determinagents` is installer/maintenance only (`update`, `materialize`, `doctor`, etc.) and does not execute audits.

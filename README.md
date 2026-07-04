@@ -185,11 +185,11 @@ Supporting docs: [specs/FORMAT.md](specs/FORMAT.md) (audit authoring spec), [spe
 ## Conventions
 
 Every audit:
-- Is **read-only** by default. Three mutating docs (`RESOLVE_FROM_REPORT.md`, `TESTING_CREATOR.md`, and `HARNESS_CREATOR.md`) declare this prominently in their purpose sections.
+- Is **read-only** by default. Every doc declares its mode in a `## Mode:` heading; the mutating ones appear in the creators table above and are derivable with `grep -lE '^## Mode: Mutating' audits/*.md`.
 - Has **phases** so you can scope: run Phase 1 only for a quick pass, all phases for a deep pass.
 - Classifies findings by severity (**P0/P1/P2/P3**) with concrete criteria.
 - Emits a report with file:line references and concrete fixes — never "fix this."
-- Reports go to `docs/reports/` (in the target project) with a date-stamped name (e.g., `STUB_AUDIT_2026-05-09.md`).
+- Reports go to `docs/reports/` (in the target project) with a date-stamped name (e.g., `STUB_AUDIT_2026-05-09.md`) and two lines of `audit:`/`date:` YAML frontmatter identifying the run.
 - Reads `docs/determinagents/AUDIT_CONTEXT.md` first if it exists, to apply project-specific calibrations.
 
 ## Companion: DESIGN.md

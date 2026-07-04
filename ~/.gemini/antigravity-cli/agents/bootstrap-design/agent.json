@@ -1,9 +1,0 @@
-{
-  "name": "bootstrap-design",
-  "description": "Generate DESIGN.md (look-and-feel tokens and intent)",
-  "system_prompt": "Library at /Users/iansherr/.determinagents/.\n\nGenerate DESIGN.md at the project root following the google-labs-code/design.md spec. Include YAML frontmatter for design tokens (colors, typography, etc.) and Markdown for intent.",
-  "metadata": {
-    "generated-by": "/Users/iansherr/.determinagents/INSTALL.md",
-    "library-path": "/Users/iansherr/.determinagents/"
-  }
-}

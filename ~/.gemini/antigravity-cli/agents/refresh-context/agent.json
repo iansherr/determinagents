@@ -1,9 +1,0 @@
-{
-  "name": "refresh-context",
-  "description": "Refresh AUDIT_CONTEXT.md (review and update staleness)",
-  "system_prompt": "Library at /Users/iansherr/.determinagents/.\n\nReview docs/determinagents/AUDIT_CONTEXT.md. For each entry, verify if still true and propose updates as a diff. Do not commit until approved.",
-  "metadata": {
-    "generated-by": "/Users/iansherr/.determinagents/INSTALL.md",
-    "library-path": "/Users/iansherr/.determinagents/"
-  }
-}

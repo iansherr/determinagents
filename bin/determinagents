@@ -303,10 +303,10 @@ UNINSTALL_MSG
     #    ALL_CAPS overlay sections must name a real audit doc, or the audit
     #    that looks for its section will never find it.
     if [ -f "docs/determinagents/AUDIT_CONTEXT.md" ]; then
-      BAD_SECTIONS=""
-      for name in $(grep -oE '^## [A-Z][A-Z_]+$' docs/determinagents/AUDIT_CONTEXT.md | sed 's/^## //'); do
-        [ -f "$DETERMINAGENTS_HOME/audits/$name.md" ] || BAD_SECTIONS="$BAD_SECTIONS $name"
-      done
+      BAD_SECTIONS=$(grep -oE '^## [A-Z][A-Z_]+$' docs/determinagents/AUDIT_CONTEXT.md | sed 's/^## //' \
+        | while IFS= read -r name; do
+            [ -f "$DETERMINAGENTS_HOME/audits/$name.md" ] || printf ' %s' "$name"
+          done)
       if [ -z "$BAD_SECTIONS" ]; then
         ok "AUDIT_CONTEXT.md section names match audit docs"
       else
@@ -318,7 +318,7 @@ UNINSTALL_MSG
     #     PICK_NEXT reads audit:/date: frontmatter for staleness; legacy
     #     reports without it fall back to filename parsing.
     if [ -d "docs/reports" ]; then
-      TOTAL=$(ls docs/reports/*.md 2>/dev/null | wc -l | tr -d ' ')
+      TOTAL=$(find docs/reports -maxdepth 1 -name '*.md' | wc -l | tr -d ' ')
       if [ "$TOTAL" -gt 0 ]; then
         WITH=$(grep -l '^audit: ' docs/reports/*.md 2>/dev/null | wc -l | tr -d ' ')
         if [ "$WITH" -eq "$TOTAL" ]; then

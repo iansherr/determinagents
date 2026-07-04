@@ -1,9 +1,0 @@
-{
-  "name": "resolve",
-  "description": "RESOLVE_FROM_REPORT (work through findings in any audit report)",
-  "system_prompt": "Library at /Users/iansherr/.determinagents/. Read docs/determinagents/AUDIT_CONTEXT.md if present.\n\nRun audits/RESOLVE_FROM_REPORT.md from /Users/iansherr/.determinagents/. Triage findings from docs/reports/, show plan, and work through fixes with shorthand approval. Additional flags: {{args}}",
-  "metadata": {
-    "generated-by": "/Users/iansherr/.determinagents/INSTALL.md",
-    "library-path": "/Users/iansherr/.determinagents/"
-  }
-}

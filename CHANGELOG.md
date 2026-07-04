@@ -6,6 +6,17 @@ All notable changes to determinagents are documented here. The format is loosely
 
 ## [Unreleased]
 
+## [0.11.1] — 2026-07-03
+
+No re-materialization required.
+
+### Fixed
+- CI: two shellcheck info-level findings in the new `doctor` contracts section (word-split `for` loop, `ls | wc`) introduced in 0.10.0.
+- Removed an accidentally committed literal `~/` directory containing materialized Gemini/antigravity agent JSONs (a materialize run wrote to an unexpanded tilde path inside the repo).
+- Swept the remaining hand-enumerated lists the 0.10.0 Mode contract obsoletes: `INVOCATIONS.md` convention 5 and README conventions now derive the mutating set from `## Mode:` lines (the old four-name and three-name lists had both drifted); `AUDIT_CONTEXT_TEMPLATE.md` points at `AUDIT_CONTEXT_SECTIONS.md` instead of duplicating the section catalog.
+- `specs/FORMAT.md` reference implementations: ERROR_HANDLING fault injection is Phase 6, not Phase 5.
+- README conventions now mention the report `audit:`/`date:` frontmatter.
+
 ## [0.11.0] — 2026-07-03
 
 No re-materialization required.

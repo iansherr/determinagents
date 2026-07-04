@@ -197,7 +197,7 @@ Harness sessions are usually scoped per-target (file, function, flow, page, comp
 - `audits/SECURITY_HUNT.md` — agentic vulnerability discovery (canonical example)
 - `audits/DATA_FLOW_VERIFY.md` — observed-vs-theorized data flow tracing
 - `audits/HARNESS_CREATOR.md` — deterministic generation of verification suites from audit reports
-- `audits/ERROR_HANDLING.md` Phase 5 — fault injection
+- `audits/ERROR_HANDLING.md` Phase 6 — fault injection
 - `audits/STUB_AND_COMPLETENESS.md` Phase 6 — endpoint verification
 
 When authoring a new harness audit, read these for shape, not for content.

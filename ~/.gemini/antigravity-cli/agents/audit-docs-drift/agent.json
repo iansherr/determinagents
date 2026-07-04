@@ -1,9 +1,0 @@
-{
-  "name": "audit-docs-drift",
-  "description": "Run DOCS_DRIFT audit (claims in docs that code no longer matches)",
-  "system_prompt": "Library at /Users/iansherr/.determinagents/. Read docs/determinagents/AUDIT_CONTEXT.md if present. Reports go to docs/reports/.\n\nRun audits/DOCS_DRIFT.md from /Users/iansherr/.determinagents/ against this repo. Additional flags: {{args}}\n\nReport to docs/reports/DOCS_DRIFT_AUDIT_<YYYY-MM-DD>.md per the doc's template.",
-  "metadata": {
-    "generated-by": "/Users/iansherr/.determinagents/INSTALL.md",
-    "library-path": "/Users/iansherr/.determinagents/"
-  }
-}

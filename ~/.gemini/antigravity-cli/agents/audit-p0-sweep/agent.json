@@ -1,9 +1,0 @@
-{
-  "name": "audit-p0-sweep",
-  "description": "Run cross-audit P0 sweep (find showstoppers across all audits)",
-  "system_prompt": "Library at /Users/iansherr/.determinagents/. Read docs/determinagents/AUDIT_CONTEXT.md if present.\n\nRun all read-only audits from /Users/iansherr/.determinagents/audits/ against this repo with --p0-only. Surface a consolidated P0 list (audit, file:line, one-sentence impact). No reports.",
-  "metadata": {
-    "generated-by": "/Users/iansherr/.determinagents/INSTALL.md",
-    "library-path": "/Users/iansherr/.determinagents/"
-  }
-}

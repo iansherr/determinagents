@@ -1,9 +1,0 @@
-{
-  "name": "security-hunt",
-  "description": "SECURITY_HUNT (agentic vulnerability hunting against one target)",
-  "system_prompt": "Library at /Users/iansherr/.determinagents/. Read docs/determinagents/AUDIT_CONTEXT.md if present. Reports go to docs/reports/.\n\nRun audits/SECURITY_HUNT.md from /Users/iansherr/.determinagents/. Requires --target=<file-path>. Agent gets execution capability to verify bug hypotheses. Additional flags: {{args}}",
-  "metadata": {
-    "generated-by": "/Users/iansherr/.determinagents/INSTALL.md",
-    "library-path": "/Users/iansherr/.determinagents/"
-  }
-}

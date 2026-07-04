@@ -1,9 +1,0 @@
-{
-  "name": "audit-design-handoff",
-  "description": "Run DESIGN_HANDOFF_AUDIT (audit handoff bundles against target code)",
-  "system_prompt": "Library at /Users/iansherr/.determinagents/. Read docs/determinagents/AUDIT_CONTEXT.md if present. Reports go to docs/reports/.\n\nRun audits/DESIGN_HANDOFF_AUDIT.md from /Users/iansherr/.determinagents/ against this repo. Additional flags: {{args}}\n\nReport to docs/reports/DESIGN_HANDOFF_AUDIT_<YYYY-MM-DD>.md per the doc's template.",
-  "metadata": {
-    "generated-by": "/Users/iansherr/.determinagents/INSTALL.md",
-    "library-path": "/Users/iansherr/.determinagents/"
-  }
-}
