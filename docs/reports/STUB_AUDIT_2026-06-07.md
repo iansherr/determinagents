@@ -1,3 +1,8 @@
+---
+audit: STUB_AND_COMPLETENESS
+date: 2026-06-07
+---
+
 # Stub & Completeness Audit — 2026-06-07
 
 ## Severity rubric (this audit)
@@ -30,13 +35,13 @@ The following behaviors are defined in the library's `audits/` folder and listed
 
 | # | Behavior / Audit | File Path | Token | Impact | Suggested Fix |
 |---|---|---|---|---|---|
-| 1 | `ADVERSARIAL_HARDENER` | [audits/ADVERSARIAL_HARDENER.md](file:///Users/iansherr/Projects/determinagents/audits/ADVERSARIAL_HARDENER.md) | `adversarial` | Missing from command materialization; cannot be run as a subagent or slash command. | Add a prompt block under `## Audits (read-only)` or as a mutating section in `INVOCATIONS.md`. |
-| 2 | `LOOP_BOOTSTRAP` | [audits/LOOP_BOOTSTRAP.md](file:///Users/iansherr/Projects/determinagents/audits/LOOP_BOOTSTRAP.md) | `init-loops` | Missing from command materialization; cannot be run as a subagent or slash command. | Add a prompt block section in `INVOCATIONS.md`. |
-| 3 | `LOOP_ORCHESTRATOR` | [audits/LOOP_ORCHESTRATOR.md](file:///Users/iansherr/Projects/determinagents/audits/LOOP_ORCHESTRATOR.md) | `loop-orchestrator` | Missing from command materialization; cannot be run as a subagent or slash command. | Add a prompt block section in `INVOCATIONS.md`. |
-| 4 | `PARSER_FUZZER` | [audits/PARSER_FUZZER.md](file:///Users/iansherr/Projects/determinagents/audits/PARSER_FUZZER.md) | `fuzzer` | Missing from command materialization; cannot be run as a subagent or slash command. | Add a prompt block section in `INVOCATIONS.md`. |
-| 5 | `RECURSIVE_IMPROVEMENT` | [audits/RECURSIVE_IMPROVEMENT.md](file:///Users/iansherr/Projects/determinagents/audits/RECURSIVE_IMPROVEMENT.md) | `recursive` | Missing from command materialization; cannot be run as a subagent or slash command. | Add a prompt block section in `INVOCATIONS.md`. |
-| 6 | `SCENARIO_CHAINER` | [audits/SCENARIO_CHAINER.md](file:///Users/iansherr/Projects/determinagents/audits/SCENARIO_CHAINER.md) | `chainer` | Missing from command materialization; cannot be run as a subagent or slash command. | Add a prompt block section in `INVOCATIONS.md`. |
-| 7 | `UX_TOKEN_REFACTOR` | [audits/UX_TOKEN_REFACTOR.md](file:///Users/iansherr/Projects/determinagents/audits/UX_TOKEN_REFACTOR.md) | `token-refactor` | Missing from command materialization; cannot be run as a subagent or slash command. | Add a prompt block section in `INVOCATIONS.md`. |
+| 1 | `ADVERSARIAL_HARDENER` | [audits/ADVERSARIAL_HARDENER.md](../../audits/ADVERSARIAL_HARDENER.md) | `adversarial` | Missing from command materialization; cannot be run as a subagent or slash command. | Add a prompt block under `## Audits (read-only)` or as a mutating section in `INVOCATIONS.md`. |
+| 2 | `LOOP_BOOTSTRAP` | [audits/LOOP_BOOTSTRAP.md](../../audits/LOOP_BOOTSTRAP.md) | `init-loops` | Missing from command materialization; cannot be run as a subagent or slash command. | Add a prompt block section in `INVOCATIONS.md`. |
+| 3 | `LOOP_ORCHESTRATOR` | [audits/LOOP_ORCHESTRATOR.md](../../audits/LOOP_ORCHESTRATOR.md) | `loop-orchestrator` | Missing from command materialization; cannot be run as a subagent or slash command. | Add a prompt block section in `INVOCATIONS.md`. |
+| 4 | `PARSER_FUZZER` | [audits/PARSER_FUZZER.md](../../audits/PARSER_FUZZER.md) | `fuzzer` | Missing from command materialization; cannot be run as a subagent or slash command. | Add a prompt block section in `INVOCATIONS.md`. |
+| 5 | `RECURSIVE_IMPROVEMENT` | [audits/RECURSIVE_IMPROVEMENT.md](../../audits/RECURSIVE_IMPROVEMENT.md) | `recursive` | Missing from command materialization; cannot be run as a subagent or slash command. | Add a prompt block section in `INVOCATIONS.md`. |
+| 6 | `SCENARIO_CHAINER` | [audits/SCENARIO_CHAINER.md](../../audits/SCENARIO_CHAINER.md) | `chainer` | Missing from command materialization; cannot be run as a subagent or slash command. | Add a prompt block section in `INVOCATIONS.md`. |
+| 7 | `UX_TOKEN_REFACTOR` | [audits/UX_TOKEN_REFACTOR.md](../../audits/UX_TOKEN_REFACTOR.md) | `token-refactor` | Missing from command materialization; cannot be run as a subagent or slash command. | Add a prompt block section in `INVOCATIONS.md`. |
 
 ---
 
@@ -49,10 +54,10 @@ The following behaviors are defined in the library's `audits/` folder and listed
 
 | # | Issue | Location | Impact | Suggested Fix |
 |---|---|---|---|---|
-| 1 | Subagent directory naming mismatch (`handoff`) | [~/.gemini/antigravity-cli/agents/audit-design-handoff](file:///Users/iansherr/Projects/determinagents/~/.gemini/antigravity-cli/agents/audit-design-handoff) | Materialization generated directory name differs from naming conventions derived from token `handoff`. | Standardize folder name to `audit-handoff` or update token in `INVOCATIONS.md`. |
-| 2 | Subagent directory naming mismatch (`next`) | [~/.gemini/antigravity-cli/agents/pick-next](file:///Users/iansherr/Projects/determinagents/~/.gemini/antigravity-cli/agents/pick-next) | Materialization generated directory name differs from naming conventions derived from token `next`. | Standardize folder name to `next` or update token in `INVOCATIONS.md`. |
-| 3 | Subagent directory naming mismatch (`p0`) | [~/.gemini/antigravity-cli/agents/audit-p0-sweep](file:///Users/iansherr/Projects/determinagents/~/.gemini/antigravity-cli/agents/audit-p0-sweep) | Materialization generated directory name differs from naming conventions derived from token `p0`. | Standardize folder name to `audit-p0` or update token in `INVOCATIONS.md`. |
-| 4 | Subagent directory naming mismatch (`testing`) | [~/.gemini/antigravity-cli/agents/testing-creator](file:///Users/iansherr/Projects/determinagents/~/.gemini/antigravity-cli/agents/testing-creator) | Materialization generated directory name differs from naming conventions derived from token `testing`. | Standardize folder name to `testing` or update token in `INVOCATIONS.md`. |
+| 1 | Subagent directory naming mismatch (`handoff`) | `~/.gemini/antigravity-cli/agents/audit-design-handoff` | Materialization generated directory name differs from naming conventions derived from token `handoff`. | Standardize folder name to `audit-handoff` or update token in `INVOCATIONS.md`. |
+| 2 | Subagent directory naming mismatch (`next`) | `~/.gemini/antigravity-cli/agents/pick-next` | Materialization generated directory name differs from naming conventions derived from token `next`. | Standardize folder name to `next` or update token in `INVOCATIONS.md`. |
+| 3 | Subagent directory naming mismatch (`p0`) | `~/.gemini/antigravity-cli/agents/audit-p0-sweep` | Materialization generated directory name differs from naming conventions derived from token `p0`. | Standardize folder name to `audit-p0` or update token in `INVOCATIONS.md`. |
+| 4 | Subagent directory naming mismatch (`testing`) | `~/.gemini/antigravity-cli/agents/testing-creator` | Materialization generated directory name differs from naming conventions derived from token `testing`. | Standardize folder name to `testing` or update token in `INVOCATIONS.md`. |
 
 ---
 
