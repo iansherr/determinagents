@@ -46,6 +46,20 @@ _Example:_ Admin-panel gaps are P1, not P0 — admins report breakage out-of-ban
 |---|---|---|---|
 | 2026-04 | (example) Phantom admin endpoints | `.catch(() => fallback)` masking 404s | `docs/operations/ADMIN_PANEL_FIXING_GUIDE.md` |
 
+### Known environment-limited findings
+
+> A real, reproduced finding that can't be fixed with what's currently
+> available — distinct from a false-positive (it's real) and from
+> out-of-scope (it's not excluded, it's blocked). Re-running the same
+> reproduction without a change in the blocking resource just burns a cycle;
+> record it here so `RESOLVE_FROM_REPORT` skips straight to "already known"
+> instead of re-verifying from scratch. Not audit-specific — a hardware or
+> credential limitation can surface from any audit's findings.
+
+| Finding | Blocked on | Last confirmed | Reference |
+|---|---|---|---|
+| (example) x64 build OOMs under arm64 QEMU emulation in CI | native x64 host or CI runner | 2026-09-06 | `docs/reports/...` |
+
 ---
 
 ## (audit-specific sections — copy from `specs/AUDIT_CONTEXT_SECTIONS.md` as needed)

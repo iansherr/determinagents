@@ -139,6 +139,7 @@ If `docs/determinagents/AUDIT_CONTEXT.md` exists, read it. Apply:
 
 - **Severity calibrations** — use the project's calibrated severities, not the universal rubric defaults.
 - **Approved silent fallbacks / known false-positives** — if a finding overlaps with a known false-positive entry, propose marking it invalid rather than fixing.
+- **Known environment-limited findings** (Global section) — if a finding matches one of these, skip straight to that outcome instead of re-running discovery; only re-verify if the blocking resource might now be available.
 - **Sensitive paths** — fixes touching these paths get extra confirmation.
 
 ---
@@ -155,6 +156,7 @@ For each finding in the report, classify:
 |--------|---------|
 | **Actionable** | Fix is well-scoped; resolver can implement |
 | **Needs decision** | Fix requires product/architectural choice (e.g., "remove or implement?"); surface to user, do not fix |
+| **Out-of-repo** | Fix is well-scoped but lives in a different repository/service with its own deploy pipeline and ownership — needs authorization to cross that boundary, not a product decision. Surface the target repo and what would unblock it; do not implement. |
 | **Already resolved** | Verification shows the issue no longer exists in the current code |
 | **Invalid** | Finding is a false positive (per AUDIT_CONTEXT or current investigation) |
 | **Out of scope** | User explicitly excluded this severity tier or category from the session |
@@ -162,6 +164,8 @@ For each finding in the report, classify:
 ### 1.2 Verify "already resolved" findings
 
 For each finding tentatively classified "already resolved", re-run the relevant discovery command from the source audit doc to confirm. Don't trust the classification without checking.
+
+If verification disagrees with an external tool's stated result (a Dependabot alert, a CI badge, a status page), check whether both are looking at the same branch/ref before concluding either is wrong — `git diff <external-ref> <working-ref> -- <relevant files>` plus `git log -S'<the specific change>'` is usually enough to settle it. Two contradicting checks are sometimes both correct, just about different branches.
 
 ### 1.3 Present plan
 
@@ -238,6 +242,24 @@ Finding P0 #1: 10 unregistered Stripe webhook handlers
 | `s` | skip; mark "deferred" with a reason |
 | `i` | mark "invalid" (false positive); record reason |
 | `q` | stop session; annotate report with what's done |
+
+If the fix's actual code lives in a different repository or service with its
+own deploy pipeline and ownership, don't offer `[y] apply` at all — present
+the finding as **Out-of-repo** instead, naming the target repo/service and
+what authorization would unblock it:
+
+```
+Finding P1 #3: newsletter topic-mask writes fail on non-empty masks
+  Location (this repo): docs/reports/... (symptom observed here)
+  Actual fix location: ~/path/to/other-repo/services/foo (separate
+    production repo, own deploy pipeline, unrelated in-flight work)
+
+  This is well-scoped but out of this session's authority to implement —
+  it needs either authorization to work in that repo, or reassignment to
+  its owner.
+
+  [o] mark out-of-repo  [e] edit the analysis  [q] quit
+```
 
 If the user types prose instead of a letter, treat it as `e` and incorporate their guidance.
 
@@ -321,6 +343,7 @@ The findings already have severities from the source audit. This rubric is about
 | **Already resolved** | Verification showed no issue at session start |
 | **Invalid** | Finding determined false-positive during work |
 | **Needs decision** | Fix requires product/architectural input; surfaced to owner |
+| **Out-of-repo** | Fix requires authorization to work in a different repository/service; surfaced to owner, not implemented |
 | **Deferred** | Owner chose to defer; reason recorded |
 | **Failed** | Fix attempted but couldn't verify; reverted; surface to owner |
 
