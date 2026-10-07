@@ -56,6 +56,19 @@ carries the resolved library path plus a fetch line, and pastes directly
 into any coding agent. Materialization buys autocomplete and one-keystroke
 routing; `prompt` buys zero-setup portability. Same library either way.
 
+Cloud environments with no local library at all use the remote variant —
+same extraction, resolved over HTTPS at a pinned ref with paths rewritten
+to raw URLs, so the output stands alone:
+
+```sh
+determinagents prompt <behavior> --remote --ref=<commit-sha> [flags]
+```
+
+`--ref` defaults to `$DETERMINAGENTS_REF` or `main`; pin a full commit
+SHA for unattended use (a mutable-ref warning goes to stderr otherwise).
+Responses cache under `$XDG_CACHE_HOME/determinagents/remote/`.
+`DETERMINAGENTS_REPO_URL` forks resolve against the fork.
+
 ## What gets installed
 
 ### The Hub: `/determinagents` (Primary)

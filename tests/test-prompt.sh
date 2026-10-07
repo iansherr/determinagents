@@ -76,6 +76,56 @@ else
   pass "unknown token exits nonzero"
 fi
 
+# --remote resolves over HTTPS with no local library (file:// rig stands
+# in for raw.githubusercontent.com; skipped if curl lacks file support)
+if curl -V 2>/dev/null | grep -qi ' file '; then
+  RT="$(mktemp -d "${TMPDIR:-/tmp}/det-remote-test.XXXXXX")"
+  REMOTE_LIB="file://$DETERMINAGENTS_HOME"
+  mkdir -p "$RT/cache"
+  if DETERMINAGENTS_HOME="$RT/nonexistent" \
+     XDG_CACHE_HOME="$RT/cache" \
+     DETERMINAGENTS_RAW_BASE="$REMOTE_LIB" \
+     "$BIN" prompt stub --remote --ref=test >"$RT/out.txt" 2>"$RT/err.txt"; then
+    pass "remote stub resolves library-less"
+  else
+    fail "remote stub resolves library-less"
+  fi
+  if grep -q "library (remote): $REMOTE_LIB @ test" "$RT/out.txt" \
+    && grep -q 'STUB_AND_COMPLETENESS' "$RT/out.txt"; then
+    pass "remote stub carries URLs, not local paths"
+  else
+    fail "remote stub carries URLs, not local paths"
+  fi
+  if [ -f "$RT/cache/determinagents/remote/test/INVOCATIONS.md" ]; then
+    pass "remote response cached"
+  else
+    fail "remote response cached"
+  fi
+  if DETERMINAGENTS_HOME="$RT/nonexistent" \
+     XDG_CACHE_HOME="$RT/cache" \
+     DETERMINAGENTS_RAW_BASE="$REMOTE_LIB" \
+     "$BIN" prompt stub --remote --ref='bad ref!' >/dev/null 2>&1; then
+    fail "remote rejects bad ref"
+  else
+    pass "remote rejects bad ref"
+  fi
+  if DETERMINAGENTS_HOME="$RT/nonexistent" \
+     XDG_CACHE_HOME="$RT/cache" \
+     DETERMINAGENTS_RAW_BASE="$REMOTE_LIB" \
+     "$BIN" prompt stub --remote --ref=32929602ab7add15fbd2db0e654f6fc0e360d622 >/dev/null 2>"$RT/err2.txt"; then
+    if [ -s "$RT/err2.txt" ]; then
+      fail "pinned SHA stays silent"
+    else
+      pass "pinned SHA stays silent"
+    fi
+  else
+    fail "pinned SHA resolves"
+  fi
+  rm -rf "$RT"
+else
+  echo "skip: curl without file protocol (remote tests need it)"
+fi
+
 if [ "$FAILED" -eq 0 ]; then
   echo "all prompt contract tests passed"
 else

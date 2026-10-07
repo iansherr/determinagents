@@ -26,6 +26,11 @@ This file is the canonical source. Individual audit/spec docs may show one examp
    fi
    ```
    Precedence is deliberate: explicit `$DETERMINAGENTS_HOME` wins; an enclosing checkout covers invoke-from-the-repo (including subdirectories); the default path covers prior installs; clone is last. Override the source with `$DETERMINAGENTS_REPO_URL` / `$DETERMINAGENTS_BRANCH` (e.g., `dev` for unreleased work) — same variables `install.sh` honors.
+
+   Cloud agents with no library on disk skip the preamble: `determinagents
+   prompt <behavior> --remote --ref=<commit-sha>` resolves over HTTPS at a
+   pinned ref (cached) with paths rewritten to raw URLs. Pin a full SHA
+   for unattended use.
 2. **Project context**: if `docs/determinagents/AUDIT_CONTEXT.md` exists, read it first and apply its calibrations
 3. **Reports** go to `docs/reports/<NAME>_<YYYY-MM-DD>.md` in the target repo, starting with `audit:`/`date:` YAML frontmatter (per `specs/FORMAT.md`) so meta-tooling can find them regardless of filename
 4. **Findings** classified P0–P3 per each audit's rubric

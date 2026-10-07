@@ -30,7 +30,9 @@ else
 fi
 
 # --- Prompt-library helpers (shared by `prompt`, `setup`, `doctor`) ---
-_det_invoc() { printf '%s/INVOCATIONS.md' "$DETERMINAGENTS_HOME"; }
+# _det_invoc resolves to the local INVOCATIONS.md, or to a fetched copy
+# when DETERMINAGENTS_INVOC_FILE is set (`prompt --remote`).
+_det_invoc() { printf '%s' "${DETERMINAGENTS_INVOC_FILE:-$DETERMINAGENTS_HOME/INVOCATIONS.md}"; }
 # Every routable token, live from the routing table, plus anchor-only
 # sections (e.g. 'maintenance') that have no routing row.
 _det_tokens() {
@@ -91,13 +93,25 @@ _det_routing() {
 }
 
 if [ ! -d "$DETERMINAGENTS_HOME/audits" ]; then
-  echo "error: determinagents library not found at $DETERMINAGENTS_HOME" >&2
-  echo "  (resolved via $RESOLVED_VIA)" >&2
-  [ -n "$DETERMINAGENTS_BAKED_HOME" ] && [ "$DETERMINAGENTS_HOME" != "$DETERMINAGENTS_BAKED_HOME" ] && echo "  (baked path was: $DETERMINAGENTS_BAKED_HOME)" >&2
-  echo "" >&2
-  echo "  run the installer to fix your paths:" >&2
-  echo "  curl -fsSL https://raw.githubusercontent.com/iansherr/determinagents/main/install.sh | sh" >&2
-  exit 1
+  # `prompt --remote` is the one command that needs no local library —
+  # it resolves everything over HTTPS. Let it through; everything else
+  # still requires a checkout.
+  _needs_local=1
+  if [ "${1:-}" = "prompt" ]; then
+    for _aa in "$@"; do
+      if [ "$_aa" = "--remote" ]; then _needs_local=0; break; fi
+    done
+  fi
+  if [ "$_needs_local" -eq 1 ]; then
+    echo "error: determinagents library not found at $DETERMINAGENTS_HOME" >&2
+    echo "  (resolved via $RESOLVED_VIA)" >&2
+    [ -n "$DETERMINAGENTS_BAKED_HOME" ] && [ "$DETERMINAGENTS_HOME" != "$DETERMINAGENTS_BAKED_HOME" ] && echo "  (baked path was: $DETERMINAGENTS_BAKED_HOME)" >&2
+    echo "" >&2
+    echo "  run the installer to fix your paths:" >&2
+    echo "  curl -fsSL https://raw.githubusercontent.com/iansherr/determinagents/main/install.sh | sh" >&2
+    echo "  (or use 'prompt --remote' for a library-less HTTPS resolve)" >&2
+    exit 1
+  fi
 fi
 
 cmd="${1:-help}"
@@ -210,8 +224,71 @@ MSG
     # extracted live from INVOCATIONS.md (the single source of truth —
     # prompt text is never copied into this shim). Works for any AI CLI:
     # pipe, paste, or backtick-embed the output.
+    # `--remote` resolves INVOCATIONS.md over HTTPS (ref-pinned, cached)
+    # instead of disk — for cloud agents with no local library.
     INVOC="$DETERMINAGENTS_HOME/INVOCATIONS.md"
-    if [ ! -f "$INVOC" ]; then
+    PROMPT_REMOTE=0; PROMPT_REF="${DETERMINAGENTS_REF:-main}"; PROMPT_FLAGS=""
+    for _pf in "$@"; do
+      case "$_pf" in
+        --remote) PROMPT_REMOTE=1 ;;
+        --ref=*) PROMPT_REF="${_pf#--ref=}" ;;
+        *) PROMPT_FLAGS="$PROMPT_FLAGS $_pf" ;;
+      esac
+    done
+    # shellcheck disable=SC2086
+    set -- $PROMPT_FLAGS
+    if [ "$PROMPT_REMOTE" -eq 1 ]; then
+      case "$PROMPT_REF" in
+        ""|*..*|*[!A-Za-z0-9._/-]*)
+          echo "error: invalid --ref (allowed: A–Z a–z 0–9 . _ - /)" >&2
+          exit 1
+          ;;
+      esac
+      _repo="${DETERMINAGENTS_REPO_URL:-https://github.com/iansherr/determinagents.git}"
+      if [ -n "${DETERMINAGENTS_RAW_BASE:-}" ]; then
+        _raw="$DETERMINAGENTS_RAW_BASE"
+      else
+        _slug=$(printf '%s' "$_repo" | sed -e 's|^[^/]*//[^/]*/||' -e 's|\.git$||' -e 's|/|-|g')
+        case "$_slug" in
+          ""|*[!A-Za-z0-9._-]*)
+            echo "error: cannot derive a raw base from DETERMINAGENTS_REPO_URL=$_repo" >&2
+            exit 1
+            ;;
+        esac
+        _raw="https://raw.githubusercontent.com/$_slug/$PROMPT_REF"
+      fi
+      _safe_ref=$(printf '%s' "$PROMPT_REF" | tr '/' '-')
+      _cachedir="${XDG_CACHE_HOME:-$HOME/.cache}/determinagents/remote/$_safe_ref"
+      mkdir -p "$_cachedir"
+      if [ ! -f "$_cachedir/INVOCATIONS.md" ]; then
+        if command -v curl >/dev/null 2>&1; then
+          _fetch="curl -fsSL -o $_cachedir/INVOCATIONS.md $_raw/INVOCATIONS.md"
+        elif command -v wget >/dev/null 2>&1; then
+          _fetch="wget -q -O $_cachedir/INVOCATIONS.md $_raw/INVOCATIONS.md"
+        else
+          echo "error: --remote needs curl or wget" >&2
+          exit 1
+        fi
+        # shellcheck disable=SC2086
+        if ! $_fetch 2>/dev/null; then
+          echo "error: could not fetch INVOCATIONS.md from $_raw" >&2
+          exit 1
+        fi
+      fi
+      DETERMINAGENTS_INVOC_FILE="$_cachedir/INVOCATIONS.md"
+      export DETERMINAGENTS_INVOC_FILE
+      PROMPT_RAWBASE="$_raw"
+      PROMPT_PINNED=0
+      if [ "${#PROMPT_REF}" -eq 40 ]; then
+        case "$PROMPT_REF" in
+          *[!0-9a-f]*) ;;
+          *) PROMPT_PINNED=1 ;;
+        esac
+      fi
+      if [ "$PROMPT_PINNED" -ne 1 ]; then
+        echo "warning: mutable ref '$PROMPT_REF' — pin a full commit SHA via --ref= for unattended use" >&2
+      fi
+    elif [ ! -f "$INVOC" ]; then
       echo "error: INVOCATIONS.md not found at $INVOC" >&2
       exit 1
     fi
@@ -222,10 +299,15 @@ MSG
     case "$sub2" in
       ""|--help|-h)
         echo "usage: determinagents prompt <behavior> [flags]"
+        echo "       determinagents prompt <behavior> --remote [--ref=<sha|branch>] [flags]"
         echo "       determinagents prompt --list"
         echo ""
         echo "print a paste-ready prompt for any behavior. hand the output"
         echo "to any coding agent — no host-tool install required."
+        echo "--remote resolves the library over HTTPS (ref-pinned, cached)"
+        echo "and rewrites paths to raw URLs: for cloud agents with no"
+        echo "local install. default ref is \$DETERMINAGENTS_REF or 'main';"
+        echo "pin a full commit SHA for unattended use."
         echo ""
         echo "behaviors:"
         _det_tokens | sed 's/^/  /'
@@ -238,33 +320,50 @@ MSG
     esac
     token="$sub2"
     doc=$(_det_doc "$token")
-    if [ -z "$doc" ] && ! grep -qE "^<!-- prompt:([a-z,-]*,)?$token(,| -->)" "$INVOC"; then
+    if [ -z "$doc" ] && ! grep -qE "^<!-- prompt:([a-z,-]*,)?$token(,| -->)" "$(_det_invoc)"; then
       echo "unknown behavior: $token" >&2
       echo "run 'determinagents prompt --list' for behaviors" >&2
       exit 1
     fi
-    if [ -d "$DETERMINAGENTS_HOME/.git" ]; then
-      LIB_SHA=$(git -C "$DETERMINAGENTS_HOME" rev-parse --short HEAD 2>/dev/null || echo "?")
-      LIB_BRANCH=$(git -C "$DETERMINAGENTS_HOME" rev-parse --abbrev-ref HEAD 2>/dev/null || echo "?")
-      LIB_URL=$(git -C "$DETERMINAGENTS_HOME" remote get-url origin 2>/dev/null \
-        || echo "https://github.com/iansherr/determinagents.git")
+    if [ "$PROMPT_REMOTE" -eq 1 ]; then
+      echo "# determinagents prompt: $token $*"
+      echo "# library (remote): $PROMPT_RAWBASE @ $PROMPT_REF"
+      echo "# paste everything below into any coding agent. library paths"
+      echo "# are raw URLs at the pinned ref above — no local install needed."
+      echo ""
     else
-      LIB_SHA="?"
-      LIB_BRANCH="main"
-      LIB_URL="https://github.com/iansherr/determinagents.git"
+      if [ -d "$DETERMINAGENTS_HOME/.git" ]; then
+        LIB_SHA=$(git -C "$DETERMINAGENTS_HOME" rev-parse --short HEAD 2>/dev/null || echo "?")
+        LIB_BRANCH=$(git -C "$DETERMINAGENTS_HOME" rev-parse --abbrev-ref HEAD 2>/dev/null || echo "?")
+        LIB_URL=$(git -C "$DETERMINAGENTS_HOME" remote get-url origin 2>/dev/null \
+          || echo "https://github.com/iansherr/determinagents.git")
+      else
+        LIB_SHA="?"
+        LIB_BRANCH="main"
+        LIB_URL="https://github.com/iansherr/determinagents.git"
+      fi
+      echo "# determinagents prompt: $token $*"
+      echo "# library: $DETERMINAGENTS_HOME ($LIB_BRANCH @ $LIB_SHA)"
+      echo "# paste everything below into any coding agent."
+      echo "# if the library path above is unreachable from the agent, fetch it with:"
+      echo "#   git clone --depth 1 --branch $LIB_BRANCH $LIB_URL <path>"
+      echo ""
     fi
-    echo "# determinagents prompt: $token $*"
-    echo "# library: $DETERMINAGENTS_HOME ($LIB_BRANCH @ $LIB_SHA)"
-    echo "# paste everything below into any coding agent."
-    echo "# if the library path above is unreachable from the agent, fetch it with:"
-    echo "#   git clone --depth 1 --branch $LIB_BRANCH $LIB_URL <path>"
-    echo ""
-    anchor_line=$(grep -n -E "^<!-- prompt:([a-z,-]*,)?$token(,| -->)" "$INVOC" | head -1 | cut -d: -f1)
-    if [ -n "$anchor_line" ]; then
+    anchor_line=$(grep -n -E "^<!-- prompt:([a-z,-]*,)?$token(,| -->)" "$(_det_invoc)" | head -1 | cut -d: -f1)
+    # Remote mode rewrites library paths to raw URLs at the pinned ref,
+    # so the output stands alone with no local install.
+    _det_emit() {
       if [ -n "$doc" ]; then
         _det_section "$anchor_line" | sed "s/<AUDIT>/$doc/g"
       else
         _det_section "$anchor_line"
+      fi
+    }
+    if [ -n "$anchor_line" ]; then
+      if [ "$PROMPT_REMOTE" -eq 1 ]; then
+        _det_emit | sed "s|\$DETERMINAGENTS_HOME|$PROMPT_RAWBASE|g"
+      else
+        _det_emit
       fi
       if [ "$token" = "data-flow" ]; then
         case " $* " in
@@ -275,10 +374,15 @@ MSG
     else
       # Token routes to a doc with no dedicated INVOCATIONS.md section yet:
       # honest pointer instead of a fabricated prompt.
+      if [ "$PROMPT_REMOTE" -eq 1 ]; then
+        _libref="$PROMPT_RAWBASE"
+      else
+        _libref=\$DETERMINAGENTS_HOME
+      fi
       cat <<FALLBACK
 No dedicated invocation section for '$token' yet.
 
-Run audits/$doc.md from \$DETERMINAGENTS_HOME against this repo, per the
+Run audits/$doc.md from $_libref against this repo, per the
 doc's own phases. Report to docs/reports/ per specs/FORMAT.md
 (audit:/date: frontmatter, P0-P3 findings with file:line and fixes).
 FALLBACK

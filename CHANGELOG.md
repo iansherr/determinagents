@@ -16,6 +16,7 @@ and `complete`-entry protocol note).
 - **`determinagents setup <tool>`** — deterministic host-tool install with no agent in the loop (`claude | opencode | gemini | agy | cursor | all`, `--global`/`--project`, `--force`, `--remove`). Instantiates `templates/` (skill, hub command, Cursor rule, Gemini hub, AGY plugin manifest) plus per-behavior Gemini TOMLs and AGY agents generated live from the routing table. `generated-by` markers; foreign files never overwritten without `--force`. Covered by `tests/test-setup.sh` (CI).
 - **`specs/LOOP_PROTOCOL.md` §6 (Completion-Loop Mandates)** — gate ledger, anti-circularity rule (two identical outcomes → pivot or block), environment capability cache, parallel-state budget (≤3 open loop-owned PRs, settle-before-spawn, scope-overlap check), harness-failure triage (`product`/`harness-flake`/`environment-limit`), credential-safety invariant. `AUTONOMOUS_COMPLETION_LOOP.md` binds every cycle to it.
 - **`INVOCATIONS.md` zero-install bootstrap** — shared-conventions preamble resolves the library (env → enclosing checkout → default path → shallow clone) with no install required.
+- **`determinagents prompt --remote`** — library-less HTTPS resolve for cloud agents: ref-pinned cached fetch of `INVOCATIONS.md` with paths rewritten to raw URLs (`--ref` defaults to `$DETERMINAGENTS_REF`/`main`; mutable-ref warning on stderr; pin a full SHA unattended). Covered by file-rig contract tests in `tests/test-prompt.sh`.
 
 ## [0.11.1] — 2026-07-03
 
