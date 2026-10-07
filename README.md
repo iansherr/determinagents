@@ -112,6 +112,7 @@ determinagents/
 │   ├── TEST_GAPS.md
 │   ├── DOCS_DRIFT.md
 │   ├── UX_DESIGN_AUDIT.md
+│   ├── API_UI_UX_DRIFT.md
 │   ├── RESOURCE_CAPACITY.md
 │   ├── SCENARIO_CHAINER.md     # meta: chains findings into simulations
 │   ├── STRUCTURAL_ENTROPY.md
@@ -147,6 +148,7 @@ determinagents/
 | [audits/TEST_GAPS.md](audits/TEST_GAPS.md) | Scenarios the test suite would miss — error paths, edge cases, integration boundaries |
 | [audits/DOCS_DRIFT.md](audits/DOCS_DRIFT.md) | Claims in README and docs that the code no longer matches |
 | [audits/UX_DESIGN_AUDIT.md](audits/UX_DESIGN_AUDIT.md) | CSS that violates DESIGN.md tokens — colors, spacing, radii, motion, typography |
+| [audits/API_UI_UX_DRIFT.md](audits/API_UI_UX_DRIFT.md) | Frontend/backend surface mismatches, hidden admin capability, hardcoded UI values, orphaned routes |
 | [audits/DESIGN_HANDOFF_AUDIT.md](audits/DESIGN_HANDOFF_AUDIT.md) | Audit design handoff bundles against target code, bypassing misleading READMEs |
 | [audits/RESOURCE_CAPACITY.md](audits/RESOURCE_CAPACITY.md) | Runtime-agnostic capacity and resource-pressure risks across k8s, docker/compose, bare metal, or unraid-style deployments |
 | [audits/STRUCTURAL_ENTROPY.md](audits/STRUCTURAL_ENTROPY.md) | God-files and god-modules. Severity is driven by responsibility count, fan-in/out, and change velocity — not LOC alone. Outputs seam proposals consumed by `STRUCTURAL_REFACTOR.md` |

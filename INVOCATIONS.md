@@ -32,6 +32,7 @@ Use these behavior tokens for direct routing on the same command:
 | `test-gaps` | `TEST_GAPS` |
 | `docs-drift` | `DOCS_DRIFT` |
 | `ux` | `UX_DESIGN_AUDIT` |
+| `surface-drift` | `API_UI_UX_DRIFT` |
 | `token-refactor` | `UX_TOKEN_REFACTOR` |
 | `fuzzer` | `PARSER_FUZZER` |
 | `handoff` | `DESIGN_HANDOFF_AUDIT` |
@@ -104,6 +105,7 @@ Substitute `<AUDIT>` with one of:
 | `SECURITY_PENTEST` | Auth bypass, injection, IDOR, secrets, JWT issues, exposed internals |
 | `DATA_FLOW_TRACE` | Where a user action breaks between UI, network, handler, DB. Requires `--target=<flow-name>`. |
 | `ERROR_HANDLING` | Silent catches, missing error UI, errors logged but not surfaced |
+| `API_UI_UX_DRIFT` | Frontend/backend surface mismatches, hidden admin capability, hardcoded UI values, orphaned routes |
 | `TEST_GAPS` | Scenarios the test suite would miss |
 | `DOCS_DRIFT` | Claims in README/docs that the code no longer matches |
 | `UX_DESIGN_AUDIT` | CSS that violates DESIGN.md tokens. For live phases (5–8) requires `--target=<dev-url>`. |
