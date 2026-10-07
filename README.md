@@ -32,7 +32,9 @@ Installs to `~/.determinagents/` (override with `$DETERMINAGENTS_HOME`) and a `d
 determinagents version             # what's installed
 determinagents doctor              # check the install is healthy
 determinagents update              # check for updates, show diff, apply with confirmation
-determinagents materialize         # install slash commands for your host tool
+determinagents prompt <behavior>   # print a paste-ready prompt (no host-tool install needed)
+determinagents setup <tool>        # install skills/commands deterministically (claude|opencode|gemini|agy|cursor|all)
+determinagents materialize         # agent-assisted slash-command install (for tools setup doesn't cover)
 determinagents completions <shell> # print tab-completion script (bash, zsh, fish)
 determinagents uninstall           # remove the library (prompts for confirmation)
 determinagents help                # full command list

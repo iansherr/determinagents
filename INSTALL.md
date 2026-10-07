@@ -23,6 +23,39 @@ Show the plan before writing files.
 
 The agent does the rest: detects the host tool, reads `INVOCATIONS.md`, and generates the host-tool-specific files.
 
+## Deterministic setup (no agent needed)
+
+`determinagents setup` performs the same installation without an agent
+in the loop — templates from `templates/` plus per-behavior files
+generated live from `INVOCATIONS.md`:
+
+```sh
+determinagents setup <tool> [--global|--project] [--force] [--remove]
+# tools: claude | opencode | gemini | agy | cursor | all
+# default scope is --global (cursor is project-only)
+```
+
+Same `generated-by` markers and safety protocol as agent materialization
+(foreign files are never overwritten without `--force`; `--remove`
+deletes only setup-owned files). Prefer `setup` for fresh installs;
+reserve agent `materialize` for host tools with conventions `setup`
+doesn't know yet.
+
+## No-install alternative: `determinagents prompt`
+
+If you don't want host-tool files at all — a new CLI, a one-off session,
+an agent you can't configure — skip materialization:
+
+```sh
+determinagents prompt <behavior> [flags]   # paste-ready prompt on stdout
+determinagents prompt --list               # all behaviors
+```
+
+The output is extracted live from `INVOCATIONS.md` (never a stale copy),
+carries the resolved library path plus a fetch line, and pastes directly
+into any coding agent. Materialization buys autocomplete and one-keystroke
+routing; `prompt` buys zero-setup portability. Same library either way.
+
 ## What gets installed
 
 ### The Hub: `/determinagents` (Primary)

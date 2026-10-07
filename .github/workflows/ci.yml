@@ -47,3 +47,11 @@ jobs:
       - uses: actions/checkout@v5
       - run: sh -n install.sh
       - run: sh -n bin/determinagents
+
+  prompt-contract:
+    name: prompt contract (determinagents prompt)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - run: sh tests/test-prompt.sh ./bin/determinagents
+      - run: sh tests/test-setup.sh ./bin/determinagents

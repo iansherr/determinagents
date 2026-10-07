@@ -96,6 +96,7 @@ if present. Reports go to docs/reports/.
 
 ---
 
+<!-- prompt:stub,security,data-flow,error-handling,test-gaps,docs-drift,ux,surface-drift,token-refactor,fuzzer,handoff,chainer,resource-capacity,structural-entropy,regression-surface -->
 ## Audits (read-only)
 
 ```
@@ -131,6 +132,7 @@ Substitute `<AUDIT>` with one of:
 | `STRUCTURAL_ENTROPY` | God-files and god-modules: responsibility count, fan-in/out, change velocity. Outputs seam proposals, not refactors. |
 | `REGRESSION_SURFACE` | Regression-prone complexity hotspots: overlapping responsibilities, fragile error handlers, fallback ladders. |
 
+<!-- prompt:p0 -->
 ### Cross-audit P0 sweep
 
 When you only have time to find showstoppers across the whole library:
@@ -143,6 +145,7 @@ one-sentence impact). No reports.
 
 ---
 
+<!-- prompt:next -->
 ## PICK_NEXT (read-only meta-audit)
 
 Recommends which audit to run next based on report staleness, git-history surface change, and `AUDIT_CONTEXT.md` cadence preferences. Writes no report by default.
@@ -166,6 +169,7 @@ unresolved P0s outrank new audit runs.
 
 ---
 
+<!-- prompt:resolve -->
 ## RESOLVE_FROM_REPORT (mutating)
 
 Works through findings in any audit report — one at a time, with per-finding approval (`y/n/d/e/s/i/q` shorthand), separate commits per fix, verification.
@@ -191,6 +195,7 @@ plan, work through with shorthand approval. One commit per fix. Append
 
 ---
 
+<!-- prompt:structural-refactor -->
 ## STRUCTURAL_REFACTOR (mutating)
 
 Specialization of `RESOLVE_FROM_REPORT` for `STRUCTURAL_ENTROPY` reports. Per-seam loop, contract-before-code gate, dependency-graph artifacts.
@@ -217,6 +222,7 @@ this file. Append ## Refactor log to the report.
 
 ---
 
+<!-- prompt:security-hunt -->
 ## SECURITY_HUNT (mutating, agentic)
 
 Agentic vulnerability hunting against one target. Agent gets execution capability — builds, modifies, runs the project to verify or refute bug hypotheses.
@@ -247,6 +253,7 @@ artifacts under docs/reports/hunt-artifacts/<report-name>/.
 
 ---
 
+<!-- prompt:flow-verify -->
 ## DATA_FLOW_VERIFY (mutating)
 
 Drives a real user flow end-to-end and observes wire traffic + DB state. The "observed" counterpart to `DATA_FLOW_TRACE`'s "inferred."
@@ -269,6 +276,7 @@ artifacts under docs/reports/data-flow-artifacts/<report-name>/.
 
 ---
 
+<!-- prompt:testing -->
 ## TESTING_CREATOR (mutating)
 
 Implements tests across four tiers beyond what `TEST_GAPS` covers. Each tier is an independent session.
@@ -293,6 +301,7 @@ Report to docs/reports/TEST_VERIFICATION_<service>_<YYYY-MM-DD>.md.
 
 ---
 
+<!-- prompt:harness -->
 ## HARNESS_CREATOR (mutating)
 
 Deterministically generate verification harnesses (Playwright scripts, Docker runners, fuzzing suites, or fault-injection skeletons) to prove or refute findings from static audit reports.
@@ -317,6 +326,7 @@ or fail) before handing over. One commit per artifact.
 
 ---
 
+<!-- prompt:init -->
 ## Project Initialization (First Run)
 
 The recommended "cold start" for a new repository. Calibrates all future audits and installs the testing safety net.
@@ -347,6 +357,7 @@ Get approval for the plan before starting Phase 2.
 
 ## Per-project artifact bootstraps
 
+<!-- prompt:design -->
 ### DESIGN.md
 
 ```
@@ -361,6 +372,7 @@ If a running app or screenshots exist, compare your DESIGN.md against
 the rendered UI and revise.
 ```
 
+<!-- prompt:registry -->
 ### FEATURE_REGISTRY.md
 
 ```
@@ -381,6 +393,7 @@ Report routes-in-registry-not-in-code and routes-in-code-not-in-registry
 to docs/reports/REGISTRY_DRIFT_<YYYY-MM-DD>.md.
 ```
 
+<!-- prompt:context -->
 ### AUDIT_CONTEXT.md
 
 ```
@@ -403,6 +416,7 @@ the report's job). Show diff; do not commit until I approve each entry.
 
 ---
 
+<!-- prompt:launch-readiness,launch -->
 ## LAUNCH_READINESS (gate + self-reinforcing loop)
 
 MVP go-live gate across seven lenses (visual, backend, security, UX, demand, biz-ops, operations/launch-ops). Builds a persistent `LAUNCH_MANIFEST.md`, drives every required element through documented → stubbed → verified, runs a per-lens coverage check so nothing is silently skipped, emits readiness signals, and loops until the verdict is GO. Phases 1–7 and 9 are read-only; Phase 8 (stub generation) and the resolve step are mutating and approval-gated.
@@ -450,6 +464,7 @@ Trend the trajectory across runs: `/determinagents auto-report --mode=trend` (re
 
 ---
 
+<!-- prompt:complete -->
 ## AUTONOMOUS_COMPLETION_LOOP (mutating, re-entrant loop)
 
 The "point it at a repo and walk away" composition: bootstraps `AUDIT_CONTEXT.md` if missing, defaults to `STUB_AND_COMPLETENESS` on a first run (or `PICK_NEXT`'s ranked choice once there's audit history), resolves P0/P1 findings via `RESOLVE_FROM_REPORT`, verifies, and repeats until a cycle turns up nothing left to fix. Reads its own state from `docs/reports/COMPLETION_LOOP_STATUS.md` rather than session memory — safe to re-invoke as a fresh turn each time, not just as one long session. Every cycle is bound by `specs/LOOP_PROTOCOL.md` §6 (gate ledger, anti-circularity, capability cache, parallel-state budget, harness triage, credential safety) — the loop may not spend cycles restating same-outcome gates or spawn branches beyond budget.
@@ -489,8 +504,10 @@ As a host-tool recurring loop: pass the exact prompt above as the body. No inter
 
 ---
 
+<!-- prompt:maintenance -->
 ## Maintenance
 
+<!-- prompt:auto-report -->
 ### Automated reporting (project-facing)
 
 Use this to generate recurring, decision-ready digests from existing
@@ -514,6 +531,7 @@ Do not auto-mutate code or infrastructure. Recommend exact follow-up
 determinagent invocation(s) when action is required.
 ```
 
+<!-- prompt:refresh-context -->
 ### Refresh AUDIT_CONTEXT
 
 ```
@@ -559,5 +577,17 @@ Add an entry to this file when the library grows a new behavior. Format:
 
 [paste-ready prompt with --flags]
 ```
+
+Every behavior section (or shared section, for template-driven behaviors)
+carries a machine-readable anchor on the line before its heading:
+
+```markdown
+<!-- prompt:<token>[,<alias>...] -->
+```
+
+`determinagents prompt <behavior>` extracts the anchored section live, so
+INVOCATIONS.md stays the single source of truth — never copy prompt text
+into the shim or anywhere else. `doctor` warns on routable tokens with no
+anchor.
 
 If the same flag pattern shows up across multiple invocations, document it once in the audits-table prompt and reference it elsewhere. Resist enumerating variants of the same behavior — variants are flag combinations, not separate invocations.

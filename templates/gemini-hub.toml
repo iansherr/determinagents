@@ -1,0 +1,16 @@
+description = "DeterminAgents library hub — list and run any audit harness"
+prompt = """
+<!-- generated-by: determinagents setup (templates/gemini-hub.toml). Safe to overwrite on re-setup. -->
+Library at @LIBRARY_PATH@ (or $DETERMINAGENTS_HOME when set — env wins).
+
+Available behaviors right now:
+!{determinagents prompt --list}
+
+Pick the behavior matching the request (or ask), then run it via
+!{determinagents prompt <chosen-behavior> {{args}}} and follow the emitted
+prompt against this repo.
+
+Conventions: read docs/determinagents/AUDIT_CONTEXT.md first if present;
+reports to docs/reports/; read-only by default, mutating work needs
+approval and a disposable workspace.
+"""

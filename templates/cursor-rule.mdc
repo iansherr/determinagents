@@ -1,0 +1,14 @@
+---
+description: DeterminAgents audit harnesses — apply when the user asks for a code audit, security review, test-gap analysis, or autonomous completion loop
+---
+<!-- generated-by: determinagents setup (templates/cursor-rule.mdc). Safe to overwrite on re-setup. -->
+
+Library at `@LIBRARY_PATH@` (or `$DETERMINAGENTS_HOME` when set — env wins).
+
+Run `determinagents prompt --list` for behaviors, then
+`determinagents prompt <behavior> [flags]` and follow the emitted prompt
+against this repo.
+
+Conventions: `docs/determinagents/AUDIT_CONTEXT.md` first if present;
+reports to `docs/reports/`; read-only by default, mutating work needs
+approval and a disposable workspace.

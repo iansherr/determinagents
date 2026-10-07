@@ -29,6 +29,67 @@ else
   RESOLVED_VIA="default"
 fi
 
+# --- Prompt-library helpers (shared by `prompt`, `setup`, `doctor`) ---
+_det_invoc() { printf '%s/INVOCATIONS.md' "$DETERMINAGENTS_HOME"; }
+# Every routable token, live from the routing table, plus anchor-only
+# sections (e.g. 'maintenance') that have no routing row.
+_det_tokens() {
+  {
+    awk -F'|' '/^\| `/ {
+      line=$2
+      while (match(line, /`[a-z][a-z-]*`/)) {
+        print substr(line, RSTART+1, RLENGTH-2)
+        line=substr(line, RSTART+RLENGTH)
+      }
+    }' "$(_det_invoc)"
+    # Real anchors only (token charset [a-z,-]); the authoring example
+    # in INVOCATIONS.md uses <token> placeholders and must not parse.
+    grep -E '^<!-- prompt:[a-z,-]+ -->$' "$(_det_invoc)" \
+      | sed -e 's/^<!-- prompt://' -e 's/ -->$//' -e 's/,/^/g' \
+      | tr '^' '\n'
+  } | awk '!seen[$0]++'
+}
+# Routing table's doc for a token (empty for anchor-only sections).
+_det_doc() {
+  awk -F'|' -v t="$1" '
+    /^\| `/ {
+      if (match($2, "`" t "`")) {
+        s=$3; sub(/^[^`]*`/, "", s); sub(/`.*/, "", s); print s; exit
+      }
+    }' "$(_det_invoc)"
+}
+# Section owned by an anchor: the anchor's own heading first, then
+# through the next anchor or level-2 heading; trailing separators
+# and blank lines trimmed.
+_det_section() {
+  awk -v start="$1" '
+    NR <= start { next }
+    !armed { buf[++n]=$0; armed=1; next }
+    /^<!-- prompt:[a-z,-]+ -->$/ || /^## / { exit }
+    { buf[++n]=$0 }
+    END {
+      while (n>0 && (buf[n]=="" || buf[n]=="---")) n--
+      for (i=1; i<=n; i++) print buf[i]
+    }' "$(_det_invoc)"
+}
+_det_anchor_line() {
+  grep -n -E "^<!-- prompt:([a-z,-]*,)?$1(,| -->)" "$(_det_invoc)" | head -1 | cut -d: -f1
+}
+# "token|menu description" per routing row, live from the table.
+_det_routing() {
+  awk -F'|' '/^\| `/ {
+    line=$2
+    c3=$3; gsub(/`/, "", c3); gsub(/"/, "", c3)
+    sub(/^ +/, "", c3); sub(/ +$/, "", c3)
+    while (match(line, /`[a-z][a-z-]*`/)) {
+      tok=substr(line, RSTART+1, RLENGTH-2)
+      line=substr(line, RSTART+RLENGTH)
+      if (c3 != "") print tok "|" c3
+      else print tok "|DeterminAgents " tok
+    }
+  }' "$(_det_invoc)"
+}
+
 if [ ! -d "$DETERMINAGENTS_HOME/audits" ]; then
   echo "error: determinagents library not found at $DETERMINAGENTS_HOME" >&2
   echo "  (resolved via $RESOLVED_VIA)" >&2
@@ -139,8 +200,282 @@ shell script.
 
 Important boundary: this CLI does not execute audits. Use your host-tool
 slash command flow (\`/determinagents\` or \`/determinagents <behavior>\`)
-to run audits.
+to run audits — or 'determinagents prompt' with a behavior name for a
+paste-ready prompt you can hand to any coding agent with no host install.
 MSG
+    ;;
+
+  prompt)
+    # Dynamic prompt library: print a paste-ready prompt for any behavior,
+    # extracted live from INVOCATIONS.md (the single source of truth —
+    # prompt text is never copied into this shim). Works for any AI CLI:
+    # pipe, paste, or backtick-embed the output.
+    INVOC="$DETERMINAGENTS_HOME/INVOCATIONS.md"
+    if [ ! -f "$INVOC" ]; then
+      echo "error: INVOCATIONS.md not found at $INVOC" >&2
+      exit 1
+    fi
+    # Behavior helpers (_det_tokens, _det_doc, _det_section,
+    # _det_anchor_line, _det_routing) live at top level.
+    sub2="${1:-}"
+    shift 2>/dev/null || true
+    case "$sub2" in
+      ""|--help|-h)
+        echo "usage: determinagents prompt <behavior> [flags]"
+        echo "       determinagents prompt --list"
+        echo ""
+        echo "print a paste-ready prompt for any behavior. hand the output"
+        echo "to any coding agent — no host-tool install required."
+        echo ""
+        echo "behaviors:"
+        _det_tokens | sed 's/^/  /'
+        exit 0
+        ;;
+      --list|list)
+        _det_tokens
+        exit 0
+        ;;
+    esac
+    token="$sub2"
+    doc=$(_det_doc "$token")
+    if [ -z "$doc" ] && ! grep -qE "^<!-- prompt:([a-z,-]*,)?$token(,| -->)" "$INVOC"; then
+      echo "unknown behavior: $token" >&2
+      echo "run 'determinagents prompt --list' for behaviors" >&2
+      exit 1
+    fi
+    if [ -d "$DETERMINAGENTS_HOME/.git" ]; then
+      LIB_SHA=$(git -C "$DETERMINAGENTS_HOME" rev-parse --short HEAD 2>/dev/null || echo "?")
+      LIB_BRANCH=$(git -C "$DETERMINAGENTS_HOME" rev-parse --abbrev-ref HEAD 2>/dev/null || echo "?")
+      LIB_URL=$(git -C "$DETERMINAGENTS_HOME" remote get-url origin 2>/dev/null \
+        || echo "https://github.com/iansherr/determinagents.git")
+    else
+      LIB_SHA="?"
+      LIB_BRANCH="main"
+      LIB_URL="https://github.com/iansherr/determinagents.git"
+    fi
+    echo "# determinagents prompt: $token $*"
+    echo "# library: $DETERMINAGENTS_HOME ($LIB_BRANCH @ $LIB_SHA)"
+    echo "# paste everything below into any coding agent."
+    echo "# if the library path above is unreachable from the agent, fetch it with:"
+    echo "#   git clone --depth 1 --branch $LIB_BRANCH $LIB_URL <path>"
+    echo ""
+    anchor_line=$(grep -n -E "^<!-- prompt:([a-z,-]*,)?$token(,| -->)" "$INVOC" | head -1 | cut -d: -f1)
+    if [ -n "$anchor_line" ]; then
+      if [ -n "$doc" ]; then
+        _det_section "$anchor_line" | sed "s/<AUDIT>/$doc/g"
+      else
+        _det_section "$anchor_line"
+      fi
+      if [ "$token" = "data-flow" ]; then
+        case " $* " in
+          *" --target="*) ;;
+          *) echo "# note: DATA_FLOW_TRACE requires --target=<flow-name>" >&2 ;;
+        esac
+      fi
+    else
+      # Token routes to a doc with no dedicated INVOCATIONS.md section yet:
+      # honest pointer instead of a fabricated prompt.
+      cat <<FALLBACK
+No dedicated invocation section for '$token' yet.
+
+Run audits/$doc.md from \$DETERMINAGENTS_HOME against this repo, per the
+doc's own phases. Report to docs/reports/ per specs/FORMAT.md
+(audit:/date: frontmatter, P0-P3 findings with file:line and fixes).
+FALLBACK
+    fi
+    ;;
+
+  setup)
+    # Deterministic host-tool setup: instantiate templates and generate
+    # per-behavior files live from INVOCATIONS.md. No agent needed.
+    # Every md/toml/mdc file carries a `generated-by: determinagents
+    # setup` marker (foreign files are never overwritten without --force);
+    # --remove deletes only files setup owns (marker or install manifest).
+    SETUP_TOOL="${1:-}"; shift 2>/dev/null || true
+    SETUP_SCOPE="global"; SETUP_FORCE=0; SETUP_REMOVE=0; SETUP_DIR=""
+    for _a in "$@"; do
+      case "$_a" in
+        --global) SETUP_SCOPE="global" ;;
+        --project) SETUP_SCOPE="project" ;;
+        --force) SETUP_FORCE=1 ;;
+        --remove) SETUP_REMOVE=1 ;;
+        --dir=*) SETUP_DIR="${_a#--dir=}" ;;
+        *) echo "unknown setup flag: $_a" >&2; exit 1 ;;
+      esac
+    done
+    case "$SETUP_TOOL" in
+      ""|--help|-h|help)
+        echo "usage: determinagents setup <tool> [--global|--project] [--dir=PATH] [--force] [--remove]"
+        echo "  tools: claude | opencode | gemini | agy | cursor | all"
+        echo "  default scope is --global (cursor is project-only)."
+        echo "  --dir=PATH installs roots under PATH (for tests/custom layouts)."
+        exit 0
+        ;;
+      claude|opencode|gemini|agy|cursor|all) ;;
+      *) echo "unknown tool: $SETUP_TOOL" >&2; exit 1 ;;
+    esac
+    if [ ! -d "$DETERMINAGENTS_HOME/templates" ]; then
+      echo "error: templates/ missing in $DETERMINAGENTS_HOME (re-run install)" >&2
+      exit 1
+    fi
+    if [ -n "$SETUP_DIR" ]; then
+      SETUP_GLOB="$SETUP_DIR"; SETUP_PROJ="$SETUP_DIR"
+    else
+      SETUP_GLOB="$HOME"; SETUP_PROJ="$(pwd)"
+    fi
+    _setup_emit() {
+      # $1 = dest; content on stdin. Marker-checked write.
+      _dest="$1"
+      if [ -e "$_dest" ]; then
+        if grep -qF 'generated-by: determinagents setup' "$_dest" 2>/dev/null; then
+          :
+        elif [ "$SETUP_FORCE" -eq 1 ]; then
+          echo "  force-overwrite (foreign file): $_dest"
+        else
+          echo "  skip (foreign file, use --force): $_dest"
+          return 0
+        fi
+      fi
+      mkdir -p "$(dirname "$_dest")"
+      cat > "$_dest"
+      echo "  wrote: $_dest"
+    }
+    _setup_template() {
+      # $1 = template file, $2 = dest
+      sed "s|@LIBRARY_PATH@|$DETERMINAGENTS_HOME|g" \
+        "$DETERMINAGENTS_HOME/templates/$1" | _setup_emit "$2"
+    }
+    _setup_remove_one() {
+      # $1 = file; delete only setup-owned files (marker or library path
+      # in body), prune newly-empty parents.
+      if [ ! -e "$1" ]; then return 0; fi
+      if grep -qF 'generated-by: determinagents setup' "$1" 2>/dev/null \
+        || grep -qF "$DETERMINAGENTS_HOME" "$1" 2>/dev/null; then
+        rm -f "$1"
+        echo "  removed: $1"
+        rmdir -p "$(dirname "$1")" 2>/dev/null || true
+      else
+        echo "  keep (foreign file): $1"
+      fi
+    }
+    _setup_claude() {
+      if [ "$SETUP_REMOVE" -eq 1 ]; then
+        _setup_remove_one "$1/.claude/skills/determinagents/SKILL.md"
+        _setup_remove_one "$1/.claude/commands/determinagents.md"
+        return 0
+      fi
+      _setup_template skill-SKILL.md "$1/.claude/skills/determinagents/SKILL.md"
+      _setup_template claude-command.md "$1/.claude/commands/determinagents.md"
+    }
+    _setup_opencode() {
+      if [ "$SETUP_REMOVE" -eq 1 ]; then
+        _setup_remove_one "$1/.opencode/commands/determinagents.md"
+        return 0
+      fi
+      _setup_template claude-command.md "$1/.opencode/commands/determinagents.md"
+    }
+    _setup_cursor() {
+      if [ "$SETUP_REMOVE" -eq 1 ]; then
+        _setup_remove_one "$1/.cursor/rules/determinagents.mdc"
+        return 0
+      fi
+      _setup_template cursor-rule.mdc "$1/.cursor/rules/determinagents.mdc"
+    }
+    _setup_gemini() {
+      if [ "$SETUP_REMOVE" -eq 1 ]; then
+        _setup_remove_one "$1/.gemini/commands/determinagents.toml"
+        _det_routing | while IFS='|' read -r _t _d; do
+          _setup_remove_one "$1/.gemini/commands/determinagents/$_t.toml"
+        done
+        return 0
+      fi
+      _setup_template gemini-hub.toml "$1/.gemini/commands/determinagents.toml"
+      {
+        _det_routing
+        echo "maintenance|DeterminAgents maintenance commands"
+      } | while IFS='|' read -r _t _d; do
+        {
+          echo "description = \"$_d\""
+          echo "prompt = \"\"\""
+          echo "<!-- generated-by: determinagents setup. Safe to overwrite on re-setup. -->"
+          echo "!{determinagents prompt $_t {{args}}}"
+          echo ""
+          echo "Follow the emitted prompt against this repo. Conventions:"
+          echo "read docs/determinagents/AUDIT_CONTEXT.md first if present;"
+          echo "reports to docs/reports/; read-only by default."
+          echo "\"\"\""
+        } | _setup_emit "$1/.gemini/commands/determinagents/$_t.toml"
+      done
+    }
+    _setup_agy() {
+      _plugdir="$1/.gemini/antigravity-cli/plugins/determinagents"
+      if [ "$SETUP_REMOVE" -eq 1 ]; then
+        if [ -f "$_plugdir/.determinagents-setup" ]; then
+          while IFS= read -r _rel; do
+            [ -n "$_rel" ] || continue
+            _setup_remove_one "$_plugdir/$_rel"
+          done < "$_plugdir/.determinagents-setup"
+          rm -f "$_plugdir/.determinagents-setup"
+          rmdir -p "$_plugdir" 2>/dev/null || true
+        else
+          echo "  no install manifest; removing guardedly"
+          _setup_remove_one "$_plugdir/plugin.json"
+          for _af in "$_plugdir"/agents/*.json; do
+            [ -e "$_af" ] || continue
+            _setup_remove_one "$_af"
+          done
+        fi
+        return 0
+      fi
+      sed "s|@LIBRARY_PATH@|$DETERMINAGENTS_HOME|g" \
+        "$DETERMINAGENTS_HOME/templates/agy-plugin.json" \
+        | _setup_emit "$_plugdir/plugin.json"
+      : > "$_plugdir/.determinagents-setup"
+      echo "plugin.json" >> "$_plugdir/.determinagents-setup"
+      _det_routing | while IFS='|' read -r _t _d; do
+        _sys="Library at $DETERMINAGENTS_HOME. Run \`determinagents prompt $_t\` in a shell and follow the emitted prompt against the target repo. Conventions: docs/determinagents/AUDIT_CONTEXT.md first if present; reports to docs/reports/; read-only by default."
+        {
+          printf '{\n  "name": "determinagents:%s",\n  "description": "%s",\n  "system_prompt": "%s"\n}\n' \
+            "$_t" "$_d" "$_sys"
+        } | _setup_emit "$_plugdir/agents/determinagents-$_t.json"
+        echo "agents/determinagents-$_t.json" >> "$_plugdir/.determinagents-setup"
+      done
+    }
+    _setup_run_tool() {
+      # $1 = tool, $2 = root
+      echo "$1 ($SETUP_SCOPE):"
+      case "$1" in
+        claude) _setup_claude "$2" ;;
+        opencode) _setup_opencode "$2" ;;
+        gemini) _setup_gemini "$2" ;;
+        agy) _setup_agy "$2" ;;
+        cursor) _setup_cursor "$2" ;;
+      esac
+    }
+    if [ "$SETUP_TOOL" = "cursor" ] && [ "$SETUP_SCOPE" = "global" ] && [ -z "$SETUP_DIR" ]; then
+      echo "error: cursor rules are project-local; re-run with --project" >&2
+      exit 1
+    fi
+    if [ "$SETUP_TOOL" = "all" ]; then
+      for _tool in claude opencode gemini agy; do
+        if [ "$SETUP_SCOPE" = "global" ]; then
+          _setup_run_tool "$_tool" "$SETUP_GLOB"
+        else
+          _setup_run_tool "$_tool" "$SETUP_PROJ"
+        fi
+      done
+      if [ "$SETUP_SCOPE" = "project" ]; then
+        _setup_run_tool cursor "$SETUP_PROJ"
+      else
+        echo "cursor: skipped (project-only; re-run setup cursor --project)"
+      fi
+    else
+      if [ "$SETUP_SCOPE" = "global" ]; then
+        _setup_run_tool "$SETUP_TOOL" "$SETUP_GLOB"
+      else
+        _setup_run_tool "$SETUP_TOOL" "$SETUP_PROJ"
+      fi
+    fi
     ;;
 
   uninstall)
@@ -330,6 +665,60 @@ UNINSTALL_MSG
     fi
 
     echo ""
+    echo "prompts:"
+
+    # 11. Every routable behavior resolves to a prompt anchor, so
+    #     `determinagents prompt <behavior>` never 404s. Tokens whose docs
+    #     have no dedicated INVOCATIONS.md section yet (adversarial,
+    #     init-loops, recursive, loop-orchestrator) fall back to a
+    #     read-the-doc pointer and are exempt here.
+    PROMPT_FALLBACK="adversarial init-loops recursive loop-orchestrator"
+    MISSING_PROMPT=""
+    # shellcheck disable=SC2046
+    for t in $("$0" prompt --list 2>/dev/null); do
+      case " $PROMPT_FALLBACK " in
+        *" $t "*) continue ;;
+      esac
+      grep -qE "^<!-- prompt:([a-z,-]*,)?$t(,| -->)" "$DETERMINAGENTS_HOME/INVOCATIONS.md" \
+        || MISSING_PROMPT="$MISSING_PROMPT $t"
+    done
+    if [ -z "$MISSING_PROMPT" ]; then
+      ok "every behavior has a prompt anchor"
+    else
+      warn "behaviors with no prompt anchor:$MISSING_PROMPT"
+    fi
+
+    echo ""
+    echo "setup:"
+
+    # 12. Report which host tools have setup-owned files (global scope).
+    SETUP_FOUND=""
+    for _sp in \
+      "claude:$HOME/.claude/skills/determinagents/SKILL.md" \
+      "claude:$HOME/.claude/commands/determinagents.md" \
+      "opencode:$HOME/.opencode/commands/determinagents.md" \
+      "gemini:$HOME/.gemini/commands/determinagents.toml" \
+      "agy:$HOME/.gemini/antigravity-cli/plugins/determinagents/plugin.json" \
+      ; do
+      _sn="${_sp%%:*}"; _sf="${_sp#*:}"
+      _hit=0
+      if [ -f "$_sf" ] && grep -qF 'determinagents setup' "$_sf" 2>/dev/null; then
+        _hit=1
+      elif [ "$_sn" = "agy" ] && [ -f "$HOME/.gemini/antigravity-cli/plugins/determinagents/.determinagents-setup" ]; then
+        _hit=1
+      fi
+      case "$SETUP_FOUND" in
+        *" $_sn "*) ;;
+        *) [ "$_hit" -eq 1 ] && SETUP_FOUND="$SETUP_FOUND $_sn " ;;
+      esac
+    done
+    # shellcheck disable=SC2086
+    for _sn in $SETUP_FOUND; do ok "setup installed: $_sn"; done
+    if [ -z "$SETUP_FOUND" ]; then
+      echo "        (no host-tool setup detected — see 'determinagents setup --help')"
+    fi
+
+    echo ""
     if [ "$FAIL" -eq 0 ]; then
       echo "all checks passed"
       exit 0
@@ -351,11 +740,15 @@ _determinagents_complete() {
   local cur prev subs
   cur="${COMP_WORDS[COMP_CWORD]}"
   prev="${COMP_WORDS[COMP_CWORD-1]}"
-  subs="version path update materialize uninstall doctor completions help"
+  subs="version path update prompt setup materialize uninstall doctor completions help"
   if [ "$COMP_CWORD" -eq 1 ]; then
     COMPREPLY=( $(compgen -W "$subs" -- "$cur") )
   elif [ "$COMP_CWORD" -eq 2 ] && [ "$prev" = "completions" ]; then
     COMPREPLY=( $(compgen -W "bash zsh fish" -- "$cur") )
+  elif [ "$COMP_CWORD" -eq 2 ] && [ "$prev" = "prompt" ]; then
+    COMPREPLY=( $(compgen -W "$(determinagents prompt --list 2>/dev/null)" -- "$cur") )
+  elif [ "$COMP_CWORD" -eq 2 ] && [ "$prev" = "setup" ]; then
+    COMPREPLY=( $(compgen -W "claude opencode gemini agy cursor all" -- "$cur") )
   fi
 }
 complete -F _determinagents_complete determinagents
@@ -372,6 +765,8 @@ _determinagents() {
     'version:show installed version (SHA, branch, date)'
     'path:print install path'
     'update:check for updates and apply with confirmation'
+    'prompt:print a paste-ready prompt for a behavior'
+    'setup:install skills/commands for a host tool'
     'materialize:instructions to install slash commands for host tool'
     'uninstall:remove the library'
     'doctor:run health checks'
@@ -383,6 +778,10 @@ _determinagents() {
     _describe 'subcommand' subs
   elif (( CURRENT == 3 )) && [[ ${words[2]} == completions ]]; then
     _describe 'shell' shells
+  elif (( CURRENT == 3 )) && [[ ${words[2]} == prompt ]]; then
+    compadd -- $(determinagents prompt --list 2>/dev/null)
+  elif (( CURRENT == 3 )) && [[ ${words[2]} == setup ]]; then
+    compadd -- claude opencode gemini agy cursor all
   fi
 }
 compdef _determinagents determinagents
@@ -397,12 +796,16 @@ complete -c determinagents -f
 complete -c determinagents -n __fish_use_subcommand -a version     -d 'show installed version'
 complete -c determinagents -n __fish_use_subcommand -a path        -d 'print install path'
 complete -c determinagents -n __fish_use_subcommand -a update      -d 'check for updates'
+complete -c determinagents -n __fish_use_subcommand -a prompt      -d 'print a paste-ready prompt'
+complete -c determinagents -n __fish_use_subcommand -a setup       -d 'install skills/commands for a host tool'
 complete -c determinagents -n __fish_use_subcommand -a materialize -d 'install slash commands'
 complete -c determinagents -n __fish_use_subcommand -a uninstall   -d 'remove the library'
 complete -c determinagents -n __fish_use_subcommand -a doctor      -d 'run health checks'
 complete -c determinagents -n __fish_use_subcommand -a completions -d 'print completion script'
 complete -c determinagents -n __fish_use_subcommand -a help        -d 'show help'
 complete -c determinagents -n '__fish_seen_subcommand_from completions' -a 'bash zsh fish'
+complete -c determinagents -n '__fish_seen_subcommand_from prompt' -a '(determinagents prompt --list)'
+complete -c determinagents -n '__fish_seen_subcommand_from setup' -a 'claude opencode gemini agy cursor all'
 FISH
         ;;
       "")
@@ -429,14 +832,20 @@ determinagents — universal, self-discovering audit prompts for coding agents
 
 boundary:
   this CLI does not execute audits.
-  use host-tool slash commands: /determinagents or
-  /determinagents <behavior> [flags].
+  run them via host-tool slash commands (/determinagents ...) or
+  'determinagents prompt <behavior>' for a paste-ready prompt.
 
 usage: determinagents <command>
 
   version              show installed version (SHA, branch, date)
   path                 print library path
   update               check for updates and apply with confirmation
+  prompt <behavior> [flags]  print a paste-ready prompt for any behavior
+                        (pipe or paste into any AI CLI — no host-tool
+                        install required). 'prompt --list' shows behaviors.
+  setup <tool> [--global|--project]  install skills/commands for a host
+                        tool deterministically (claude|opencode|gemini|
+                        agy|cursor|all). 'setup <tool> --remove' uninstalls.
   materialize          instructions to install slash commands for your host
                        tool (the agent detects Claude Code / Gemini / Cursor /
                        etc. from its own context — same prompt for all)

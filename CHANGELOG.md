@@ -6,8 +6,16 @@ All notable changes to determinagents are documented here. The format is loosely
 
 ## [Unreleased]
 
+No re-materialization required (existing installs keep working; re-run
+`materialize`/`setup` only to pick up the new shared-conventions bootstrap
+and `complete`-entry protocol note).
+
 ### Added
 - **`audits/AUTONOMOUS_COMPLETION_LOOP.md`** — re-entrant "point it at a repo and walk away" loop. Bootstraps `AUDIT_CONTEXT.md` if missing (conservative defaults + flagged assumptions when unattended), defaults to `STUB_AND_COMPLETENESS` on a first run or `PICK_NEXT`'s ranked choice otherwise, resolves P0/P1 via `RESOLVE_FROM_REPORT`, verifies, repeats until a cycle finds nothing left to fix. State lives in `docs/reports/COMPLETION_LOOP_STATUS.md`, read fresh each invocation, so it works as a host-tool recurring loop (not just one long session). Routing token `complete`.
+- **`determinagents prompt <behavior> [flags]`** — the binary as a dynamic prompt library: prints a paste-ready prompt on stdout, extracted live from `INVOCATIONS.md` via `<!-- prompt:token -->` anchors (single source of truth, never copied into the shim). Carries the resolved library path plus a fetch line, so any AI CLI can consume it with no host-tool install. `prompt --list` enumerates all 36 behaviors; tokens without a dedicated section emit an honest read-the-doc pointer. Covered by `tests/test-prompt.sh` (CI) and `doctor` check 11 (anchor coverage).
+- **`determinagents setup <tool>`** — deterministic host-tool install with no agent in the loop (`claude | opencode | gemini | agy | cursor | all`, `--global`/`--project`, `--force`, `--remove`). Instantiates `templates/` (skill, hub command, Cursor rule, Gemini hub, AGY plugin manifest) plus per-behavior Gemini TOMLs and AGY agents generated live from the routing table. `generated-by` markers; foreign files never overwritten without `--force`. Covered by `tests/test-setup.sh` (CI).
+- **`specs/LOOP_PROTOCOL.md` §6 (Completion-Loop Mandates)** — gate ledger, anti-circularity rule (two identical outcomes → pivot or block), environment capability cache, parallel-state budget (≤3 open loop-owned PRs, settle-before-spawn, scope-overlap check), harness-failure triage (`product`/`harness-flake`/`environment-limit`), credential-safety invariant. `AUTONOMOUS_COMPLETION_LOOP.md` binds every cycle to it.
+- **`INVOCATIONS.md` zero-install bootstrap** — shared-conventions preamble resolves the library (env → enclosing checkout → default path → shallow clone) with no install required.
 
 ## [0.11.1] — 2026-07-03
 
