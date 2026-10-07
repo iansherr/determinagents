@@ -18,6 +18,9 @@ and `complete`-entry protocol note).
 - **`INVOCATIONS.md` zero-install bootstrap** — shared-conventions preamble resolves the library (env → enclosing checkout → default path → shallow clone) with no install required.
 - **`determinagents prompt --remote`** — library-less HTTPS resolve for cloud agents: ref-pinned cached fetch of `INVOCATIONS.md` with paths rewritten to raw URLs (`--ref` defaults to `$DETERMINAGENTS_REF`/`main`; mutable-ref warning on stderr; pin a full SHA unattended). Covered by file-rig contract tests in `tests/test-prompt.sh`.
 
+### Fixed
+- **`prompt --remote` raw-URL derivation** — the fallback now keeps the `owner/repo` separator (`raw.githubusercontent.com/<owner>/<repo>/<ref>/…`) instead of flattening it to a dashed slug; non-GitHub hosts and malformed/traversal inputs fail with a `DETERMINAGENTS_RAW_BASE` pointer. Cache dir is namespaced per repo+ref so forks can't collide.
+
 ## [0.11.1] — 2026-07-03
 
 No re-materialization required.

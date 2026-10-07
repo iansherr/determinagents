@@ -247,18 +247,52 @@ MSG
       _repo="${DETERMINAGENTS_REPO_URL:-https://github.com/iansherr/determinagents.git}"
       if [ -n "${DETERMINAGENTS_RAW_BASE:-}" ]; then
         _raw="$DETERMINAGENTS_RAW_BASE"
+        _cache_slug="custom"
       else
-        _slug=$(printf '%s' "$_repo" | sed -e 's|^[^/]*//[^/]*/||' -e 's|\.git$||' -e 's|/|-|g')
+        # Split host from owner/repo for both URL and scp-like forms.
+        # The separator between owner and repo is kept: raw hosts serve
+        # <owner>/<repo>/<ref>/..., not a dashed slug.
+        case "$_repo" in
+          *@*:*)
+            _host=$(printf '%s' "$_repo" | sed -e 's/^.*@//' -e 's/:.*//')
+            _slug=$(printf '%s' "$_repo" | sed -e 's/^[^:]*://' -e 's|\.git$||')
+            ;;
+          *://*)
+            _host=$(printf '%s' "$_repo" | sed -e 's|^[^/]*//||' -e 's|/.*$||' -e 's/^.*@//')
+            _slug=$(printf '%s' "$_repo" | sed -e 's|^[^/]*//[^/]*/||' -e 's|\.git$||' -e 's|/$||')
+            ;;
+          *)
+            _host=""; _slug=""
+            ;;
+        esac
+        case "$_host" in
+          github.com) ;;
+          *)
+            echo "error: auto raw-base only supports github.com URLs (got '${_host:-none}')" >&2
+            echo "  repo: $_repo" >&2
+            echo "  set DETERMINAGENTS_RAW_BASE explicitly" >&2
+            exit 1
+            ;;
+        esac
         case "$_slug" in
-          ""|*[!A-Za-z0-9._-]*)
-            echo "error: cannot derive a raw base from DETERMINAGENTS_REPO_URL=$_repo" >&2
+          ""|*..*|*[!A-Za-z0-9._/-]*|*/*/*)
+            echo "error: expected owner/repo in DETERMINAGENTS_REPO_URL=$_repo" >&2
+            echo "  set DETERMINAGENTS_RAW_BASE explicitly" >&2
+            exit 1
+            ;;
+        esac
+        case "$_slug" in
+          */*) ;;
+          *)
+            echo "error: expected owner/repo in DETERMINAGENTS_REPO_URL=$_repo" >&2
             exit 1
             ;;
         esac
         _raw="https://raw.githubusercontent.com/$_slug/$PROMPT_REF"
+        _cache_slug=$(printf '%s' "$_slug" | tr '/' '-')
       fi
       _safe_ref=$(printf '%s' "$PROMPT_REF" | tr '/' '-')
-      _cachedir="${XDG_CACHE_HOME:-$HOME/.cache}/determinagents/remote/$_safe_ref"
+      _cachedir="${XDG_CACHE_HOME:-$HOME/.cache}/determinagents/remote/$_cache_slug/$_safe_ref"
       mkdir -p "$_cachedir"
       if [ ! -f "$_cachedir/INVOCATIONS.md" ]; then
         if command -v curl >/dev/null 2>&1; then

@@ -96,7 +96,7 @@ if curl -V 2>/dev/null | grep -qi ' file '; then
   else
     fail "remote stub carries URLs, not local paths"
   fi
-  if [ -f "$RT/cache/determinagents/remote/test/INVOCATIONS.md" ]; then
+  if [ -f "$RT/cache/determinagents/remote/custom/test/INVOCATIONS.md" ]; then
     pass "remote response cached"
   else
     fail "remote response cached"
@@ -125,6 +125,34 @@ if curl -V 2>/dev/null | grep -qi ' file '; then
 else
   echo "skip: curl without file protocol (remote tests need it)"
 fi
+
+# raw-base derivation keeps owner/repo (no network: assert the attempted URL)
+RT2="$(mktemp -d "${TMPDIR:-/tmp}/det-remote-deriv.XXXXXX")"
+if DETERMINAGENTS_HOME="$RT2/nonexistent" \
+   XDG_CACHE_HOME="$RT2/cache" \
+   DETERMINAGENTS_REPO_URL='git@github.com:foo/bar.git' \
+   "$BIN" prompt stub --remote --ref=test >/dev/null 2>"$RT2/err.txt"; then
+  fail "unfetchable remote fails cleanly"
+else
+  if grep -q 'raw.githubusercontent.com/foo/bar/test' "$RT2/err.txt"; then
+    pass "raw base keeps owner/repo"
+  else
+    fail "raw base keeps owner/repo"
+  fi
+fi
+if DETERMINAGENTS_HOME="$RT2/nonexistent" \
+   XDG_CACHE_HOME="$RT2/cache" \
+   DETERMINAGENTS_REPO_URL='https://codeberg.org/foo/bar.git' \
+   "$BIN" prompt stub --remote --ref=test >/dev/null 2>"$RT2/err2.txt"; then
+  fail "non-github without RAW_BASE fails cleanly"
+else
+  if grep -q 'DETERMINAGENTS_RAW_BASE' "$RT2/err2.txt"; then
+    pass "non-github points at RAW_BASE"
+  else
+    fail "non-github points at RAW_BASE"
+  fi
+fi
+rm -rf "$RT2"
 
 if [ "$FAILED" -eq 0 ]; then
   echo "all prompt contract tests passed"
