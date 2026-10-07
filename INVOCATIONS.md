@@ -57,6 +57,7 @@ Use these behavior tokens for direct routing on the same command:
 | `recursive` | `RECURSIVE_IMPROVEMENT` |
 | `loop-orchestrator` | `LOOP_ORCHESTRATOR` |
 | `launch-readiness` (alias `launch`) | `LAUNCH_READINESS` (MVP go-live gate; manifest + self-reinforcing loop) |
+| `complete` | `AUTONOMOUS_COMPLETION_LOOP` (re-entrant bootstrap + discover + resolve loop) |
 
 Example direct runs:
 
@@ -427,6 +428,45 @@ or diminishing returns per specs/LOOP_PROTOCOL.md.
 Resolve blockers between iterations (mutating, gated): `/determinagents resolve --report=docs/reports/LAUNCH_READINESS_<date>.md scope=B0`.
 
 Trend the trajectory across runs: `/determinagents auto-report --mode=trend` (reads the readiness signals).
+
+---
+
+## AUTONOMOUS_COMPLETION_LOOP (mutating, re-entrant loop)
+
+The "point it at a repo and walk away" composition: bootstraps `AUDIT_CONTEXT.md` if missing, defaults to `STUB_AND_COMPLETENESS` on a first run (or `PICK_NEXT`'s ranked choice once there's audit history), resolves P0/P1 findings via `RESOLVE_FROM_REPORT`, verifies, and repeats until a cycle turns up nothing left to fix. Reads its own state from `docs/reports/COMPLETION_LOOP_STATUS.md` rather than session memory — safe to re-invoke as a fresh turn each time, not just as one long session.
+
+**Prerequisites**: none — this is a valid first thing to run on a brand-new repo.
+
+First run (or any later run — it's re-entrant, always safe to repeat verbatim):
+
+```
+Run audits/AUTONOMOUS_COMPLETION_LOOP.md from $DETERMINAGENTS_HOME against
+this repo.
+
+Read docs/reports/COMPLETION_LOOP_STATUS.md first if it exists and resume
+from there. If docs/determinagents/AUDIT_CONTEXT.md is missing, cold-
+bootstrap it per specs/BOOTSTRAP.md (ask up to 5 questions; if unattended,
+use conservative defaults and mark every assumption for later human review
+instead of blocking).
+
+Each cycle: pick an audit (STUB_AND_COMPLETENESS by default with no prior
+reports, otherwise PICK_NEXT's top recommendation), run it, resolve its
+P0/P1 findings via RESOLVE_FROM_REPORT, verify clean, update
+docs/reports/COMPLETION_LOOP_STATUS.md, and continue to the next cycle.
+
+Stop when a full cycle finds zero P0/P1 across every audit PICK_NEXT would
+currently recommend, or at --max-iterations, whichever comes first. Record
+genuine technical blockers (not subjective/approval gates) under "Blocked"
+and keep working independent findings around them.
+
+Optional flags:
+  --max-iterations=N   Stop after N cycles regardless of status
+  --scope=P0           Resolve only P0 each cycle
+  --target=<audit>      Skip the picker, always run this audit
+  --unattended          Skip interactive bootstrap questions even if a human is present
+```
+
+As a host-tool recurring loop: pass the exact prompt above as the body. No interval tuning is required beyond what the host tool already does for re-invocation — the doc's own re-entrancy handles state across turns.
 
 ---
 

@@ -67,6 +67,8 @@ After installing, the lowest-friction path:
 
 Once that loop is comfortable, browse the audits table below for other audits to try, or **[INVOCATIONS.md](INVOCATIONS.md)** for canonical paste-ready prompts. To install as slash commands in your host tool, see **[INSTALL.md](INSTALL.md)**.
 
+**Want the manual steps above to just run themselves?** `AUTONOMOUS_COMPLETION_LOOP.md` composes the same read-report-resolve cycle into one re-entrant prompt: bootstrap `AUDIT_CONTEXT.md` if missing, run `STUB_AND_COMPLETENESS`, resolve its P0/P1 findings, verify, repeat — until a cycle turns up nothing left to fix. See the entry in the behavior table below.
+
 ## Choose a behavior
 
 | Need | Run |
@@ -78,6 +80,7 @@ Once that loop is comfortable, browse the audits table below for other audits to
 | Find god-files and propose extraction seams | `/determinagents structural-entropy` |
 | Find regression-prone complexity hotspots | `/determinagents regression-surface` |
 | **Don't know what to run** — let it pick | `/determinagents next` |
+| **Point it at a repo and walk away** — bootstrap, find what's half-built, fix it, repeat until clean | `/determinagents complete` |
 | Set up and discover recursive improvement loops | `/determinagents init-loops` |
 | Orchestrate recursive improvement loops automatically | `/determinagents loop-orchestrator` |
 | Create a weekly or post-change system digest | `/determinagents auto-report --mode=baseline` |
@@ -119,7 +122,8 @@ determinagents/
 │   ├── DATA_FLOW_VERIFY.md     # mutating: observed-vs-theorized data flow
 │   ├── TESTING_CREATOR.md      # mutating: writes new tests
 │   ├── HARNESS_CREATOR.md      # mutating: generates verification harnesses
-│   └── LAUNCH_READINESS.md     # gate + loop: MVP go-live manifest across seven lenses
+│   ├── LAUNCH_READINESS.md     # gate + loop: MVP go-live manifest across seven lenses
+│   └── AUTONOMOUS_COMPLETION_LOOP.md  # mutating: re-entrant bootstrap+discover+resolve loop
 └── specs/               # conventions and per-project artifact specs
     ├── FORMAT.md                  # how to author a new audit; harness conventions
     ├── HARNESS_STUBS.md           # boilerplate for common harnesses
@@ -165,6 +169,7 @@ Most audits run in 30–180 minutes at default scope, scaling with codebase size
 | [audits/HARNESS_CREATOR.md](audits/HARNESS_CREATOR.md) | Deterministically generates verification harnesses (Playwright, Docker, Fuzzing) to prove/refute audit findings | An audit report exists; disposable workspace |
 | [audits/RECURSIVE_IMPROVEMENT.md](audits/RECURSIVE_IMPROVEMENT.md) | Autonomously design, execute, and evaluate experiments to improve a specific metric or solve an open-ended problem. Generates hypotheses, mutates code, and verifies against a harness. | Measurable goal; deterministic harness exists; disposable workspace |
 | [audits/LAUNCH_READINESS.md](audits/LAUNCH_READINESS.md) | MVP go-live gate across seven lenses (visual, backend, security, UX, demand, biz-ops, operations/launch-ops). Builds a persistent `LAUNCH_MANIFEST.md`, drives each element documented → stubbed → verified with a per-lens coverage check so nothing is silently skipped, emits readiness signals, and loops toward a GO verdict. Read-only except Phase 8 stub-gen + the resolve step (both gated). | Target repo; verification-credentials source for auth/tiered products (scaffolds one if absent) |
+| [audits/AUTONOMOUS_COMPLETION_LOOP.md](audits/AUTONOMOUS_COMPLETION_LOOP.md) | Re-entrant "point it at a repo and walk away" loop: bootstraps `AUDIT_CONTEXT.md` if missing, defaults to `STUB_AND_COMPLETENESS` with no history or `PICK_NEXT`'s ranked choice otherwise, resolves P0/P1 via `RESOLVE_FROM_REPORT`, verifies, repeats. Each invocation is stateless-safe — reads `docs/reports/COMPLETION_LOOP_STATUS.md` rather than relying on session memory, so it works as a host-tool recurring loop, not just one long session. | None — bootstraps everything it needs on first run |
 
 Two read-only audits — `ERROR_HANDLING.md` and `STUB_AND_COMPLETENESS.md` — include an **optional mutating Phase 6** (fault injection and endpoint verification respectively) that follows the harness conventions in `specs/FORMAT.md`. Use scope `+harness` to enable.
 

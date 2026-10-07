@@ -6,6 +6,9 @@ All notable changes to determinagents are documented here. The format is loosely
 
 ## [Unreleased]
 
+### Added
+- **`audits/AUTONOMOUS_COMPLETION_LOOP.md`** — re-entrant "point it at a repo and walk away" loop. Bootstraps `AUDIT_CONTEXT.md` if missing (conservative defaults + flagged assumptions when unattended), defaults to `STUB_AND_COMPLETENESS` on a first run or `PICK_NEXT`'s ranked choice otherwise, resolves P0/P1 via `RESOLVE_FROM_REPORT`, verifies, repeats until a cycle finds nothing left to fix. State lives in `docs/reports/COMPLETION_LOOP_STATUS.md`, read fresh each invocation, so it works as a host-tool recurring loop (not just one long session). Routing token `complete`.
+
 ## [0.11.1] — 2026-07-03
 
 No re-materialization required.
