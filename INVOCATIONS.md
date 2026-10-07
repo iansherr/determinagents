@@ -8,7 +8,24 @@ This file is the canonical source. Individual audit/spec docs may show one examp
 
 ## Shared conventions (every invocation inherits these)
 
-1. **Library**: `${DETERMINAGENTS_HOME:-$HOME/.determinagents}/`
+1. **Library**: resolve once per session, then use the result for every `from $DETERMINAGENTS_HOME` path below. No install required — this preamble is idempotent, never prompts, and clones shallow only as a last resort:
+   ```sh
+   # DeterminAgents library bootstrap (prints how it resolved)
+   if [ -n "${DETERMINAGENTS_HOME:-}" ] && [ -d "$DETERMINAGENTS_HOME/audits" ]; then
+     echo "library: $DETERMINAGENTS_HOME (env)"
+   elif TOP="$(git rev-parse --show-toplevel 2>/dev/null)" && [ -d "$TOP/audits" ]; then
+     export DETERMINAGENTS_HOME="$TOP"; echo "library: $DETERMINAGENTS_HOME (repo checkout)"
+   elif [ -d "$HOME/.determinagents/audits" ]; then
+     export DETERMINAGENTS_HOME="$HOME/.determinagents"; echo "library: $DETERMINAGENTS_HOME (default)"
+   else
+     export DETERMINAGENTS_HOME="${DETERMINAGENTS_HOME:-$HOME/.determinagents}"
+     git clone --quiet --depth 1 --branch "${DETERMINAGENTS_BRANCH:-main}" \
+       "${DETERMINAGENTS_REPO_URL:-https://github.com/iansherr/determinagents.git}" \
+       "$DETERMINAGENTS_HOME"
+     echo "library: $DETERMINAGENTS_HOME (fresh clone)"
+   fi
+   ```
+   Precedence is deliberate: explicit `$DETERMINAGENTS_HOME` wins; an enclosing checkout covers invoke-from-the-repo (including subdirectories); the default path covers prior installs; clone is last. Override the source with `$DETERMINAGENTS_REPO_URL` / `$DETERMINAGENTS_BRANCH` (e.g., `dev` for unreleased work) — same variables `install.sh` honors.
 2. **Project context**: if `docs/determinagents/AUDIT_CONTEXT.md` exists, read it first and apply its calibrations
 3. **Reports** go to `docs/reports/<NAME>_<YYYY-MM-DD>.md` in the target repo, starting with `audit:`/`date:` YAML frontmatter (per `specs/FORMAT.md`) so meta-tooling can find them regardless of filename
 4. **Findings** classified P0–P3 per each audit's rubric
@@ -435,7 +452,7 @@ Trend the trajectory across runs: `/determinagents auto-report --mode=trend` (re
 
 ## AUTONOMOUS_COMPLETION_LOOP (mutating, re-entrant loop)
 
-The "point it at a repo and walk away" composition: bootstraps `AUDIT_CONTEXT.md` if missing, defaults to `STUB_AND_COMPLETENESS` on a first run (or `PICK_NEXT`'s ranked choice once there's audit history), resolves P0/P1 findings via `RESOLVE_FROM_REPORT`, verifies, and repeats until a cycle turns up nothing left to fix. Reads its own state from `docs/reports/COMPLETION_LOOP_STATUS.md` rather than session memory — safe to re-invoke as a fresh turn each time, not just as one long session.
+The "point it at a repo and walk away" composition: bootstraps `AUDIT_CONTEXT.md` if missing, defaults to `STUB_AND_COMPLETENESS` on a first run (or `PICK_NEXT`'s ranked choice once there's audit history), resolves P0/P1 findings via `RESOLVE_FROM_REPORT`, verifies, and repeats until a cycle turns up nothing left to fix. Reads its own state from `docs/reports/COMPLETION_LOOP_STATUS.md` rather than session memory — safe to re-invoke as a fresh turn each time, not just as one long session. Every cycle is bound by `specs/LOOP_PROTOCOL.md` §6 (gate ledger, anti-circularity, capability cache, parallel-state budget, harness triage, credential safety) — the loop may not spend cycles restating same-outcome gates or spawn branches beyond budget.
 
 **Prerequisites**: none — this is a valid first thing to run on a brand-new repo.
 

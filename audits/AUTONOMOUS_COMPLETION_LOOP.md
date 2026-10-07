@@ -14,7 +14,10 @@ It composes existing library docs rather than duplicating their logic:
 `specs/BOOTSTRAP.md` for the project overlay, `STUB_AND_COMPLETENESS` +
 `DATA_FLOW_TRACE` as the default discovery pair, `PICK_NEXT` once a project
 has enough history to rank audits itself, and `RESOLVE_FROM_REPORT` for every
-fix. This doc is the glue, not a replacement for any of them.
+fix. Every cycle is additionally bound by `specs/LOOP_PROTOCOL.md` §6
+(Completion-Loop Mandates): the gate ledger, anti-circularity rule,
+environment capability cache, parallel-state budget, harness-failure
+triage, and credential-safety invariant. This doc is the glue, not a replacement for any of them.
 
 ## Mode: Mutating (orchestrates a Read-Only discovery phase, then the
 library's existing Mutating resolve step — see Phase 2)
@@ -163,7 +166,11 @@ Standard phases for the chosen audit, per its own doc. Report lands at
 
 ### 2.3 Update status
 
-Write `docs/reports/COMPLETION_LOOP_STATUS.md`:
+Write `docs/reports/COMPLETION_LOOP_STATUS.md`. It MUST include the
+gate ledger per `specs/LOOP_PROTOCOL.md` §6.1 (`gate | state |
+identical-outcomes | last-change`) and the environment capability
+cache per §6.3 — these are the anti-circularity instruments for 2.4,
+not optional commentary:
 
 ```markdown
 # Completion Loop Status
@@ -192,6 +199,14 @@ Write `docs/reports/COMPLETION_LOOP_STATUS.md`:
 Run `RESOLVE_FROM_REPORT` against the report from 2.2, `scope=P0,P1` by
 default — P2/P3 accumulate across cycles and get swept in a dedicated pass
 later rather than blocking the completion signal on polish.
+
+Before any new branch, worktree, or retry, run the pre-flights in
+`specs/LOOP_PROTOCOL.md` §6.4 (parallel-state budget: ≤3 open
+loop-owned PRs, settle-before-spawn, scope-overlap check) and §6.5
+(classify every red signal as `product` / `harness-flake` /
+`environment-limit` before acting). A cycle that only restates a prior
+outcome without a gate state transition violates §6.2 — pivot or
+block instead.
 
 Honor `RESOLVE_FROM_REPORT`'s own discipline exactly: per-finding approval
 model, one commit per fix, stop on a genuine technical blocker (missing
